@@ -3,6 +3,7 @@
 	<name>remotecontrol</name>
 	<comment></comment>
 	<projects>
+		<project>robocommon</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -31,6 +32,11 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
 	<linkedResources>
+		<link>
+			<name>robocommon</name>
+			<type>2</type>
+			<locationURI>robocommon</locationURI>
+		</link>
 		<link>
 			<name>Static_Code/IO_Map/MKL25Z4.h</name>
 			<type>1</type>
@@ -147,4 +153,10 @@
 			<location>/opt/Freescale/KDS_2.0.0/eclipse/ProcessorExpert/lib/Kinetis/pdd/inc/USB_PDD.h</location>
 		</link>
 	</linkedResources>
+	<variableList>
+		<variable>
+			<name>robocommon</name>
+			<value>$%7BPARENT-1-PROJECT_LOC%7D/robocommon</value>
+		</variable>
+	</variableList>
 </projectDescription>
