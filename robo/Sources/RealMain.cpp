@@ -7,9 +7,14 @@
 
 #include "RealMain.h"
 
-
+/**
+ * C++ world main function
+ */
 void realMain()
 {
+	for (;;)
+	{
+	}
 }
 
 
@@ -18,6 +23,9 @@ void realMain()
 extern "C" {
 #endif
 
+/**
+ * Forward to C++ world
+ */
 void _main()
 {
 	realMain();
