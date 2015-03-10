@@ -36,6 +36,10 @@ template <typename EventEnumType, typename GlobalLockGuard>
 class EventQueue
 {
 public:
+	using Traits = detail::Traits<EventEnumType>;
+	using EnumType = EventEnumType;
+	static constexpr typename Traits::EventUnderlyingType AmountOfEvents = static_cast<typename Traits::EventUnderlyingType>(EventEnumType::AmountOfEvents);
+
 	void setEvent(EventEnumType event)
 	{
 		GlobalLockGuard lock;
@@ -52,9 +56,6 @@ public:
 
 		return isSet;
 	}
-
-private:
-	using Traits = detail::Traits<EventEnumType>;
 
 private:
 	typename Traits::EventQueueArray data{};
