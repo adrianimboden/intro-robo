@@ -28,8 +28,7 @@ namespace detail
 			return 0x1 << (static_cast<EventUnderlyingType>(event) % ArrayElementTypeBits);
 		}
 
-		//using EventQueueArray = std::array<ArrayElementType, getAmountOfArrayEntries()>;
-		using EventQueueArray = ArrayElementType[getAmountOfArrayEntries()];
+		using EventQueueArray = std::array<ArrayElementType, getAmountOfArrayEntries()>;
 	};
 }
 
