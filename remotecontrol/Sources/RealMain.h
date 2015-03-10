@@ -1,8 +1,7 @@
-/*
- * RealMain.h
+/*!
+ * \file RealMain.h
+ * \brief RealMain
  *
- *  Created on: Feb 24, 2015
- *      Author: adrian
  */
 
 #ifndef REALMAIN_H_

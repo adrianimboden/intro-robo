@@ -1,4 +1,5 @@
-/**
+/*!
+ * \file Platform_local.h
  * \brief Local platform implementation module.
  *
  * This implements the local platform interface.
@@ -45,6 +46,14 @@
 #define Led_Blue_Init()		LED3_Init()
 #define Led_Blue_Deinit()	LED3_Deinit()
 
+#endif
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#ifdef __cplusplus
+}  /* extern "C" */
 #endif
 
 #endif /* PLATFORM_LOCAL_H_ */

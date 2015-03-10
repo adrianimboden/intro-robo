@@ -1,4 +1,5 @@
-/**
+/*!
+ * \file Platform.h
  * \brief Platform implementation module.
  *
  * This implements the platform interface.
@@ -12,6 +13,10 @@
 
 #include "PE_Types.h" /* for common Processor Expert types used throughout the project, e.g. 'bool' */
 #include "PE_Error.h" /* global error constants */
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define PL_IS_FRDM		(defined(PL_L_BOARD_IS_FRDM))
 /*!< Macro is defined in the local platform file for the FRDM board*/
@@ -45,6 +50,10 @@ void PL_Init(void);
  * \brief Platform deinitialization
  */
 void PL_Deinit(void);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 #endif /* PLATFORM_LOCAL_H_ */
 #endif /* PLATFORM_H_ */

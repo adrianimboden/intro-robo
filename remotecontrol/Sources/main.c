@@ -37,12 +37,14 @@
 #include "BitIoLdd2.h"
 #include "LedBit3.h"
 #include "BitIoLdd3.h"
+#include "CS1.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
 #include "PE_Const.h"
 #include "IO_Map.h"
 /* User includes (#include below this line is not maintained by Processor Expert) */
+#include "RealMain.h"
 
 /*lint -save  -e970 Disable MISRA rule (6.3) checking. */
 int main(void)
