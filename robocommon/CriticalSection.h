@@ -12,9 +12,26 @@
 
 #include "CS1.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+/*!
+ * \brief DisableInterrupts class
+ *
+ */
+class DisableInterrupts
+{
+public:
+	DisableInterrupts()
+	{
+		CS1_EnterCritical();
+	}
+
+	~DisableInterrupts()
+	{
+		CS1_ExitCritical();
+	}
+
+private:
+	CS1_CriticalVariable();
+};
 
 /*!
  * \brief This function runs the passed function in a critical section.
@@ -29,12 +46,5 @@ void runWithDisabledInterrupts(Fn fn)
 	fn();
 	CS1_ExitCritical();
 }
-
-#ifdef __cplusplus
-}  /* extern "C" */
-#endif
-
-
-
 
 #endif /* CRITICALSECTION_H_ */
