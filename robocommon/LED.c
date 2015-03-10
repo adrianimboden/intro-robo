@@ -1,4 +1,5 @@
-/**
+/*!
+ * \file LED.c
  * \brief LED driver interface.
  *
  * This module implements a generic LED driver for several LEDs.
@@ -10,6 +11,10 @@
  */
 
 #include "LED.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 void LED_Init(void) {
 	/* all LED's off by default */
@@ -29,6 +34,10 @@ void LED_Open(void) {
 void LED_Close(void) {
 	/* nothing to do */
 }
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 /*!
  ** @}

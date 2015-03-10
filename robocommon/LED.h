@@ -1,4 +1,5 @@
-/**
+/*!
+ * \file LED.h
  * \brief LED driver interface.
  *
  * This module implements a generic LED driver for several LEDs.
@@ -121,6 +122,10 @@
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*!
  * \brief LED test routine.
  * \todo Define and implement the test.
@@ -146,6 +151,10 @@ void LED_Open(void);
  * \brief Close the LED Driver
  */
 void LED_Close(void);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
 
 
 #endif /* LED_H_ */
