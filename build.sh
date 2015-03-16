@@ -8,9 +8,6 @@ trap finish EXIT
 
 ./init.sh
 
-export PATH=/opt/Freescale/KDS_2.0.0/toolchain/bin/:$PATH
-export PATH=/opt/Freescale/KDS_2.0.0/eclipse/:$PATH
-
 mkdir $TMPDIR/workspace
 
 echo -------------- import into workspace
