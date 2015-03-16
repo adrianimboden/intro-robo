@@ -6,6 +6,7 @@
 
 #include <array>
 #include <type_traits>
+#include "Platform.h"
 
 namespace detail
 {

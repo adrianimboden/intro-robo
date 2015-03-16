@@ -8,6 +8,7 @@
 
 #include "Platform.h"
 #include "LED.h"
+#include "Timer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,6 +19,12 @@ void PL_Init(void){
 #if PL_HAS_LED
 	LED_Init();
 #endif
+#if PL_HAS_EVENT
+	/* do nothing */
+#endif
+#if PL_HAS_TIMER
+	TMR_Init();
+#endif
 
 }
 
@@ -27,11 +34,17 @@ void PL_Deinit(void){
 #if PL_HAS_LED
 	LED_Deinit();
 #endif
+#if PL_HAS_EVENT
+	/* do nothing */
+#endif
+#if PL_HAS_TIMER
+	TMR_Deinit();
+#endif
+
+}
 
 #ifdef __cplusplus
 }  /* extern "C" */
 #endif
 
-
-}
 

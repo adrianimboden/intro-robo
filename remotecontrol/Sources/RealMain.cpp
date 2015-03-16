@@ -10,23 +10,27 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
-#include "Platform_local.h"
+#include "Platform.h"
+#include "EventQueue.h"
+#include "CriticalSection.h"
 #include "WAIT1.h"
+#include "EventHandler.h"
+#include "Event.h"
 
+void doLedHeartbeat(void);
 
 /**
  * C++ world main function
  */
 void realMain()
 {
+	new(&eventQueue)MainEventQueue();
+	for(;;){
+		handleOneEvent(eventQueue, []{}, doLedHeartbeat);
+	}
 
+	eventQueue.~EventQueue();
 }
-
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 /**
  * Forward to C++ world
@@ -36,6 +40,8 @@ void _main()
 	realMain();
 }
 
-#ifdef __cplusplus
-}  /* extern "C" */
-#endif
+void doLedHeartbeat(void){
+	Led_Red_On();
+	WAIT1_Waitms(50);
+	Led_Red_Off();
+}
