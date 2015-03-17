@@ -21,7 +21,7 @@
 #include "Mealy.h"
 
 extern "C" {
-//#include "CLS1.h"
+#include "CLS1.h"
 }
 
 void doLedHeartbeat(void);
@@ -69,24 +69,24 @@ void doLedHeartbeat(void){
 }
 
 void Key_A_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 
 void Key_B_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_B_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_B_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 void Key_C_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_C_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_C_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 void Key_D_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_D_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_D_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 void Key_E_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_E_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_E_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 void Key_F_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_F_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_F_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
 void Key_J_Pressed(void){
-	//CLS1_SendStr((const uint8_t* )"Key_J_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+	CLS1_SendStr((const uint8_t* )"Key_J_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
