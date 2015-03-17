@@ -71,7 +71,6 @@ void doLedHeartbeat(void){
 void Key_A_Pressed(void){
 	CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
-
 void Key_B_Pressed(void){
 	CLS1_SendStr((const uint8_t* )"Key_B_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }

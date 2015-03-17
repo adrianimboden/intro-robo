@@ -99,7 +99,7 @@ const uint8_t tbl[3][2][2] = /* format: {next,output} */
    /*     input a   input b */
  {
    /*A*/ {{A,0},    {B,LED1}},       /*!< State A: with input_a, remain in A; with input_b: go to B and turn on LED1 */
-   /*B*/ {{C,LED2}, {B,LED1}},
+   /*B*/ {{B,LED1}, {C,LED2}},
    /*C*/ {{C,LED2}, {B,LED1}},
  };
 #elif PL_NOF_LEDS==3
