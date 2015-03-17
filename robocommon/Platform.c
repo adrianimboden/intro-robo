@@ -9,6 +9,8 @@
 #include "Platform.h"
 #include "LED.h"
 #include "Timer.h"
+#include "Mealy.h"
+#include "Keys.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,7 +27,12 @@ void PL_Init(void){
 #if PL_HAS_TIMER
 	TMR_Init();
 #endif
-
+#if PL_HAS_MEALY
+	MEALY_Init();
+#endif
+#if PL_HAS_KEYS
+	KEY_Init();
+#endif
 }
 
 
@@ -39,6 +46,12 @@ void PL_Deinit(void){
 #endif
 #if PL_HAS_TIMER
 	TMR_Deinit();
+#endif
+#if PL_HAS_MEALY
+	MEALY_Deinit();
+#endif
+#if PL_HAS_KEYS
+	KEY_Deinit();
 #endif
 
 }

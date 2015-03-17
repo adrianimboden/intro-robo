@@ -37,7 +37,7 @@
 #if PL_HAS_MEALY
 #include "Mealy.h"    /* our own interface */
 #include "LED.h"      /* interface to LED driver */
-//#include "Keys.h"     /* interface to switch 1 */
+#include "Keys.h"     /* interface to switch 1 */
 /*!
  \brief Enumeration for the LEDs we want to emit. Note that they are encoded in bits
 */
@@ -113,8 +113,8 @@ const uint8_t tbl[9][2][2] = /* format: {next,output} */
    /*E*/ {{E,LED1}, {F,LED2}},
    /*F*/ {{G,LED1}, {F,LED2}},
    /*G*/ {{G,LED1}, {H,LED2}},
-   /*I*/ {{J,LED3}, {H,LED2}},
-   /*J*/ {{J,LED3}, {B,LED1}},
+   /*I*/ {{I,LED3}, {H,LED2}},
+   /*J*/ {{I,LED3}, {B,LED1}},
  };
 #elif PL_NOF_LEDS==4
 const uint8_t tbl[5][2][2] = /* format: {next,output} */
@@ -133,7 +133,7 @@ const uint8_t tbl[5][2][2] = /* format: {next,output} */
   \return Returns ::INPUT_a or ::INPUT_b
  */
 static InputState GetInput(void) {
-  if (/*KEY1_Get()==*/ 0) { /* a, not pressed */
+  if (KEY1_Get()==0) { /* a, not pressed */
     return INPUT_a;
   } else { /* b, pressed */
     return INPUT_b;
