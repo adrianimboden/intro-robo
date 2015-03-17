@@ -18,7 +18,7 @@ echo -------------- build project
 kinetis-design-studio -noSplash -data $TMPDIR/workspace -application org.eclipse.cdt.managedbuilder.core.headlessbuild -build all
 echo -------------- generate documentation
 cd remotecontrol/doxy
-doxygen .
+doxygen remotecontrol.doxyfile
 cd ../..
-cd remotecontrol/doxy
-doxygen .
+cd robo/doxy
+doxygen robo.doxyfile
