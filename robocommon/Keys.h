@@ -109,11 +109,11 @@ typedef enum {
     /*!< if we do not have a button, then return 'not pressed' */
 #endif
 
-#if PL_HAS_KBI
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#if PL_HAS_KBI
 
 /*!
  * \brief Function called from a keyboard interrupt (if supported).

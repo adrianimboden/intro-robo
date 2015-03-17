@@ -24,6 +24,21 @@
 #define PL_L_HAS_MEALY		(1)
 /*! Set to 1 to enable MEALY support, 0 otherwise */
 
+#define PL_L_HAS_KEYS		(1)
+/*! Set to 1 to enable KEYS support,  otherwise */
+
+#define PL_L_HAS_KBI		(0)
+/*!< Set to 1 to enable key interrupt support, 0 otherwise */
+
+#define PL_L_HAS_KBI_NMI    (0)
+  /*!< Set to 1 for special case on NMI/PTA pin on FRDM board, 0 otherwise */
+
+#define PL_L_HAS_RESET_KEY  (0)
+  /*!< Set to 1 to use reset switch on FRDM as button, 0 otherwise */
+
+#define PL_L_HAS_JOYSTICK   (0)
+/*!< Set to 1 to enable joystick shield support, 0 otherwise */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
