@@ -27,7 +27,7 @@
 #define PL_L_HAS_KEYS		(1)
 /*! Set to 1 to enable KEYS support,  otherwise */
 
-#define PL_L_HAS_KBI		(0)
+#define PL_L_HAS_KBI		(1)
 /*!< Set to 1 to enable key interrupt support, 0 otherwise */
 
 #define PL_L_HAS_KBI_NMI    (0)

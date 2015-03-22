@@ -12,10 +12,7 @@
 
 #include "CS1.h"
 
-/*!
- * \brief DisableInterrupts class
- *
- */
+
 class DisableInterrupts
 {
 public:

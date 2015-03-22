@@ -42,6 +42,11 @@
 #include "BitIoLdd2.h"
 #include "SW1.h"
 #include "ExtIntLdd1.h"
+#include "UTIL1.h"
+#include "CLS1.h"
+#include "BT1.h"
+#include "Serial2.h"
+#include "ASerialLdd2.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"
