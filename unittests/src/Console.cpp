@@ -42,7 +42,6 @@ void checkOutputOfWrite(const std::string& str, Args... args)
 
 TEST(Console, when_i_write_a_number_then_it_will_be_written_as_text)
 {
-	checkOutputOfWrite("5", static_cast<uint8_t>(5));
 	checkOutputOfWrite("5", static_cast<uint16_t>(5));
 	checkOutputOfWrite("5", static_cast<uint32_t>(5));
 }
