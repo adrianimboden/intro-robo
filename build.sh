@@ -12,8 +12,8 @@ mkdir ${TMPDIR}/tests
 cd ${TMPDIR}/tests
 cmake ${DIR}/unittests
 make -j4
-./unittests --gtest_output=xml:${DIR}/testresults.xml
 echo -------------- executing unittests
+./unittests --gtest_output=xml:${DIR}/testresults.xml
 
 echo -------------- building firmware
 cd ${DIR}
