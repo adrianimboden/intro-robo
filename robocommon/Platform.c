@@ -27,9 +27,7 @@ void PL_Init(void){
 #if PL_HAS_TIMER
 	TMR_Init();
 #endif
-#if PL_HAS_MEALY
-	MEALY_Init();
-#endif
+MEALY_Init();
 #if PL_HAS_KEYS
 	KEY_Init();
 #endif
@@ -47,9 +45,7 @@ void PL_Deinit(void){
 #if PL_HAS_TIMER
 	TMR_Deinit();
 #endif
-#if PL_HAS_MEALY
-	MEALY_Deinit();
-#endif
+MEALY_Deinit();
 #if PL_HAS_KEYS
 	KEY_Deinit();
 #endif

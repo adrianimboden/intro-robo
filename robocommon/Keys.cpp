@@ -29,10 +29,12 @@ void KEY_Scan(void) {
 #if PL_NOF_KEYS >= 3 && PL_KEY_POLLED_KEY3
   if (KEY3_Get()) { /* key pressed */
 	  eventQueue.setEvent(Event::Sw3Pressed);
+  }
 #endif
 #if PL_NOF_KEYS >= 4 && PL_KEY_POLLED_KEY4
   if (KEY4_Get()) { /* key pressed */
 	  eventQueue.setEvent(Event::Sw4Pressed);
+  }
 #endif
 #if PL_NOF_KEYS >= 5 && PL_KEY_POLLED_KEY5
   if (KEY5_Get()) { /* key pressed */

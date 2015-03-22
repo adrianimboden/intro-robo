@@ -2,9 +2,9 @@
 <PEproject>
   <Header>
     <Name>remotecontrol</Name>
-    <SavedBy>Helyman83</SavedBy>
-    <ModificationStamp>13</ModificationStamp>
-    <Date>2015-03-17</Date>
+    <SavedBy>adrian</SavedBy>
+    <ModificationStamp>16</ModificationStamp>
+    <Date>2015-03-22</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.10.1.RT6_b1444-1070</PEversion>
   </Header>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>59</ProjectCompNumb>
+    <ProjectCompNumb>62</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -6543,7 +6543,7 @@
     <Methods>
       <ItemState>
         <ItemSymbol>CriticalVariable</ItemSymbol>
-        <ReadOnly>true</ReadOnly>
+        <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
         <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
@@ -6555,7 +6555,7 @@
       </ItemState>
       <ItemState>
         <ItemSymbol>EnterCritical</ItemSymbol>
-        <ReadOnly>true</ReadOnly>
+        <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
         <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
@@ -6567,7 +6567,7 @@
       </ItemState>
       <ItemState>
         <ItemSymbol>ExitCritical</ItemSymbol>
-        <ReadOnly>true</ReadOnly>
+        <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
         <ItemWasNeverEnabledInChgScript>true</ItemWasNeverEnabledInChgScript>
@@ -26616,7 +26616,7 @@
     <BeanType>Shell</BeanType>
     <Name>CLS1</Name>
     <CompNumb>54</CompNumb>
-    <CompEnabled>true</CompEnabled>
+    <CompEnabled>false</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>Shell</IconName>
     <UserFolderName />
@@ -27142,7 +27142,7 @@
     <CompEnabled>true</CompEnabled>
     <GenCodeMode>ALWAYS_WRITE</GenCodeMode>
     <IconName>PHONE</IconName>
-    <UserFolderName>Referenced_Components</UserFolderName>
+    <UserFolderName />
     <Comment lines_count="0" />
     <Template>Serial</Template>
     <BeanVersion>02.611</BeanVersion>
