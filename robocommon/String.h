@@ -15,6 +15,11 @@ template <size_t MaxSize>
 class String
 {
 public:
+	explicit String()
+	{
+		currSize = 0;
+	}
+
 	explicit String(const char* pSrc, const char* pEnd)
 	{
 		currSize = (pEnd - pSrc);
@@ -110,9 +115,15 @@ public:
 		}
 		for (auto pos = to; pos <= currSize; ++pos)
 		{
-			data[pos] = data[pos + 1];
+			auto src = (pos + 1);
+			data[pos] = (src >= currSize) ? '\0' : data[src];
 		}
 		currSize -= (to - from);
+	}
+
+	void erase()
+	{
+		currSize = 0;
 	}
 
 private:

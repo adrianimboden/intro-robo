@@ -125,7 +125,7 @@ void checkEraseResult(TString str, size_t from, size_t to, const char* result)
 	EXPECT_THAT(modified, Eq(result)) << "\"" << str << "\".erase(" << from << ", " << to << ") => " << result;
 }
 
-TEST(String, erase_operations)
+TEST(String, erase_operation)
 {
 	checkEraseResult<String<3>>("abc", 1, 3, "a");
 	checkEraseResult<String<3>>("abc", 0, 3, "");
@@ -134,4 +134,11 @@ TEST(String, erase_operations)
 	checkEraseResult<String<3>>("abc", 1, 2, "ac");
 	checkEraseResult<String<3>>("abc", 2, 3, "ab");
 	checkEraseResult<String<3>>("abc", 0, 100, "");
+}
+
+TEST(String, erase_clear_operation)
+{
+	String<3> str{"abc"};
+	str.erase();
+	EXPECT_THAT(str, Eq(""));
 }

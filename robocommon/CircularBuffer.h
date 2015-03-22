@@ -30,11 +30,14 @@ class CircularBuffer
 public:
 	static_assert(MaxSize >= 1, "circular buffer must be at leas one element big");
 
+	using element_type = T;
+
 	explicit CircularBuffer(LockingStrategy lockingStrategy = {})
+		: lockingStrategy(lockingStrategy)
 	{
 	}
 
-	void push_back(T&& element)
+	void push_back(T element)
 	{
 		auto lock = lockingStrategy.lock();
 		if (currSize >= MaxSize)
