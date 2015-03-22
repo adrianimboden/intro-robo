@@ -10,8 +10,7 @@
 #define PLATFORM_H_
 
 #include "Platform_local.h"
-
-#define CHAR_BIT 8
+#include "CharBit.h"
 
 #include "PE_Types.h" /* for common Processor Expert types used throughout the project, e.g. 'bool' */
 #include "PE_Error.h" /* global error constants */

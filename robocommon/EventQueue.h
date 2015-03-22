@@ -6,7 +6,7 @@
 
 #include <array>
 #include <type_traits>
-#include "Platform.h"
+#include "CharBit.h"
 
 namespace detail
 {

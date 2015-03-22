@@ -5,7 +5,7 @@ FILE(GLOB_RECURSE SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
 FILE(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/src/*.h)
 FILE(GLOB_RECURSE HEADERS_TOBETESTED ${CMAKE_CURRENT_SOURCE_DIR}/../robocommon/*.h) #to be tested headers
 add_executable(${PROJECT_NAME} ${SOURCE} ${HEADERS} ${HEADERS_TOBETESTED})
-target_link_libraries(${PROJECT_NAME} gtest_main)
+target_link_libraries(${PROJECT_NAME} gtest_main gmock gmock_main)
 
 # C++11
 include(CheckCXXCompilerFlag)
@@ -27,3 +27,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../robocommon/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/gmock-1.7.0/include)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/gmock-1.7.0/gtest/include)
+
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+	add_definitions(-DDEBUG)
+ENDIF()
