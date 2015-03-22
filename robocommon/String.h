@@ -5,6 +5,12 @@
 #include <array>
 #include <type_traits>
 
+enum class StringManipulationResult
+{
+	Ok,
+	NotEnoughBufferMemory,
+};
+
 template <size_t MaxSize>
 class String
 {
@@ -17,7 +23,7 @@ public:
 			data[i] = pSrc[i];
 		}
 #ifdef DEBUG
-		pDebugStr = &data[0];
+		pDebugStr = data.data();
 #endif
 	}
 
@@ -73,6 +79,40 @@ public:
 	{
 		ASSERT(index < size());
 		return data[index];
+	}
+
+	StringManipulationResult append(char c)
+	{
+		if (currSize >= MaxSize)
+		{
+			return StringManipulationResult::NotEnoughBufferMemory;
+		}
+		data[currSize] = c;
+		++currSize;
+
+		return StringManipulationResult::Ok;
+	}
+
+	//! erases part of the string  (from 'from' to ('to'-1))
+	void erase(size_t from, size_t to)
+	{
+		ASSERT(from <= to);
+
+		to = std::min(to, currSize);
+		if (from == to)
+			return ;
+
+		for (auto i = size_t{0}; i < (to - from); ++i)
+		{
+			auto src = (to + i);
+			auto dst = from + i;
+			data[dst] = (src >= currSize) ? '\0' : data[src];
+		}
+		for (auto pos = to; pos <= currSize; ++pos)
+		{
+			data[pos] = data[pos + 1];
+		}
+		currSize -= (to - from);
 	}
 
 private:

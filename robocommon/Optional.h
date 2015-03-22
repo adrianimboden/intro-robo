@@ -85,11 +85,13 @@ public:
 
 	T& operator *()
 	{
+		ASSERT(isInitialized);
 		return *static_cast<T*>(static_cast<void*>(&storage));
 	}
 
 	const T& operator *() const
 	{
+		ASSERT(isInitialized);
 		return *static_cast<const T*>(static_cast<const void*>(&storage));
 	}
 
