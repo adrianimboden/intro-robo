@@ -6,7 +6,7 @@ inline void testAssert(bool ok)
 {
 	if (!ok)
 	{
-		FAIL();
+		abort();
 	}
 }
 
