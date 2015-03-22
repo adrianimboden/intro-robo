@@ -63,6 +63,12 @@ public:
 		return impl_pop_front();
 	}
 
+	size_t size() const
+	{
+		auto lock = lockingStrategy.lock();
+		return currSize;
+	}
+
 private:
 	optional<T> impl_pop_front()
 	{
@@ -86,7 +92,7 @@ private:
 	}
 
 private:
-	LockingStrategy lockingStrategy;
+	mutable LockingStrategy lockingStrategy;
 
 	size_t currSize = 0;
 	size_t pushPos = 0;
