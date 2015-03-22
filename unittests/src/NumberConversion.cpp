@@ -1,15 +1,10 @@
 #include <gmock/gmock.h>
 #include "TestAssert.h"
+#include "StringStreamer.h"
 
 #include <NumberConversion.h>
 
 using namespace testing;
-
-template <size_t MaxSize>
-std::ostream& operator<<(std::ostream& strm, const String<MaxSize>& str)
-{
-	return strm << str.begin();
-}
 
 TEST(NumberConversion, _uint8_t)
 {
