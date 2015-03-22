@@ -8,6 +8,10 @@
 #include <array>
 #include <type_traits>
 
+
+
+
+#include <CircularBuffer.h>
 //byte AS1_RecvChar(AS1_TComData *Chr) { }
 //byte AS1_SendChar(AS1_TComData Chr) { }
 //byte AS1_RecvBlock(AS1_TComData *Ptr,word Size,word *Rcv) { }

@@ -10,9 +10,12 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
+#include <Console.h>
+#include <LineInputStrategy.h>
 #include "Platform.h"
 #include "EventQueue.h"
 #include "Console.h"
+#include "LineInputStrategy.h"
 #include "CriticalSection.h"
 #include "WAIT1.h"
 #include "EventHandler.h"
@@ -22,18 +25,49 @@
 #include "Mealy.h"
 
 #include "AS1.h"
-//extern "C" {
-//#include "CLS1.h"
-//}
 
 void doLedHeartbeat(void);
+
+class EchoConsole;
+
+using MyLineInputStrategy = LineInputStrategy<80, DiscardingLineSink, EchoConsole>;
+using RemoteControlConsole = Console<decltype(AS1_SendChar)*, MyLineInputStrategy>;
+
+class EchoConsole
+{
+public:
+	explicit EchoConsole(RemoteControlConsole* pConsole)
+		: pConsole(pConsole)
+	{
+	}
+
+	template <typename... Args>
+	void write(Args... args)
+	{
+		pConsole->write(args...);
+	}
+
+private:
+	RemoteControlConsole* pConsole;
+};
 
 /**
  * C++ world main function
  */
 void realMain()
 {
-	Console<decltype(AS1_SendChar)*> console{AS1_SendChar};
+	RemoteControlConsole console{AS1_SendChar, MyLineInputStrategy{DiscardingLineSink{}, EchoConsole{&console}} };
+
+	auto handleConsoleInput = [&]
+    {
+		byte inputChar;
+		if (AS1_RecvChar(&inputChar) == ERR_OK)
+		{
+			console.rxChar(inputChar);
+		}
+    };
+
+	console.write("Up and running\r\n");
 
 	new(&eventQueue)MainEventQueue();
 	for(;;){
@@ -49,9 +83,9 @@ void realMain()
 			[&]{ console.write("Key_J_Pressed!\r\n"); }
 		);
 
-		KEY_Scan(); /* scan keys */
+		KEY_Scan();
 		MEALY_Step();
-		WAIT1_Waitms(100);
+		handleConsoleInput();
 	}
 
 	eventQueue.~EventQueue();

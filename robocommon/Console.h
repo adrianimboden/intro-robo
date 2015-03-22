@@ -2,6 +2,7 @@
 
 #include <String.h>
 #include <NumberConversion.h>
+#include <cstring>
 
 using ConsoleChar = unsigned char;
 
@@ -64,6 +65,16 @@ public:
 		}
 	}
 
+	void write(char c)
+	{
+		writeTxCharFn(c);
+	}
+
+	void write(unsigned char c)
+	{
+		writeTxCharFn(c);
+	}
+
 private:
 	template <typename T>
 	void writeImpl(typename std::enable_if<std::is_integral<T>::value, T>::type number)
@@ -76,6 +87,16 @@ private:
 
 	template <typename T>
 	void writeImpl(typename std::enable_if<std::is_same<T, const char*>::value, T>::type pStr)
+	{
+		auto len = strlen(pStr);
+		for (auto i = size_t{0}; i < len; ++i)
+		{
+			writeTxCharFn(pStr[i]);
+		}
+	}
+
+	template <typename T>
+	void writeImpl(typename std::enable_if<std::is_same<T, const unsigned char*>::value, T>::type pStr)
 	{
 		auto len = strlen(pStr);
 		for (auto i = size_t{0}; i < len; ++i)

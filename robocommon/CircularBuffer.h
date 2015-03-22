@@ -28,7 +28,7 @@ template <
 class CircularBuffer
 {
 public:
-	static_assert(MaxSize >= 1, "circular buffer must be at leas one element big");
+	static_assert(MaxSize >= 1, "circular buffer must be at least one element big");
 
 	using element_type = T;
 

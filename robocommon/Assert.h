@@ -1,8 +1,11 @@
-#ifndef ASSERT_H
-#define ASSERT_H
+#pragma once
 
-#ifndef ASSERT
-#define ASSERT(...) while (true);
+#ifndef __cplusplus
+#error sorry, this header is c++ only
 #endif
 
-#endif // ASSERT_H
+void AssertImpl();
+
+#ifndef ASSERT
+#define ASSERT(ok) do { if (!(ok)) AssertImpl(); } while (false)
+#endif
