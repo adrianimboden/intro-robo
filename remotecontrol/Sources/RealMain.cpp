@@ -77,6 +77,11 @@ void realMain()
 	RemoteControlConsole* pConsole;
 
 	auto parser = makeParser(
+		[&](const String<80>& error)
+		{
+			pConsole->write(error);
+			pConsole->write("\r\n");
+		},
 		cmd("echo", [&](const String<80>& param)
 		{
 			pConsole->write(param);
