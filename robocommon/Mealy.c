@@ -180,4 +180,8 @@ void MEALY_Init(void) {
 /*! \brief De-initializes the Mealy state machine */
 void MEALY_Deinit(void) {
 }
+#else
+void MEALY_Step(void) { }
+void MEALY_Init(void) { }
+void MEALY_Deinit(void) { }
 #endif

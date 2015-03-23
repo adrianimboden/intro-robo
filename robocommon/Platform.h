@@ -10,8 +10,7 @@
 #define PLATFORM_H_
 
 #include "Platform_local.h"
-
-#define CHAR_BIT 8
+#include "CharBit.h"
 
 #include "PE_Types.h" /* for common Processor Expert types used throughout the project, e.g. 'bool' */
 #include "PE_Error.h" /* global error constants */
@@ -57,13 +56,13 @@
 
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
-  #define PL_KEY_POLLED_KEY1    (0)
-  #define PL_KEY_POLLED_KEY2    (0)
-  #define PL_KEY_POLLED_KEY3    (0)
-  #define PL_KEY_POLLED_KEY4    (0)
+  #define PL_KEY_POLLED_KEY1    (1)
+  #define PL_KEY_POLLED_KEY2    (1)
+  #define PL_KEY_POLLED_KEY3    (1)
+  #define PL_KEY_POLLED_KEY4    (1)
   #define PL_KEY_POLLED_KEY5    (1)
   #define PL_KEY_POLLED_KEY6    (1)
-  #define PL_KEY_POLLED_KEY7    (0)
+  #define PL_KEY_POLLED_KEY7    (1)
 #elif PL_IS_ROBO
   #define PL_KEY_POLLED_KEY1    (0)
 #endif

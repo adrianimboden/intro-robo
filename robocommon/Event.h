@@ -18,7 +18,7 @@ enum class Event : uint8_t
 	Sw5Pressed,
 	Sw6Pressed,
 	Sw7Pressed,
-	/*!< \todo Your events here */
+	/*!< add your events here */
 	AmountOfEvents		/*!< must be the last */
 };
 

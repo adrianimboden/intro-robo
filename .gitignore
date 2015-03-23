@@ -17,3 +17,4 @@ ProjectInfo.xml
 */ProcessorExpert.pe
 unittests-build
 CMakeLists.txt.user
+testresults.xml

@@ -10,8 +10,13 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
+#include <Console.h>
+#include <LineInputStrategy.h>
+#include <CommandParser.h>
 #include "Platform.h"
 #include "EventQueue.h"
+#include "Console.h"
+#include "LineInputStrategy.h"
 #include "CriticalSection.h"
 #include "WAIT1.h"
 #include "EventHandler.h"
@@ -20,35 +25,106 @@
 #include "Keys.h"
 #include "Mealy.h"
 
-extern "C" {
-#include "CLS1.h"
-}
+#include "AS1.h"
 
 void doLedHeartbeat(void);
 
-void Key_A_Pressed(void);
-void Key_B_Pressed(void);
-void Key_C_Pressed(void);
-void Key_D_Pressed(void);
-void Key_E_Pressed(void);
-void Key_F_Pressed(void);
-void Key_J_Pressed(void);
+class EchoConsole;
+
+class CommandExecutorLineSink
+{
+public:
+	explicit CommandExecutorLineSink(CommandParser* pCommandParser)
+		: pCommandParser(pCommandParser)
+	{
+	}
+
+	void lineCompleted(const String<80>& line)
+	{
+		pCommandParser->executeCommand(line);
+	}
+
+private:
+	CommandParser* pCommandParser;
+};
+
+using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole>;
+using RemoteControlConsole = Console<decltype(AS1_SendChar)*, MyLineInputStrategy>;
+
+class EchoConsole
+{
+public:
+	explicit EchoConsole(RemoteControlConsole* pConsole)
+		: pConsole(pConsole)
+	{
+	}
+
+	template <typename... Args>
+	void write(Args... args)
+	{
+		pConsole->write(args...);
+	}
+
+private:
+	RemoteControlConsole* pConsole;
+};
 
 /**
  * C++ world main function
  */
 void realMain()
 {
+	RemoteControlConsole* pConsole;
+
+	auto parser = makeParser(
+		cmd("echo", [&](const String<80>& param)
+		{
+			pConsole->write(param);
+			pConsole->write("\r\n");
+		}),
+		cmd("add", [&](int32_t lhs, int32_t rhs)
+		{
+			pConsole->write(lhs + rhs);
+			pConsole->write("\r\n");
+		}),
+		cmd("mult", [&](int32_t lhs, int32_t rhs)
+		{
+			pConsole->write(lhs * rhs);
+			pConsole->write("\r\n");
+		})
+	);
+
+	RemoteControlConsole console{AS1_SendChar, MyLineInputStrategy{CommandExecutorLineSink{&parser}, EchoConsole{&console}} };
+	pConsole = &console;
+
+	auto handleConsoleInput = [&]
+    {
+		byte inputChar;
+		if (AS1_RecvChar(&inputChar) == ERR_OK)
+		{
+			console.rxChar(inputChar);
+		}
+    };
+
+	console.write("Up and running\r\n");
+
 	new(&eventQueue)MainEventQueue();
 	for(;;){
-		handleOneEvent(eventQueue, []{}, doLedHeartbeat, Key_A_Pressed, Key_B_Pressed, Key_C_Pressed, Key_D_Pressed, Key_E_Pressed, Key_F_Pressed, Key_J_Pressed);
-		#if PL_HAS_KEYS && PL_NOF_KEYS>0
-			KEY_Scan(); /* scan keys */
-		#endif
-		#if PL_HAS_MEALY
-			MEALY_Step();
-		#endif
-		WAIT1_Waitms(100);
+		handleOneEvent(eventQueue,
+			[]{},
+			doLedHeartbeat,
+			[&]{ console.write("Key_A_Pressed!\r\n"); },
+			[&]{ console.write("Key_B_Pressed!\r\n"); },
+			[&]{ console.write("Key_C_Pressed!\r\n"); },
+			[&]{ console.write("Key_D_Pressed!\r\n"); },
+			[&]{ console.write("Key_E_Pressed!\r\n"); },
+			[&]{ console.write("Key_F_Pressed!\r\n"); },
+			[&]{ console.write("Key_J_Pressed!\r\n"); }
+		);
+
+		KEY_Scan();
+		MEALY_Step();
+		handleConsoleInput();
 	}
 
 	eventQueue.~EventQueue();
@@ -66,26 +142,4 @@ void doLedHeartbeat(void){
 	LED1_On(); // RED RGB LED
 	WAIT1_Waitms(50);
 	LED1_Off();
-}
-
-void Key_A_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_B_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_B_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_C_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_C_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_D_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_D_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_E_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_E_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_F_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_F_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_J_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_J_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
