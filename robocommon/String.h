@@ -45,7 +45,34 @@ public:
 		, pDebugStr(data.data())
 	{
 	}
+
+	String& operator=(const String& other)
+	{
+		if (this != &other)
+		{
+			data = other.data;
+			currSize = other.currSize;
+		}
+		return *this;
+	}
 #endif
+
+	explicit String(String&& other)
+		: data(other.data)
+		, currSize(other.currSize)
+		, pDebugStr(data.data())
+	{
+	}
+
+	String& operator=(String&& other)
+	{
+		if (this != &other)
+		{
+			data = other.data;
+			currSize = other.currSize;
+		}
+		return *this;
+	}
 
 	explicit String(const char* pSrc, size_t srcSize)
 		: String(pSrc, getEndPtr(pSrc, srcSize))
