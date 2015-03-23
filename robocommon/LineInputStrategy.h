@@ -13,7 +13,8 @@ public:
 class DiscardingLineSink
 {
 public:
-	void lineCompleted(...)
+	template <typename... Args>
+	void lineCompleted(Args... /*args*/)
 	{
 	}
 };

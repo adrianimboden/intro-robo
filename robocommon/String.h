@@ -38,11 +38,12 @@ public:
 #endif
 	}
 
-#ifdef DEBUG
 	explicit String(const String& other)
 		: data(other.data)
 		, currSize(other.currSize)
+#ifdef DEBUG
 		, pDebugStr(data.data())
+#endif
 	{
 	}
 
@@ -55,12 +56,13 @@ public:
 		}
 		return *this;
 	}
-#endif
 
 	explicit String(String&& other)
 		: data(other.data)
 		, currSize(other.currSize)
+#ifdef DEBUG
 		, pDebugStr(data.data())
+#endif
 	{
 	}
 
