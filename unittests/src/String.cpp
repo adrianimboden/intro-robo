@@ -2,7 +2,7 @@
 #include "TestAssert.h"
 #include "StringStreamer.h"
 
-#include <String.h>
+#include <FixedSizeString.h>
 
 using namespace testing;
 

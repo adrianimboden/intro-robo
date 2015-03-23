@@ -1,6 +1,6 @@
 #pragma once
 
-#include <String.h>
+#include <FixedSizeString.h>
 #include <CharBit.h>
 #include <Optional.h>
 

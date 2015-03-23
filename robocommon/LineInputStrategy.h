@@ -1,6 +1,6 @@
 #pragma once
 
-#include <String.h>
+#include <FixedSizeString.h>
 
 class DiscardingEchoConsole
 {
@@ -59,6 +59,7 @@ public:
 				echoConsole.write(c);
 			}
 		}
+		//TODO: history
 	}
 
 private:

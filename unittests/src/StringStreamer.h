@@ -1,6 +1,6 @@
 #pragma once
 
-#include <String.h>
+#include <FixedSizeString.h>
 #include <iostream>
 
 template <size_t MaxSize>
