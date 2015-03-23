@@ -15,9 +15,15 @@ template <size_t MaxSize>
 class String
 {
 public:
+	using iterator = char*;
+	using const_iterator = const char*;
+
 	explicit String()
 	{
 		currSize = 0;
+#ifdef DEBUG
+		pDebugStr = data.data();
+#endif
 	}
 
 	explicit String(const char* pSrc, const char* pEnd)
@@ -31,6 +37,15 @@ public:
 		pDebugStr = data.data();
 #endif
 	}
+
+#ifdef DEBUG
+	explicit String(const String& other)
+		: data(other.data)
+		, currSize(other.currSize)
+		, pDebugStr(data.data())
+	{
+	}
+#endif
 
 	explicit String(const char* pSrc, size_t srcSize)
 		: String(pSrc, getEndPtr(pSrc, srcSize))
@@ -149,10 +164,11 @@ private:
 
 private:
 	std::array<char, MaxSize + 1> data{};
+	size_t currSize;
+
 #ifdef DEBUG
 	char* pDebugStr;
 #endif
-	size_t currSize;
 };
 
 template <size_t MaxSizeLhs, size_t MaxSizeRhs>

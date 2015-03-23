@@ -2,6 +2,7 @@
 
 #include <String.h>
 #include <CharBit.h>
+#include <Optional.h>
 
 #include <type_traits>
 
@@ -145,10 +146,78 @@ auto numberToStringImpl(TVal val) -> String<calcMaxStringSizeByNumberType(sizeof
 	});
 }
 
+template <typename TVal>
+optional<TVal> stringToNumber(const unsigned char* pStr)
+{
+	/* scans a decimal number, and stops at any non-number. Number can have any preceding zeros or spaces. */
+	constexpr auto MaxNoOfDigits = calcMaxStringSizeByNumberType(sizeof(TVal) * CHAR_BIT, false) + 1;
+	uint8_t noOfDigits = MaxNoOfDigits;
+	const unsigned char *p = pStr;
+
+	while(*p==' ')
+	{ /* skip leading spaces */
+		p++;
+	}
+
+	bool isNeg = false;
+	if (std::is_signed<TVal>::value)
+	{
+		if (*p=='-')
+		{
+			isNeg = true;
+			p++; /* skip minus */
+		}
+	}
+
+	TVal val = 0;
+	while(*p>='0' && *p<='9' && noOfDigits > 0)
+	{
+		val = (TVal)((val)*10 + *p-'0');
+		noOfDigits--;
+		p++;
+	} /* while */
+	if (noOfDigits==0)
+	{
+		return {};
+	}
+	if (noOfDigits == MaxNoOfDigits)
+	{ /* no digits at all? */
+		return {};
+	}
+
+	if (isNeg)
+	{
+		return -val;
+	} else
+	{
+		return val;
+	}
 }
+
+
+}
+
 
 template <typename TVal>
 auto numberToString(TVal val) -> decltype(detail::numberToStringImpl<std::is_signed<TVal>::value, TVal>(val))
 {
 	return detail::numberToStringImpl<std::is_signed<TVal>::value, TVal>(val);
+}
+
+template <typename TVal>
+optional<TVal> stringToNumber(const unsigned char* pStr)
+{
+	return detail::stringToNumber<TVal>(pStr);
+}
+
+template <typename TVal>
+optional<TVal> stringToNumber(const char* pStr)
+{
+	return detail::stringToNumber<TVal>(reinterpret_cast<const unsigned char*>(pStr));
+}
+
+template <typename TVal, size_t MaxSize>
+optional<TVal> stringToNumber(const String<MaxSize>& str)
+{
+	return detail::stringToNumber<TVal>(str.begin());
 }
