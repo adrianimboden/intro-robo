@@ -44,7 +44,7 @@ static bool CheckCallbacks(void) {
   bool calledCallBack = FALSE;
   CS1_CriticalVariable()
 
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;i++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
     CS1_EnterCritical();
     if (TRG_Triggers[i].ticks==0 && TRG_Triggers[i].callback != NULL) { /* trigger! */
       callback = TRG_Triggers[i].callback; /* get a copy */
@@ -66,7 +66,7 @@ void TRG_IncTick(void) {
   CS1_CriticalVariable()
 
   CS1_EnterCritical();
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;i++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
     if (TRG_Triggers[i].ticks!=0) { /* prevent underflow */
       TRG_Triggers[i].ticks--;
     }
@@ -82,7 +82,7 @@ void TRG_Deinit(void) {
 void TRG_Init(void) {
   TRG_TriggerKind i;
 
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;i++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
     TRG_Triggers[i].ticks = 0;
     TRG_Triggers[i].callback = NULL;
     TRG_Triggers[i].data = NULL;
