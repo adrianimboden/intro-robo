@@ -47,6 +47,8 @@
 #include "BT1.h"
 #include "Serial2.h"
 #include "ASerialLdd2.h"
+#include "BUZ1.h"
+#include "BitIoLdd4.h"
 /* Including shared modules, which are used for whole project */
 #include "PE_Types.h"
 #include "PE_Error.h"

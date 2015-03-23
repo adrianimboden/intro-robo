@@ -19,6 +19,7 @@
 #include "LED.h"
 #include "Keys.h"
 #include "Mealy.h"
+#include "Buzzer.h"
 
 extern "C" {
 #include "CLS1.h"
@@ -70,6 +71,9 @@ void doLedHeartbeat(void){
 
 void Key_A_Pressed(void){
 	CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+#if PL_HAS_BUZZER
+      BUZ_Beep(300, 1000);
+#endif
 }
 
 void Key_B_Pressed(void){
