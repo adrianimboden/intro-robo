@@ -29,6 +29,7 @@ public:
 
 	explicit String(const char* pSrc, const char* pEnd)
 	{
+		ASSERT(pEnd > pSrc);
 		currSize = (pEnd - pSrc);
 		for (auto i = 0u; i < (pEnd - pSrc); ++i)
 		{

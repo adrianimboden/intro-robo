@@ -170,12 +170,12 @@ namespace detail
 				}
 				for (auto i = size_t{1}; i < traits::AmountOfArguments; ++i)
 				{
-					if (splitPoints[i - 1] == cmdToExecute.end())
+					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+
+					if (splitPoints[i] == cmdToExecute.end())
 					{
 						return false; //not enough parameters
 					}
-
-					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
 				}
 			}
 
