@@ -52,7 +52,7 @@ public:
 	{
 		for (auto i = size_t{0}; i < size; ++i)
 		{
-			writeTxCharFn(pData[i]);
+			writeChar(pData[i]);
 		}
 	}
 
@@ -61,16 +61,22 @@ public:
 	{
 		for (auto i = size_t{0}; i < Size; ++i)
 		{
-			writeTxCharFn(data[i]);
+			writeChar(data[i]);
 		}
 	}
 
 	void write(char c)
 	{
-		writeTxCharFn(c);
+		writeChar(c);
 	}
 
 	void write(unsigned char c)
+	{
+		writeChar(c);
+	}
+
+private:
+	void writeChar(unsigned char c)
 	{
 		writeTxCharFn(c);
 	}
@@ -81,7 +87,7 @@ private:
 	{
 		for (auto c : numberToString(number))
 		{
-			writeTxCharFn(c);
+			writeChar(c);
 		}
 	}
 
@@ -91,7 +97,7 @@ private:
 		auto len = strlen(pStr);
 		for (auto i = size_t{0}; i < len; ++i)
 		{
-			writeTxCharFn(pStr[i]);
+			writeChar(pStr[i]);
 		}
 	}
 
@@ -101,7 +107,7 @@ private:
 		auto len = strlen(pStr);
 		for (auto i = size_t{0}; i < len; ++i)
 		{
-			writeTxCharFn(pStr[i]);
+			writeChar(pStr[i]);
 		}
 	}
 
@@ -110,7 +116,7 @@ private:
 	{
 		for (auto c : str)
 		{
-			writeTxCharFn(c);
+			writeChar(c);
 		}
 	}
 
@@ -119,7 +125,7 @@ private:
 	{
 		for (auto c : arr)
 		{
-			writeTxCharFn(c);
+			writeChar(c);
 		}
 	}
 

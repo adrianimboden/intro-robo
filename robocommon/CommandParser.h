@@ -191,6 +191,11 @@ namespace detail
 			return syntax;
 		}
 
+		const String<10>& getCmd() const
+		{
+			return cmd;
+		}
+
 	private:
 		CmdString::const_iterator findNextSplitter(CmdString::const_iterator start, CmdString::const_iterator end)
 		{
@@ -266,7 +271,37 @@ class CommandParser
 {
 public:
 	virtual void executeCommand(const detail::CmdString& command) = 0;
+	virtual void getAvailableCommands(String<10> list[], size_t maxElements) = 0;
 };
+
+namespace detail
+{
+
+template <typename... Commands>
+using AvailableCommands = std::array<String<10>, std::tuple_size<std::tuple<Commands...>>::value>;
+
+template <size_t no>
+struct AddCommandImpl
+{
+	template <typename... Commands>
+	static void addCommand(std::tuple<Commands...> commands, AvailableCommands<Commands...>& cmds)
+	{
+		constexpr auto Index = std::tuple_size<std::tuple<Commands...>>::value - no;
+		cmds[Index] = std::get<Index>(commands).getCmd();
+		AddCommandImpl<no - 1>::addCommand(commands, cmds);
+	}
+};
+
+template <>
+struct AddCommandImpl<0>
+{
+	template <typename... Commands>
+	static void addCommand(std::tuple<Commands...> /*commands*/, AvailableCommands<Commands...>& /*cmds*/)
+	{
+	}
+};
+
+}
 
 template <typename ErrorHandler, typename... Commands>
 class ConcreteCommandParser : public CommandParser
@@ -281,6 +316,25 @@ public:
 	void executeCommand(const detail::CmdString& command) override
 	{
 		detail::handleCommandRecursive(errorHandler, command, commands);
+	}
+
+	detail::AvailableCommands<Commands...> getAvailableCommands()
+	{
+		detail::AvailableCommands<Commands...> availableCommands;
+
+		detail::AddCommandImpl<std::tuple_size<std::tuple<Commands...>>::value>::addCommand(commands, availableCommands);
+
+		return availableCommands;
+	}
+
+	void getAvailableCommands(String<10> cmds[], size_t maxElements) override
+	{
+		auto availableCommands = getAvailableCommands();
+		ASSERT(availableCommands.size() <= maxElements);
+		for (auto i = size_t{0}; i < availableCommands.size(); ++i)
+		{
+			cmds[i] = availableCommands[i];
+		}
 	}
 
 private:

@@ -48,8 +48,14 @@ private:
 	CommandParser* pCommandParser;
 };
 
+void writeCharToSerialPort(unsigned char c)
+{
+	while (AS1_SendChar(c) == ERR_TXFULL)
+		;
+}
+
 using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole>;
-using RemoteControlConsole = Console<decltype(AS1_SendChar)*, MyLineInputStrategy>;
+using RemoteControlConsole = Console<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
 
 class EchoConsole
 {
@@ -76,12 +82,27 @@ void realMain()
 {
 	RemoteControlConsole* pConsole;
 
+	CommandParser* pParser = nullptr;
 	auto parser = makeParser(
 		[&](const String<80>& error)
 		{
 			pConsole->write(error);
 			pConsole->write("\r\n");
 		},
+		cmd("help", [&]()
+		{
+			String<10> cmds[10] = {};
+			pParser->getAvailableCommands(cmds, 10);
+			pConsole->write("available commands:\r\n");
+			for (const auto& cmd : cmds)
+			{
+				if (cmd.size() > 0)
+				{
+					pConsole->write(cmd);
+					pConsole->write("\r\n");
+				}
+			}
+		}),
 		cmd("echo", [&](const String<80>& param)
 		{
 			pConsole->write(param);
@@ -98,8 +119,9 @@ void realMain()
 			pConsole->write("\r\n");
 		})
 	);
+	pParser = &parser;
 
-	RemoteControlConsole console{AS1_SendChar, MyLineInputStrategy{CommandExecutorLineSink{&parser}, EchoConsole{&console}} };
+	RemoteControlConsole console{writeCharToSerialPort, MyLineInputStrategy{CommandExecutorLineSink{&parser}, EchoConsole{&console}} };
 	pConsole = &console;
 
 	auto handleConsoleInput = [&]
@@ -118,7 +140,7 @@ void realMain()
 		handleOneEvent(eventQueue,
 			[]{},
 			doLedHeartbeat,
-			[&]{ console.write("Key_A_Pressed!\r\n"); },
+			[&]{ console.write("Key_A_Pressed!\r\n"); pParser->executeCommand("help"); },
 			[&]{ console.write("Key_B_Pressed!\r\n"); },
 			[&]{ console.write("Key_C_Pressed!\r\n"); },
 			[&]{ console.write("Key_D_Pressed!\r\n"); },
