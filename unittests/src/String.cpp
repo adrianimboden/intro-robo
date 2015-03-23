@@ -142,3 +142,31 @@ TEST(String, erase_clear_operation)
 	str.erase();
 	EXPECT_THAT(str, Eq(""));
 }
+
+TEST(String, append_const_char_has_not_enough_memory)
+{
+	String<4> str{"abc"};
+	auto result = str.append("de");
+	EXPECT_THAT(result, Eq(StringManipulationResult::NotEnoughBufferMemory));
+}
+
+TEST(String, append_const_char_has_enough_memory)
+{
+	String<5> str{"abc"};
+	str.append("de");
+	EXPECT_THAT(str, Eq("abcde"));
+}
+
+TEST(String, append_string_has_not_enough_memory)
+{
+	String<4> str{"abc"};
+	auto result = str.append(String<2>{"de"});
+	EXPECT_THAT(result, Eq(StringManipulationResult::NotEnoughBufferMemory));
+}
+
+TEST(String, append_string_has_enough_memory)
+{
+	String<5> str{"abc"};
+	str.append(String<2>{"de"});
+	EXPECT_THAT(str, Eq("abcde"));
+}

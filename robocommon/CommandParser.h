@@ -46,7 +46,7 @@ namespace detail
 		using ProcessedParamType = typename std::decay<typename std::tuple_element<Index, typename traits::arguments>::type>::type;
 
 		template <typename... Args>
-		static void executeImpl(const Fn& fn, const CmdString& cmdToExecute, std::array<CmdString::const_iterator, traits::AmountOfArguments> splitPoints, Args... args)
+		static bool executeImpl(const Fn& fn, const CmdString& cmdToExecute, std::array<CmdString::const_iterator, traits::AmountOfArguments> splitPoints, Args... args)
 		{
 			ParamString param{
 				splitPoints[Index] + 1,
@@ -54,25 +54,58 @@ namespace detail
 			};
 
 			ProcessedParamType parsedParam;
-			parseParam(param, parsedParam);
-			Executor<Fn, ArgNo-1>::executeImpl(fn, cmdToExecute, splitPoints, args..., std::move(parsedParam));
-		}
-
-		template <typename T>
-		static auto parseParam(const ParamString& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, void>::type
-		{
-			value = *stringToNumber<T>(param);
+			bool parseOk = parseParam(param, parsedParam);
+			if (!parseOk)
+			{
+				return false;
+			}
+			return Executor<Fn, ArgNo-1>::executeImpl(fn, cmdToExecute, splitPoints, args..., std::move(parsedParam));
 		}
 
 		template <size_t MaxSize>
-		static void parseParam(const ParamString& param, String<MaxSize>& value)
+		static void appendParams(String<MaxSize>& value)
 		{
-			value = String<MaxSize>{param.begin(), std::min(MaxSize, param.size())};
+			value.append(" ");
+			appendParamTypeName(value, static_cast<ProcessedParamType*>(nullptr));
+			return Executor<Fn, ArgNo-1>::appendParams(value);
 		}
 
-		static void parseParam(...)
+		template <typename T>
+		static auto parseParam(const ParamString& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, bool>::type
+		{
+			auto result = stringToNumber<T>(param);
+			if (!result)
+			{
+				return false;
+			}
+			value = *result;
+			return true;
+		}
+
+		template <size_t MaxSize>
+		static bool parseParam(const ParamString& param, String<MaxSize>& value)
+		{
+			value = String<MaxSize>{param.begin(), std::min(MaxSize, param.size())};
+			return true; //possibly stripped
+		}
+
+		static bool parseParam(...)
 		{
 			static_assert(AlwaysFalse<Fn>::value, "unsupported parameter type used in command function");
+			return false;
+		}
+
+
+		template <typename T, size_t MaxSize>
+		static auto appendParamTypeName(String<MaxSize>& value, T* /*dummy*/) -> typename std::enable_if<std::is_integral<T>::value, void>::type
+		{
+			value.append("num");
+		}
+
+		template <size_t MaxSizeValue, size_t MaxSizeDummy>
+		static void appendParamTypeName(String<MaxSizeValue>& value, String<MaxSizeDummy>* /*dummy*/)
+		{
+			value.append("str");
 		}
 	};
 
@@ -82,9 +115,15 @@ namespace detail
 		using traits = function_traits<Fn>;
 
 		template <typename... Args>
-		static void executeImpl(const Fn& fn, const CmdString& /*cmdToExecute*/, std::array<CmdString::const_iterator, traits::AmountOfArguments> /*splitPoints*/, Args... args)
+		static bool executeImpl(const Fn& fn, const CmdString& /*cmdToExecute*/, std::array<CmdString::const_iterator, traits::AmountOfArguments> /*splitPoints*/, Args... args)
 		{
 			fn(args...);
+			return true;
+		}
+
+		template <size_t MaxSize>
+		static void appendParams(String<MaxSize>& /*value*/)
+		{
 		}
 	};
 
@@ -118,17 +157,38 @@ namespace detail
 				(cmdToExecute[cmd.size()] == ' '));		//there are parameters after the command (space)
 		}
 
-		void execute(const CmdString& cmdToExecute)
+		bool execute(const CmdString& cmdToExecute)
 		{
 			std::array<CmdString::const_iterator, traits::AmountOfArguments> splitPoints;
 
-			splitPoints[0] = findNextSplitter(cmdToExecute.begin(), cmdToExecute.end());
-			for (auto i = size_t{1}; i < traits::AmountOfArguments; ++i)
+			if (traits::AmountOfArguments > 0)
 			{
-				splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+				splitPoints[0] = findNextSplitter(cmdToExecute.begin(), cmdToExecute.end());
+				if (splitPoints[0] == cmdToExecute.end())
+				{
+					return false; //not enough parameters
+				}
+				for (auto i = size_t{1}; i < traits::AmountOfArguments; ++i)
+				{
+					if (splitPoints[i - 1] == cmdToExecute.end())
+					{
+						return false; //not enough parameters
+					}
+
+					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+				}
 			}
 
-			Executor<Fn, traits::AmountOfArguments>::executeImpl(fn, cmdToExecute, splitPoints);
+			return Executor<Fn, traits::AmountOfArguments>::executeImpl(fn, cmdToExecute, splitPoints);
+		}
+
+		String<80> getSyntax() const
+		{
+			String<80> syntax;
+			syntax.append(cmd);
+			Executor<Fn, traits::AmountOfArguments>::appendParams(syntax);
+
+			return syntax;
 		}
 
 	private:
@@ -154,18 +214,24 @@ namespace detail
 	template <size_t Count>
 	struct HandleCommandRecursive
 	{
-		template <typename... Commands>
-		static void doHandleCommand(const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
+		template <typename ErrorHandler, typename... Commands>
+		static void doHandleCommand(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
 		{
 			auto command = std::get<std::tuple_size<std::tuple<Commands...>>::value - Count>(commands);
 
 			if (command.matches(cmdToExecute))
 			{
-				command.execute(cmdToExecute);
+				bool success = command.execute(cmdToExecute);
+				if (!success)
+				{
+					String<80> err{"error. syntax: "};
+					err.append(command.getSyntax());
+					errorHandler(err);
+				}
 			}
 			else
 			{
-				HandleCommandRecursive<Count - 1>::doHandleCommand(cmdToExecute, commands);
+				HandleCommandRecursive<Count - 1>::doHandleCommand(errorHandler, cmdToExecute, commands);
 			}
 		}
 	};
@@ -173,17 +239,20 @@ namespace detail
 	template <>
 	struct HandleCommandRecursive<0>
 	{
-		template <typename... Commands>
-		static void doHandleCommand(const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
+		//terminating case
+		template <typename ErrorHandler, typename... Commands>
+		static void doHandleCommand(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
 		{
-			//terminating case
+			String<80> error = cmdToExecute;
+			error.append(" not found");
+			errorHandler(error);
 		}
 	};
 
-	template <typename... Commands>
-	void handleCommandRecursive(const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
+	template <typename ErrorHandler, typename... Commands>
+	void handleCommandRecursive(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
 	{
-		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(cmdToExecute, commands);
+		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(errorHandler, cmdToExecute, commands);
 	}
 }
 
@@ -199,26 +268,28 @@ public:
 	virtual void executeCommand(const detail::CmdString& command) = 0;
 };
 
-template <typename... Commands>
+template <typename ErrorHandler, typename... Commands>
 class ConcreteCommandParser : public CommandParser
 {
 public:
-	explicit ConcreteCommandParser(std::tuple<Commands...> commands)
-		: commands(std::move(commands))
+	explicit ConcreteCommandParser(ErrorHandler errorHandler, std::tuple<Commands...> commands)
+		: errorHandler(std::move(errorHandler))
+		, commands(std::move(commands))
 	{
 	}
 
 	void executeCommand(const detail::CmdString& command) override
 	{
-		detail::handleCommandRecursive(command, commands);
+		detail::handleCommandRecursive(errorHandler, command, commands);
 	}
 
 private:
+	ErrorHandler errorHandler;
 	std::tuple<Commands...> commands;
 };
 
-template <typename... Commands>
-ConcreteCommandParser<Commands...> makeParser(Commands... commands)
+template <typename ErrorHandler, typename... Commands>
+ConcreteCommandParser<ErrorHandler, Commands...> makeParser(ErrorHandler errorHandler, Commands... commands)
 {
-	return ConcreteCommandParser<Commands...>(std::make_tuple(commands...));
+	return ConcreteCommandParser<ErrorHandler, Commands...>(errorHandler, std::make_tuple(commands...));
 }

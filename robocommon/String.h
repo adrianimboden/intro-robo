@@ -4,6 +4,7 @@
 
 #include <array>
 #include <type_traits>
+#include <cstring>
 
 enum class StringManipulationResult
 {
@@ -138,6 +139,39 @@ public:
 		}
 		data[currSize] = c;
 		++currSize;
+
+		return StringManipulationResult::Ok;
+	}
+
+	template <size_t MaxSizeOther>
+	StringManipulationResult append(String<MaxSizeOther> toAppend)
+	{
+		auto len = toAppend.size();
+		if (currSize + len > MaxSize)
+		{
+			return StringManipulationResult::NotEnoughBufferMemory;
+		}
+		for (auto i = size_t{0}; i < len; ++i)
+		{
+			data[currSize + i] = toAppend[i];
+		}
+		currSize += len;
+
+		return StringManipulationResult::Ok;
+	}
+
+	StringManipulationResult append(const char* pStrToApend)
+	{
+		auto len = strlen(pStrToApend);
+		if (currSize + len > MaxSize)
+		{
+			return StringManipulationResult::NotEnoughBufferMemory;
+		}
+		for (auto i = size_t{0}; i < len; ++i)
+		{
+			data[currSize + i] = pStrToApend[i];
+		}
+		currSize += len;
 
 		return StringManipulationResult::Ok;
 	}

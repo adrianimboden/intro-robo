@@ -1,5 +1,6 @@
 #include <gmock/gmock.h>
 #include "TestAssert.h"
+#include "StringStreamer.h"
 
 #include <CommandParser.h>
 
@@ -7,6 +8,7 @@ using namespace testing;
 
 struct ParserTestData
 {
+	String<80> lastError;
 	struct {
 		size_t callCount = 0;
 		uint16_t p1 = 0;
@@ -39,6 +41,10 @@ struct ParserTestData
 	void executeCommand(const detail::CmdString& command)
 	{
 		auto parser = makeParser(
+			[&](const String<80>& error)
+			{
+				lastError = error;
+			},
 			cmd("cmd1", [&](uint16_t p1)
 			{
 				++cmd1.callCount;
@@ -121,4 +127,31 @@ TEST(CommandParser, combination)
 	ASSERT_THAT(testParser.cmd5.p3, Eq(-15));
 	ASSERT_THAT(testParser.cmd5.p4, Eq(40));
 	ASSERT_THAT(testParser.cmd5.p5, Eq(-500));
+}
+
+TEST(CommandParser, error_cmd_not_found)
+{
+	ParserTestData testParser;
+
+	testParser.executeCommand("unknown");
+	ASSERT_THAT(testParser.lastError, Eq("unknown not found"));
+}
+
+TEST(CommandParser, error_paramters_dont_match)
+{
+	ParserTestData testParser;
+
+	auto checkError = [&](const char* cmd, const char* expectedError)
+	{
+		testParser.lastError.erase();
+		testParser.executeCommand(cmd);
+		ASSERT_THAT(testParser.lastError, Eq(expectedError)) << testParser.lastError;
+	};
+
+	checkError("cmd1", "error. syntax: cmd1 num");
+	checkError("cmd3", "error. syntax: cmd3 str");
+	checkError("cmd4", "error. syntax: cmd4 str num");
+
+	checkError("cmd1 text", "error. syntax: cmd1 num");
+	checkError("cmd4 45 text", "error. syntax: cmd4 str num");
 }
