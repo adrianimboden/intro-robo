@@ -11,6 +11,8 @@
 #include "Timer.h"
 #include "Mealy.h"
 #include "Keys.h"
+#include "Trigger.h"
+#include "Buzzer.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,31 +29,42 @@ void PL_Init(void){
 #if PL_HAS_TIMER
 	TMR_Init();
 #endif
+#if PL_HAS_KEYS
+	KEY_Init();
+#endif
 #if PL_HAS_MEALY
 	MEALY_Init();
 #endif
-#if PL_HAS_KEYS
-	KEY_Init();
+#if PL_HAS_TRIGGER
+  TRG_Init();
+#endif
+#if PL_HAS_BUZZER
+  BUZ_Init();
 #endif
 }
 
 
 void PL_Deinit(void){
-
-#if PL_HAS_LED
-	LED_Deinit();
+#if PL_HAS_BUZZER
+  BUZ_Init();
 #endif
-#if PL_HAS_EVENT
-	/* do nothing */
-#endif
-#if PL_HAS_TIMER
-	TMR_Deinit();
+#if PL_HAS_TRIGGER
+  TRG_Init();
 #endif
 #if PL_HAS_MEALY
 	MEALY_Deinit();
 #endif
 #if PL_HAS_KEYS
 	KEY_Deinit();
+#endif
+#if PL_HAS_TIMER
+	TMR_Deinit();
+#endif
+#if PL_HAS_EVENT
+	/* do nothing */
+#endif
+#if PL_HAS_LED
+	LED_Deinit();
 #endif
 
 }
