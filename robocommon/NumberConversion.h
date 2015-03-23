@@ -219,5 +219,5 @@ optional<TVal> stringToNumber(const char* pStr)
 template <typename TVal, size_t MaxSize>
 optional<TVal> stringToNumber(const String<MaxSize>& str)
 {
-	return detail::stringToNumber<TVal>(str.begin());
+	return stringToNumber<TVal>(str.begin());
 }
