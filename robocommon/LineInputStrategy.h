@@ -35,12 +35,13 @@ public:
 	{
 		if (isNewLine(c))
 		{
+			echoConsole.write("\r\n");
 			if (currentlyReceivingLine.size() > 0)
 			{
 				lineSink.lineCompleted(currentlyReceivingLine);
 				currentlyReceivingLine.erase();
 			}
-			echoConsole.write("\r\n> ");
+			echoConsole.write("> ");
 		}
 		else if (isBackspace(c))
 		{

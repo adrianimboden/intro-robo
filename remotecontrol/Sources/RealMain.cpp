@@ -12,6 +12,7 @@
 
 #include <Console.h>
 #include <LineInputStrategy.h>
+#include <CommandParser.h>
 #include "Platform.h"
 #include "EventQueue.h"
 #include "Console.h"
@@ -30,7 +31,24 @@ void doLedHeartbeat(void);
 
 class EchoConsole;
 
-using MyLineInputStrategy = LineInputStrategy<80, DiscardingLineSink, EchoConsole>;
+class CommandExecutorLineSink
+{
+public:
+	explicit CommandExecutorLineSink(CommandParser* pCommandParser)
+		: pCommandParser(pCommandParser)
+	{
+	}
+
+	void lineCompleted(const String<80>& line)
+	{
+		pCommandParser->executeCommand(line);
+	}
+
+private:
+	CommandParser* pCommandParser;
+};
+
+using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole>;
 using RemoteControlConsole = Console<decltype(AS1_SendChar)*, MyLineInputStrategy>;
 
 class EchoConsole
@@ -56,7 +74,28 @@ private:
  */
 void realMain()
 {
-	RemoteControlConsole console{AS1_SendChar, MyLineInputStrategy{DiscardingLineSink{}, EchoConsole{&console}} };
+	RemoteControlConsole* pConsole;
+
+	auto parser = makeParser(
+		cmd("echo", [&](const String<80>& param)
+		{
+			pConsole->write(param);
+			pConsole->write("\r\n");
+		}),
+		cmd("add", [&](int32_t lhs, int32_t rhs)
+		{
+			pConsole->write(lhs + rhs);
+			pConsole->write("\r\n");
+		}),
+		cmd("mult", [&](int32_t lhs, int32_t rhs)
+		{
+			pConsole->write(lhs * rhs);
+			pConsole->write("\r\n");
+		})
+	);
+
+	RemoteControlConsole console{AS1_SendChar, MyLineInputStrategy{CommandExecutorLineSink{&parser}, EchoConsole{&console}} };
+	pConsole = &console;
 
 	auto handleConsoleInput = [&]
     {
