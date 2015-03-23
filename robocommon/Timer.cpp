@@ -15,16 +15,25 @@
 #if PL_HAS_EVENT
 	#include "Event.h"
 #endif
+#if PL_HAS_TRIGGER
+  #include "Trigger.h"
+#endif
 
 /*! \brief Function called from timer interrupt every TMR_TICK_MS */
 void TMR_OnInterrupt(void){
 	static int cntr = 0;
 
+#if PL_HAS_TRIGGER
+	TRG_IncTick();
+#endif
+
+#if PL_HAS_EVENT
 	cntr++;
 	if(cntr==1000/TMR_TICK_MS){
 		eventQueue.setEvent(Event::LedHeartbeat);
 		cntr = 0;
 	}
+#endif
 }
 
 /*! \brief Timer driver initialization */
