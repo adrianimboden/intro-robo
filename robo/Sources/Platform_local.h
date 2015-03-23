@@ -39,6 +39,15 @@
 #define PL_L_HAS_JOYSTICK   (0)
 /*!< Set to 1 to enable joystick shield support, 0 otherwise */
 
+#define PL_L_HAS_TRIGGER        (1)
+  /*!< Set to 1 for trigger enabled, 0 otherwise */
+
+#define PL_L_HAS_SHELL          (0)
+  /*!< Set to 1 for shell enabled, 0 otherwise */
+
+#define PL_L_HAS_BUZZER         (1)
+  /*!< Set to 1 for buzzer enabled, 0 otherwise */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
