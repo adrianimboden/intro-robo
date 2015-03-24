@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef __cplusplus
+#error sorry, this header is c++ only
+#endif
+
 #include <Assert.h>
 
 #include <array>
@@ -12,12 +16,14 @@ enum class StringManipulationResult
 	NotEnoughBufferMemory,
 };
 
+using CharT = char;
+
 template <size_t MaxSize>
 class String
 {
 public:
-	using iterator = char*;
-	using const_iterator = const char*;
+	using iterator = CharT*;
+	using const_iterator = const CharT*;
 
 	explicit String()
 	{
@@ -27,9 +33,9 @@ public:
 #endif
 	}
 
-	explicit String(const char* pSrc, const char* pEnd)
+	explicit String(const CharT* pSrc, const CharT* pEnd)
 	{
-		ASSERT(pEnd > pSrc);
+		ASSERT(pEnd >= pSrc);
 		currSize = (pEnd - pSrc);
 		for (auto i = 0u; i < (pEnd - pSrc); ++i)
 		{
@@ -78,14 +84,29 @@ public:
 		return *this;
 	}
 
-	explicit String(const char* pSrc, size_t srcSize)
+	explicit String(const CharT* pSrc, size_t srcSize)
 		: String(pSrc, getEndPtr(pSrc, srcSize))
 	{
 	}
 
-	String(const char* pSrc)
+	String(const CharT* pSrc)
 		: String(pSrc, getEndPtr(pSrc))
 	{
+	}
+
+	template <int Size>
+	String(const CharT arr[Size])
+		: String(arr, size)
+	{
+	}
+
+	String(CharT c)
+		: currSize(1)
+	#ifdef DEBUG
+		, pDebugStr(data.data())
+	#endif
+	{
+		data[0] = c;
 	}
 
 	//! implicit conversion to different size
@@ -100,39 +121,44 @@ public:
 		return currSize;
 	}
 
-	char* begin()
+	bool empty() const
+	{
+		return currSize == 0;
+	}
+
+	CharT* begin()
 	{
 		return data.begin();
 	}
 
-	char* end()
+	CharT* end()
 	{
 		return data.begin() + currSize;
 	}
 
-	const char* begin() const
+	const CharT* begin() const
 	{
 		return data.begin();
 	}
 
-	const char* end() const
+	const CharT* end() const
 	{
 		return data.begin() + currSize;
 	}
 
-	char& operator[](size_t index)
+	CharT& operator[](size_t index)
 	{
 		ASSERT(index < size());
 		return data[index];
 	}
 
-	char operator[](size_t index) const
+	CharT operator[](size_t index) const
 	{
 		ASSERT(index < size());
 		return data[index];
 	}
 
-	StringManipulationResult append(char c)
+	StringManipulationResult append(CharT c)
 	{
 		if (currSize >= MaxSize)
 		{
@@ -161,7 +187,7 @@ public:
 		return StringManipulationResult::Ok;
 	}
 
-	StringManipulationResult append(const char* pStrToApend)
+	StringManipulationResult append(const CharT* pStrToApend)
 	{
 		auto len = strlen(pStrToApend);
 		if (currSize + len > MaxSize)
@@ -206,15 +232,15 @@ public:
 	}
 
 private:
-	static const char* getEndPtr(const char* pSrc, size_t srcSize)
+	static const CharT* getEndPtr(const CharT* pSrc, size_t srcSize)
 	{
 		ASSERT(srcSize <= MaxSize);
 		return pSrc + srcSize;
 	}
 
-	static const char* getEndPtr(const char* pSrc)
+	static const CharT* getEndPtr(const CharT* pSrc)
 	{
-		const char* pEnd = pSrc;
+		const CharT* pEnd = pSrc;
 
 		while (*pEnd != '\0')
 		{
@@ -227,11 +253,11 @@ private:
 	}
 
 private:
-	std::array<char, MaxSize + 1> data{};
+	std::array<CharT, MaxSize + 1> data{};
 	size_t currSize;
 
 #ifdef DEBUG
-	char* pDebugStr;
+	CharT* pDebugStr;
 #endif
 };
 
@@ -258,7 +284,7 @@ bool operator!=(const String<MaxSizeLhs>& lhs, const String<MaxSizeRhs>& rhs)
 
 
 template <size_t OtherSize>
-bool operator==(const String<OtherSize>& str, const char* pStr)
+bool operator==(const String<OtherSize>& str, const CharT* pStr)
 {
 	auto pEnd = pStr;
 	while (*pEnd != '\0')
@@ -279,19 +305,19 @@ bool operator==(const String<OtherSize>& str, const char* pStr)
 }
 
 template <size_t OtherSize>
-bool operator==(const char* pStr, const String<OtherSize>& str)
+bool operator==(const CharT* pStr, const String<OtherSize>& str)
 {
 	return str == pStr;
 }
 
 template <size_t OtherSize>
-bool operator!=(const String<OtherSize>& str, const char* pStr)
+bool operator!=(const String<OtherSize>& str, const CharT* pStr)
 {
 	return !(str == pStr);
 }
 
 template <size_t OtherSize>
-bool operator!=(const char* pStr, const String<OtherSize>& str)
+bool operator!=(const CharT* pStr, const String<OtherSize>& str)
 {
 	return str != pStr;
 }
