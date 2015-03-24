@@ -33,7 +33,7 @@ void checkOutputOfWrite(const std::string& str, Args... args)
 		strm << c;
 	};
 
-	Console<decltype(writeTxChar)> console{writeTxChar};
+	ConcreteConsole<decltype(writeTxChar)> console{writeTxChar};
 
 	console.write(args...);
 
@@ -69,7 +69,7 @@ TEST(Console, when_i_write_an_array_then_it_will_be_written_as_data)
 		strm << c;
 	};
 
-	Console<decltype(writeTxChar)> console{writeTxChar};
+	ConcreteConsole<decltype(writeTxChar)> console{writeTxChar};
 
 	console.write(data);
 
@@ -97,7 +97,7 @@ TEST(Console, when_i_receive_data_it_will_be_forwarded_to_input_strategy)
 
 	std::stringstream inStrm;
 
-	Console<void*, StoreInStringstreamInputStrategy> console{nullptr, StoreInStringstreamInputStrategy{&inStrm}};
+	ConcreteConsole<void(*)(char c), StoreInStringstreamInputStrategy> console{[](char){}, StoreInStringstreamInputStrategy{&inStrm}};
 
 	console.rxChar('a');
 	ASSERT_THAT(inStrm.str(), StrEq("a"));

@@ -170,3 +170,21 @@ TEST(String, append_string_has_enough_memory)
 	str.append(String<2>{"de"});
 	EXPECT_THAT(str, Eq("abcde"));
 }
+
+TEST(String, when_size_is_zero_then_string_is_empty)
+{
+	String<5> str;
+	EXPECT_THAT(str.empty(), Eq(true));
+}
+
+TEST(String, when_initialized_from_character_then_character_is_in_string)
+{
+	String<5> str{'a'};
+	EXPECT_THAT(str, Eq("a"));
+}
+
+TEST(String, when_initialized_from_empty_string_then_character_is_an_empty_string)
+{
+	String<5> str{""};
+	EXPECT_THAT(str, Eq(""));
+}

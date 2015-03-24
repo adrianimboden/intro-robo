@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef __cplusplus
+#error sorry, this header is c++ only
+#endif
+
 #include <array>
 
 #include <Optional.h>

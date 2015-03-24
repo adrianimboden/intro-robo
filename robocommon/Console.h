@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef __cplusplus
+#error sorry, this header is c++ only
+#endif
+
 #include <FixedSizeString.h>
 #include <NumberConversion.h>
 #include <cstring>
@@ -24,23 +28,10 @@ public:
 	}
 };
 
-template <typename WriteTxCharFn, typename ConsoleInputStrategy = DiscardInputStrategy>
 class Console
 {
 public:
-	using type = Console<WriteTxCharFn, ConsoleInputStrategy>;
-
-	explicit Console(WriteTxCharFn writeTxCharFn, ConsoleInputStrategy inputStrategy = {})
-		: writeTxCharFn(std::move(writeTxCharFn))
-		, inputStrategy(std::move(inputStrategy))
-	{
-	}
-
-	//! to be called when a character has been received (eg. from interrupt)
-	void rxChar(ConsoleChar c)
-	{
-		inputStrategy.rxChar(c);
-	}
+	virtual void rxChar(ConsoleChar c) = 0;
 
 	template <typename T>
 	void write(const T& val)
@@ -73,12 +64,6 @@ public:
 	void write(unsigned char c)
 	{
 		writeChar(c);
-	}
-
-private:
-	void writeChar(unsigned char c)
-	{
-		writeTxCharFn(c);
 	}
 
 private:
@@ -129,6 +114,34 @@ private:
 		}
 	}
 
+
+protected:
+	virtual void writeChar(unsigned char c) = 0;
+};
+
+template <typename WriteTxCharFn, typename ConsoleInputStrategy = DiscardInputStrategy>
+class ConcreteConsole : public Console
+{
+public:
+	using type = ConcreteConsole<WriteTxCharFn, ConsoleInputStrategy>;
+
+	explicit ConcreteConsole(WriteTxCharFn writeTxCharFn, ConsoleInputStrategy inputStrategy = {})
+		: writeTxCharFn(std::move(writeTxCharFn))
+		, inputStrategy(std::move(inputStrategy))
+	{
+	}
+
+	//! to be called when a character has been received (eg. from interrupt)
+	void rxChar(ConsoleChar c)
+	{
+		inputStrategy.rxChar(c);
+	}
+
+protected:
+	void writeChar(unsigned char c) override
+	{
+		writeTxCharFn(c);
+	}
 
 private:
 	WriteTxCharFn writeTxCharFn;

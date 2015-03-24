@@ -10,6 +10,8 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
+#include <RemoteControlConsole.h>
+
 #include <Console.h>
 #include <LineInputStrategy.h>
 #include <CommandParser.h>
@@ -29,100 +31,14 @@
 
 void doLedHeartbeat(void);
 
-class EchoConsole;
-
-class CommandExecutorLineSink
-{
-public:
-	explicit CommandExecutorLineSink(CommandParser* pCommandParser)
-		: pCommandParser(pCommandParser)
-	{
-	}
-
-	void lineCompleted(const String<80>& line)
-	{
-		pCommandParser->executeCommand(line);
-	}
-
-private:
-	CommandParser* pCommandParser;
-};
-
-void writeCharToSerialPort(unsigned char c)
-{
-	while (AS1_SendChar(c) == ERR_TXFULL)
-		;
-}
-
-using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole>;
-using RemoteControlConsole = Console<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
-
-class EchoConsole
-{
-public:
-	explicit EchoConsole(RemoteControlConsole* pConsole)
-		: pConsole(pConsole)
-	{
-	}
-
-	template <typename... Args>
-	void write(Args... args)
-	{
-		pConsole->write(args...);
-	}
-
-private:
-	RemoteControlConsole* pConsole;
-};
 
 /**
  * C++ world main function
  */
 void realMain()
 {
-	RemoteControlConsole* pConsole;
-
-	CommandParser* pParser = nullptr;
-	auto parser = makeParser(
-		[&](const String<80>& error)
-		{
-			pConsole->write(error);
-			pConsole->write("\r\n");
-		},
-		cmd("help", [&]()
-		{
-			String<10> cmds[10] = {};
-			pParser->getAvailableCommands(cmds, 10);
-			pConsole->write("available commands:\r\n");
-			for (const auto& cmd : cmds)
-			{
-				if (cmd.size() > 0)
-				{
-					pConsole->write(cmd);
-					pConsole->write("\r\n");
-				}
-			}
-		}),
-		cmd("echo", [&](const String<80>& param)
-		{
-			pConsole->write(param);
-			pConsole->write("\r\n");
-		}),
-		cmd("add", [&](int32_t lhs, int32_t rhs)
-		{
-			pConsole->write(lhs + rhs);
-			pConsole->write("\r\n");
-		}),
-		cmd("mult", [&](int32_t lhs, int32_t rhs)
-		{
-			pConsole->write(lhs * rhs);
-			pConsole->write("\r\n");
-		})
-	);
-	pParser = &parser;
-
-	RemoteControlConsole console{writeCharToSerialPort, MyLineInputStrategy{CommandExecutorLineSink{&parser}, EchoConsole{&console}} };
-	pConsole = &console;
+	auto& commandParser = getCommandParser();
+	auto& console = getConsole();
 
 	auto handleConsoleInput = [&]
     {
@@ -140,7 +56,7 @@ void realMain()
 		handleOneEvent(eventQueue,
 			[]{},
 			doLedHeartbeat,
-			[&]{ console.write("Key_A_Pressed!\r\n"); pParser->executeCommand("help"); },
+			[&]{ console.write("Key_A_Pressed!\r\n"); },
 			[&]{ console.write("Key_B_Pressed!\r\n"); },
 			[&]{ console.write("Key_C_Pressed!\r\n"); },
 			[&]{ console.write("Key_D_Pressed!\r\n"); },
