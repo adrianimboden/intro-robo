@@ -10,6 +10,10 @@
 #ifndef CRITICALSECTION_H_
 #define CRITICALSECTION_H_
 
+#ifndef __cplusplus
+#error sorry, this header is c++ only
+#endif
+
 #include "CS1.h"
 
 
