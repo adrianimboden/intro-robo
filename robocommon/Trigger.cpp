@@ -22,6 +22,12 @@ typedef struct TRG_TriggerDesc {
 
 static TRG_TriggerDesc TRG_Triggers[TRG_NOF_TRIGGERS];  /*!< Array of triggers */
 
+TRG_TriggerKind operator ++(TRG_TriggerKind &id)
+{
+   id = static_cast<TRG_TriggerKind>( id + 1 );
+   return id;
+}
+
 uint8_t TRG_SetTrigger(TRG_TriggerKind trigger, TRG_TriggerTime ticks, TRG_Callback callback, TRG_CallBackDataPtr data) {
   CS1_CriticalVariable()
 
@@ -44,7 +50,7 @@ static bool CheckCallbacks(void) {
   bool calledCallBack = FALSE;
   CS1_CriticalVariable()
 
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;++i) {
     CS1_EnterCritical();
     if (TRG_Triggers[i].ticks==0 && TRG_Triggers[i].callback != NULL) { /* trigger! */
       callback = TRG_Triggers[i].callback; /* get a copy */
@@ -66,7 +72,7 @@ void TRG_IncTick(void) {
   CS1_CriticalVariable()
 
   CS1_EnterCritical();
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;++i) {
     if (TRG_Triggers[i].ticks!=0) { /* prevent underflow */
       TRG_Triggers[i].ticks--;
     }
@@ -82,7 +88,7 @@ void TRG_Deinit(void) {
 void TRG_Init(void) {
   TRG_TriggerKind i;
 
-  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;(*(int*)&i)++) {
+  for(i=(TRG_TriggerKind)0;i<TRG_NOF_TRIGGERS;++i) {
     TRG_Triggers[i].ticks = 0;
     TRG_Triggers[i].callback = NULL;
     TRG_Triggers[i].data = NULL;

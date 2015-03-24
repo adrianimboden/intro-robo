@@ -47,22 +47,28 @@
 
 #define PL_HAS_JOYSTICK       ((PL_L_HAS_JOYSTICK) && PL_IS_FRDM && PL_HAS_KEYS)
   /*!< Set to 1 to enable joystick shield support, 0 otherwise */
+
 #define PL_HAS_TRIGGER        (PL_L_HAS_TRIGGER)
   /*!< Set to 1 for trigger enabled, 0 otherwise */
+
 #define PL_HAS_SHELL          (PL_L_HAS_SHELL)
   /*!< Set to 1 for shell enabled, 0 otherwise */
+
 #define PL_HAS_BUZZER         (PL_L_HAS_BUZZER && PL_IS_ROBO)
   /*!< Set to 1 for buzzer enabled, 0 otherwise */
 
+#define PL_HAS_RTOS			(1)
+  /*!< Set to 1 for rtos enabled, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
-  #define PL_KEY_POLLED_KEY1    (1)
-  #define PL_KEY_POLLED_KEY2    (1)
-  #define PL_KEY_POLLED_KEY3    (1)
-  #define PL_KEY_POLLED_KEY4    (1)
+  #define PL_KEY_POLLED_KEY1    (0)
+  #define PL_KEY_POLLED_KEY2    (0)
+  #define PL_KEY_POLLED_KEY3    (0)
+  #define PL_KEY_POLLED_KEY4    (0)
   #define PL_KEY_POLLED_KEY5    (1)
   #define PL_KEY_POLLED_KEY6    (1)
-  #define PL_KEY_POLLED_KEY7    (1)
+  #define PL_KEY_POLLED_KEY7    (0)
 #elif PL_IS_ROBO
   #define PL_KEY_POLLED_KEY1    (0)
 #endif
