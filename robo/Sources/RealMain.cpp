@@ -40,7 +40,6 @@ void Key_J_Pressed(void);
  */
 void realMain()
 {
-	new(&eventQueue)MainEventQueue();
 	for(;;){
 		handleOneEvent(eventQueue, []{}, doLedHeartbeat, Key_A_Pressed, Key_B_Pressed, Key_C_Pressed, Key_D_Pressed, Key_E_Pressed, Key_F_Pressed, Key_J_Pressed);
 		#if PL_HAS_KEYS && PL_NOF_KEYS>0
@@ -51,8 +50,6 @@ void realMain()
 		#endif
 		WAIT1_Waitms(100);
 	}
-
-	eventQueue.~EventQueue();
 }
 
 /**

@@ -31,7 +31,7 @@ void writeCharToSerialPort(unsigned char c)
 		;
 }
 
-using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole, HistoryController<String<80>, 10>>;
+using MyLineInputStrategy = LineInputStrategy<40, CommandExecutorLineSink, EchoConsole, HistoryController<String<40>, 2>>;
 using RemoteControlConsole = ConcreteConsole<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
 
 class EchoConsole

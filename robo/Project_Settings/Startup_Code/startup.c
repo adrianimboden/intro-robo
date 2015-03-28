@@ -1,5 +1,5 @@
 /* GNUC Startup library
- *    Copyright © 2005 Freescale semiConductor Inc. All Rights Reserved.
+ *    Copyright ï¿½ 2005 Freescale semiConductor Inc. All Rights Reserved.
  *
  * $Date: 2011/09/21 06:41:34 $
  * $Revision: 1.4 $
@@ -15,7 +15,7 @@
 #include "IO_Map.h"
 
 #define __MAX_CMDLINE_ARGS 10
-static char *argv[__MAX_CMDLINE_ARGS] = { 0 };
+//static char *argv[__MAX_CMDLINE_ARGS] = { 0 };
 
 #if __GNUC__
 #define __call_static_initializers __init_cpp
@@ -135,54 +135,6 @@ void __copy_rom_sections_to_ram(void)
 	}
 }
 
-
-static void zero_fill_bss(void)
-{
-	extern char __START_BSS[];
-	extern char __END_BSS[];
-
-	unsigned long len = __END_BSS - __START_BSS;
-  unsigned long dst = (unsigned long) __START_BSS;
-
-	const int size_int = sizeof(int);
-	const int mask_int = sizeof(int)-1;
-
-	const int size_short = sizeof(short);
-	const int mask_short = sizeof(short)-1;
-
-	const int size_char = sizeof(char);
-
-	if( len == 0)
-	{
-		return;
-	}
-
-
-	while( len > 0)
-	{
-
-		if( !(dst & mask_int) && len >= size_int)
-		{
-			*((int *)dst)  = 0;
-			dst += size_int;
-			len -= size_int;
-		}
-		else if( !(dst & mask_short) && len >= size_short)
-		{
-			*((short *)dst)  = 0;
-			dst += size_short;
-			len -= size_short;
-		}
-		else
-		{
-			*((char *)dst)  = 0;
-			dst += size_char;
-			len -= size_char;
-		}
-	}
-}
-
-
 // __init_registers, __init_hardware, __init_user suggested by Kobler
 void __attribute__ ((weak)) __init_registers(void)
 {
@@ -212,6 +164,8 @@ void __iar_program_start()
 	__thumb_startup();
 }
 
+void _start(void);
+
 void __thumb_startup(void)
 {
 int addr = (int)__SP_INIT;
@@ -239,19 +193,14 @@ int addr = (int)__SP_INIT;
 		::"r"(addr));
 
 
-		//	zero-fill the .bss section
-		zero_fill_bss();
 
     // SUPPORT_ROM_TO_RAM
 			__copy_rom_sections_to_ram();
 
-		//	call C++ static initializers
-    //  __call_static_initializers();
-
 		// initializations before main, user specific
 		__init_user();
 
-		main(0, argv);
+		_start();
 
 
 

@@ -26,15 +26,14 @@
 #include "LED.h"
 #include "Keys.h"
 #include "Mealy.h"
+#include "RTOS.h"
+#include "FRTOS1.h"
 
 #include "AS1.h"
 
 void doLedHeartbeat(void);
 
-/**
- * C++ world main function
- */
-void realMain()
+void consoleAndKeyTask(void*)
 {
 	Console& console = getConsole();
 
@@ -48,8 +47,11 @@ void realMain()
     };
 
 	console.write("Up and running\r\n");
-	console.rxChar('h'); console.rxChar('e'); console.rxChar('l'); console.rxChar('p'); console.rxChar('\n');
-
+	console.rxChar('t');
+	console.rxChar('e');
+	console.rxChar('s');
+	console.rxChar('t');
+	console.rxChar('\n');
 
 	for(;;){
 		handleOneEvent(eventQueue,
@@ -67,6 +69,20 @@ void realMain()
 		KEY_Scan();
 		MEALY_Step();
 		handleConsoleInput();
+	}
+}
+
+/**
+ * C++ world main function
+ */
+void realMain()
+{
+	RTOS_Init();
+
+
+	if (FRTOS1_xTaskCreate(consoleAndKeyTask, "consoleAndKeyTask", 400, NULL, tskIDLE_PRIORITY, NULL) != pdPASS)
+	{
+		ASSERT(false);
 	}
 }
 
