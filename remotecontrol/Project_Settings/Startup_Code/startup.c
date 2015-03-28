@@ -1,5 +1,5 @@
 /* GNUC Startup library
- *    Copyright © 2005 Freescale semiConductor Inc. All Rights Reserved.
+ *    Copyright ï¿½ 2005 Freescale semiConductor Inc. All Rights Reserved.
  *
  * $Date: 2011/09/21 06:41:34 $
  * $Revision: 1.4 $
@@ -212,6 +212,8 @@ void __iar_program_start()
 	__thumb_startup();
 }
 
+void _start(void);
+
 void __thumb_startup(void)
 {
 int addr = (int)__SP_INIT;
@@ -240,7 +242,7 @@ int addr = (int)__SP_INIT;
 
 
 		//	zero-fill the .bss section
-		zero_fill_bss();
+		/// zero_fill_bss();
 
     // SUPPORT_ROM_TO_RAM
 			__copy_rom_sections_to_ram();
@@ -250,8 +252,8 @@ int addr = (int)__SP_INIT;
 
 		// initializations before main, user specific
 		__init_user();
-
-		main(0, argv);
+		_start();
+		//main(0, argv);
 
 
 

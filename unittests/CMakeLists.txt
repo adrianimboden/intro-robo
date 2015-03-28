@@ -19,6 +19,9 @@ else()
 		message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
 
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-missing-field-initializers -Wno-type-limits -Wno-sign-compare -Wno-missing-braces")
+
 #gtest
 add_subdirectory(gmock-1.7.0)
 

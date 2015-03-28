@@ -65,3 +65,26 @@ TEST(CircularBuffer, OverwriteOldest_when_buffer_is_full_then_the_oldest_element
 	ASSERT_THAT(*circularBuffer.pop_front(), Eq(2));
 	ASSERT_THAT(*circularBuffer.pop_front(), Eq(3));
 }
+
+TEST(CircularBuffer, pop_back)
+{
+	CircularBuffer<size_t, 2, CircularBufferFullStrategy::OverwriteOldest> circularBuffer;
+
+	circularBuffer.push_back(1);
+	circularBuffer.push_back(2);
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(2));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(1));
+	ASSERT_THAT(circularBuffer.pop_back().is_initialized(), Eq(false));
+}
+
+TEST(CircularBuffer, pop_back_after_overflow)
+{
+	CircularBuffer<size_t, 2, CircularBufferFullStrategy::OverwriteOldest> circularBuffer;
+
+	circularBuffer.push_back(1);
+	circularBuffer.push_back(2);
+	circularBuffer.push_back(3);
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(3));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(2));
+	ASSERT_THAT(circularBuffer.pop_back().is_initialized(), Eq(false));
+}

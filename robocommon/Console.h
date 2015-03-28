@@ -52,6 +52,19 @@ public:
 	{
 		for (auto i = size_t{0}; i < Size; ++i)
 		{
+			if (data[i] == '\0')
+			{ //assume that it is a string in this case
+				break;
+			}
+			writeChar(data[i]);
+		}
+	}
+
+	template <typename T, size_t Size>
+	void writeRaw(T (&data)[Size])
+	{
+		for (auto i = size_t{0}; i < Size; ++i)
+		{
 			writeChar(data[i]);
 		}
 	}

@@ -49,6 +49,7 @@ public:
 				isInitialized = true;
 			}
 		}
+		return *this;
 	}
 
 	optional& operator=(optional&& other)
@@ -62,6 +63,7 @@ public:
 				isInitialized = true;
 			}
 		}
+		return *this;
 	}
 
 	bool is_initialized() const

@@ -44,6 +44,7 @@ public:
 	void setEvent(EventEnumType event)
 	{
 		GlobalLockGuard lock;
+		(void)lock;
 		auto eventNo = static_cast<typename Traits::EventUnderlyingType>(event);
 		data[eventNo / Traits::ArrayElementTypeBits] |= Traits::getBitmaskFor(event);
 	}
@@ -51,6 +52,7 @@ public:
 	bool getAndResetEvent(EventEnumType event)
 	{
 		GlobalLockGuard lock;
+		(void)lock;
 		auto eventNo = static_cast<typename Traits::EventUnderlyingType>(event);
 		auto isSet = data[eventNo / Traits::ArrayElementTypeBits] & Traits::getBitmaskFor(event);
 		data[eventNo / Traits::ArrayElementTypeBits] &= ~Traits::getBitmaskFor(event);

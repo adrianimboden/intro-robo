@@ -31,14 +31,12 @@
 
 void doLedHeartbeat(void);
 
-
 /**
  * C++ world main function
  */
 void realMain()
 {
-	auto& commandParser = getCommandParser();
-	auto& console = getConsole();
+	Console& console = getConsole();
 
 	auto handleConsoleInput = [&]
     {
@@ -50,13 +48,14 @@ void realMain()
     };
 
 	console.write("Up and running\r\n");
+	console.rxChar('h'); console.rxChar('e'); console.rxChar('l'); console.rxChar('p'); console.rxChar('\n');
 
-	new(&eventQueue)MainEventQueue();
+
 	for(;;){
 		handleOneEvent(eventQueue,
 			[]{},
 			doLedHeartbeat,
-			[&]{ console.write("Key_A_Pressed!\r\n"); },
+			[&]{ console.write("Key_A_Pressed!\r\n");  },
 			[&]{ console.write("Key_B_Pressed!\r\n"); },
 			[&]{ console.write("Key_C_Pressed!\r\n"); },
 			[&]{ console.write("Key_D_Pressed!\r\n"); },
@@ -69,8 +68,6 @@ void realMain()
 		MEALY_Step();
 		handleConsoleInput();
 	}
-
-	eventQueue.~EventQueue();
 }
 
 /**

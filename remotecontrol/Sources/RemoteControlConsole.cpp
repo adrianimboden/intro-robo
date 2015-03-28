@@ -1,6 +1,8 @@
 #include "RemoteControlConsole.h"
 
 #include <LineInputStrategy.h>
+#include <CircularBuffer.h>
+#include <HistoryController.h>
 
 #include <AS1.h>
 
@@ -29,7 +31,7 @@ void writeCharToSerialPort(unsigned char c)
 		;
 }
 
-using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole>;
+using MyLineInputStrategy = LineInputStrategy<80, CommandExecutorLineSink, EchoConsole, HistoryController<String<80>, 10>>;
 using RemoteControlConsole = ConcreteConsole<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
 
 class EchoConsole
@@ -113,10 +115,10 @@ RemoteControlConsoleData& getData()
 
 CommandParser& getCommandParser()
 {
-	getData().parser;
+	return getData().parser;
 }
 
 Console& getConsole()
 {
-	getData().console;
+	return getData().console;
 }
