@@ -46,13 +46,6 @@ void consoleAndKeyTask(void*)
 		}
     };
 
-	console.write("Up and running\r\n");
-	console.rxChar('t');
-	console.rxChar('e');
-	console.rxChar('s');
-	console.rxChar('t');
-	console.rxChar('\n');
-
 	for(;;){
 		handleOneEvent(eventQueue,
 			[]{},

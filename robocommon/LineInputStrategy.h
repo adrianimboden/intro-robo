@@ -114,8 +114,7 @@ private:
 			return InputState::ReceiveEscapeSequence;
 		}
 		else
-		{
-			ASSERT(false);
+		{ //ignore unknown characters
 			return InputState::ReceiveNormalCharacter;
 		}
 	}

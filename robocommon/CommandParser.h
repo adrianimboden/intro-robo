@@ -59,9 +59,9 @@ namespace detail
 		}
 
 		template <size_t Index>
-		String<MaxParamLength> getParam() const
+		String<MaxCommandLength> getParam() const
 		{
-			return String<MaxParamLength>{parameters[Index].first, parameters[Index].second};
+			return String<MaxCommandLength>{parameters[Index].first, parameters[Index].second};
 		}
 
 	private:
@@ -197,8 +197,8 @@ namespace detail
 			return Executor<Fn, ArgNo-1>::appendParams(value);
 		}
 
-		template <typename T>
-		static auto parseParam(const String<MaxParamLength>& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, bool>::type
+		template <typename ParamStringType, typename T>
+		static auto parseParam(const ParamStringType& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, bool>::type
 		{
 			auto result = stringToNumber<T>(param);
 			if (!result)
@@ -209,11 +209,16 @@ namespace detail
 			return true;
 		}
 
-		template <size_t MaxSize>
-		static bool parseParam(const String<MaxParamLength>& param, String<MaxSize>& value)
+		template <typename ParamStringType, size_t MaxSize>
+		static bool parseParam(const ParamStringType& param, String<MaxSize>& value)
 		{
+			if (param.size() > MaxSize)
+			{
+				return false;
+			}
+
 			value = String<MaxSize>{param.begin(), std::min(MaxSize, param.size())};
-			return true; //possibly stripped
+			return true;
 		}
 
 		static bool parseParam(...)
