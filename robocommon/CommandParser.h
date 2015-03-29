@@ -79,12 +79,15 @@ namespace detail
 				ReadCmd,
 				ReadDelimiter,
 				ReadParam,
+				ReadQuotedParam,
 			};
 
 			auto state = ReadCmd;
 
 			auto currParam = 0u;
+
 			decltype(cmdToExecute.begin()) paramStart;
+			char usedQuotationCharacter = '\0';
 
 			const auto cmdSize = cmdToExecute.size();
 			for (auto i = 0u; i <= cmdSize; ++i)
@@ -110,6 +113,15 @@ namespace detail
 						{
 							state = ReadDelimiter;
 						}
+						else if (c == '\"' || c == '\'')
+						{
+							if (cmdToExecute.begin() + i + 1 > cmdToExecute.end())
+								return false; //quote at end of string
+
+							paramStart = cmdToExecute.begin() + i + 1;
+							usedQuotationCharacter = c;
+							state = ReadQuotedParam;
+						}
 						else
 						{
 							paramStart = cmdToExecute.begin() + i;
@@ -128,6 +140,20 @@ namespace detail
 						else
 						{
 							state = ReadParam;
+						}
+					}
+					break;
+				case ReadQuotedParam:
+					{
+						if (c == usedQuotationCharacter)
+						{
+							parameters[currParam] = {paramStart, cmdToExecute.begin() + i};
+							++currParam;
+							state = ReadDelimiter;
+						}
+						else
+						{
+							state = ReadQuotedParam;
 						}
 					}
 					break;

@@ -189,3 +189,47 @@ TEST(CommandParser, when_multiple_spaces_come_after_another_then_they_will_be_ig
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a"));
 	ASSERT_THAT(testParser.cmd4.p2, Eq(1));
 }
+
+TEST(CommandParser, when_a_parameter_is_between_single_quotes_then_the_parameter_can_contain_spaces)
+{
+	ParserTestData testParser;
+	testParser.getCommandParser().executeCommand("cmd4 'a b' 1");
+	ASSERT_THAT(testParser.cmd4.p1, Eq("a b"));
+}
+
+TEST(CommandParser, when_a_parameter_is_between_double_quotes_then_the_parameter_can_contain_spaces)
+{
+	ParserTestData testParser;
+	testParser.getCommandParser().executeCommand("cmd4 \"a b\" 1");
+	ASSERT_THAT(testParser.cmd4.p1, Eq("a b"));
+}
+
+TEST(CommandParser, when_a_parameter_is_between_double_quotes_then_single_quotes_can_be_in_the_string)
+{
+	ParserTestData testParser;
+	testParser.getCommandParser().executeCommand("cmd4 \"a ' b\" 1");
+	ASSERT_THAT(testParser.cmd4.p1, Eq("a ' b"));
+}
+
+TEST(CommandParser, when_a_parameter_is_between_single_quotes_then_double_quotes_can_be_in_the_string)
+{
+	ParserTestData testParser;
+	testParser.getCommandParser().executeCommand("cmd4 \'a \" b\' 1");
+	ASSERT_THAT(testParser.cmd4.p1, Eq("a \" b"));
+}
+
+TEST(CommandParser, when_malicious_input_is_being_received_then_the_program_outputs_a_correct_error)
+{
+	ParserTestData testParser;
+
+	auto checkError = [&](const char* cmd)
+	{
+		testParser.lastError.erase();
+		testParser.getCommandParser().executeCommand(cmd);
+		ASSERT_THAT(testParser.lastError.empty(), Eq(false));
+	};
+
+	checkError("cmd4 \"a b");
+	checkError("cmd4 \"");
+	checkError("cmd4 \"\"\"");
+}
