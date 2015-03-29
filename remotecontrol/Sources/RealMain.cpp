@@ -33,20 +33,24 @@
 
 void doLedHeartbeat(void);
 
-void consoleAndKeyTask(void*)
+void TASK_console(void*)
 {
 	Console& console = getConsole();
-
-	auto handleConsoleInput = [&]
-    {
+	for(;;)
+	{
 		byte inputChar;
 		if (AS1_RecvChar(&inputChar) == ERR_OK)
 		{
 			console.rxChar(inputChar);
 		}
-    };
+	}
+}
 
-	for(;;){
+void TASK_events(void*)
+{
+	Console& console = getConsole();
+	for(;;)
+	{
 		handleOneEvent(eventQueue,
 			[]{},
 			doLedHeartbeat,
@@ -58,10 +62,21 @@ void consoleAndKeyTask(void*)
 			[&]{ console.write("Key_F_Pressed!\r\n"); },
 			[&]{ console.write("Key_J_Pressed!\r\n"); }
 		);
+	}
+}
 
+void TASK_keyscan(void*)
+{
+	for(;;)
+	{
 		KEY_Scan();
+	}
+}
+
+void TASK_mealyLamp(void*)
+{
+	for(;;){
 		MEALY_Step();
-		handleConsoleInput();
 	}
 }
 
@@ -72,11 +87,10 @@ void realMain()
 {
 	RTOS_Init();
 
-
-	if (FRTOS1_xTaskCreate(consoleAndKeyTask, "consoleAndKeyTask", 400, NULL, tskIDLE_PRIORITY, NULL) != pdPASS)
-	{
-		ASSERT(false);
-	}
+	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 400, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_mealyLamp, "mealyLamp", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 }
 
 /**
