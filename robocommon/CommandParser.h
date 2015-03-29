@@ -33,13 +33,88 @@ namespace detail
 {
 	constexpr size_t MaxCommandLength = 80;
 	constexpr size_t MaxParamLength = 10;
-	using CmdString = String<MaxCommandLength>;
-	using ParamString = String<MaxCommandLength>;
 
 	template <typename T>
 	struct AlwaysFalse
 	{
 		enum { value = 0 };
+	};
+
+	template <size_t ExpectedAmountOfArguments>
+	class Parameters
+	{
+	public:
+		static optional<Parameters> parseParameters(const String<MaxCommandLength>* pCmdToExecute)
+		{
+			Parameters parameters{pCmdToExecute};
+			auto success = initSplitPoints(*pCmdToExecute, parameters.splitPoints);
+			if (success)
+			{
+				return parameters;
+			}
+			else
+			{
+				return { };
+			}
+		}
+
+		template <size_t Index>
+		String<MaxParamLength> getParam() const
+		{
+			return String<MaxParamLength>{
+				splitPoints[Index] + 1,
+				((Index + 1) >= ExpectedAmountOfArguments) ? pCmdToExecute->end() : splitPoints[Index + 1]
+			};
+		}
+
+	private:
+		using ArrayOfSplitPoints = std::array<String<MaxCommandLength>::const_iterator, ExpectedAmountOfArguments>;
+
+		explicit Parameters(const String<MaxCommandLength>* pCmdToExecute)
+			: pCmdToExecute(pCmdToExecute)
+		{
+		}
+
+		static bool initSplitPoints(const String<MaxCommandLength>& cmdToExecute, ArrayOfSplitPoints& splitPoints)
+		{
+			if (ExpectedAmountOfArguments > 0)
+			{
+				splitPoints[0] = findNextSplitter(cmdToExecute.begin(), cmdToExecute.end());
+				if (splitPoints[0] == cmdToExecute.end())
+				{
+					return false; //not enough parameters
+				}
+				for (auto i = size_t{1}; i < ExpectedAmountOfArguments; ++i)
+				{
+					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+
+					if (splitPoints[i] == cmdToExecute.end())
+					{
+						return false; //not enough parameters
+					}
+				}
+			}
+
+			return true;
+		}
+
+		static String<MaxCommandLength>::const_iterator findNextSplitter(String<MaxCommandLength>::const_iterator start, String<MaxCommandLength>::const_iterator end)
+		{
+			auto it = start;
+			while (it != end)
+			{
+				if (*it == ' ')
+				{
+					break;
+				}
+				++it;
+			}
+			return it;
+		}
+
+	private:
+		const String<MaxCommandLength>* pCmdToExecute;
+		ArrayOfSplitPoints splitPoints;
 	};
 
 	template <typename Fn, size_t ArgNo>
@@ -50,12 +125,9 @@ namespace detail
 		using ProcessedParamType = typename std::decay<typename std::tuple_element<Index, typename traits::arguments>::type>::type;
 
 		template <typename... Args>
-		static bool executeImpl(const Fn& fn, const CmdString& cmdToExecute, std::array<CmdString::const_iterator, traits::AmountOfArguments> splitPoints, Args... args)
+		static bool executeImpl(const Fn& fn, const String<MaxCommandLength>& cmdToExecute, const detail::Parameters<traits::AmountOfArguments>& parameters, Args... args)
 		{
-			ParamString param{
-				splitPoints[Index] + 1,
-				((Index + 1) >= traits::AmountOfArguments) ? cmdToExecute.end() : splitPoints[Index + 1]
-			};
+			auto param = parameters.template getParam<Index>();
 
 			ProcessedParamType parsedParam;
 			bool parseOk = parseParam(param, parsedParam);
@@ -63,7 +135,7 @@ namespace detail
 			{
 				return false;
 			}
-			return Executor<Fn, ArgNo-1>::executeImpl(fn, cmdToExecute, splitPoints, args..., std::move(parsedParam));
+			return Executor<Fn, ArgNo-1>::executeImpl(fn, cmdToExecute, parameters, args..., std::move(parsedParam));
 		}
 
 		template <size_t MaxSize>
@@ -75,7 +147,7 @@ namespace detail
 		}
 
 		template <typename T>
-		static auto parseParam(const ParamString& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, bool>::type
+		static auto parseParam(const String<MaxParamLength>& param, T& value) -> typename std::enable_if<std::is_integral<T>::value, bool>::type
 		{
 			auto result = stringToNumber<T>(param);
 			if (!result)
@@ -87,7 +159,7 @@ namespace detail
 		}
 
 		template <size_t MaxSize>
-		static bool parseParam(const ParamString& param, String<MaxSize>& value)
+		static bool parseParam(const String<MaxParamLength>& param, String<MaxSize>& value)
 		{
 			value = String<MaxSize>{param.begin(), std::min(MaxSize, param.size())};
 			return true; //possibly stripped
@@ -119,7 +191,7 @@ namespace detail
 		using traits = function_traits<Fn>;
 
 		template <typename... Args>
-		static bool executeImpl(const Fn& fn, const CmdString& /*cmdToExecute*/, std::array<CmdString::const_iterator, traits::AmountOfArguments> /*splitPoints*/, Args... args)
+		static bool executeImpl(const Fn& fn, const String<MaxCommandLength>& /*cmdToExecute*/, const detail::Parameters<traits::AmountOfArguments>& /*parameters*/, Args... args)
 		{
 			fn(args...);
 			return true;
@@ -144,7 +216,7 @@ namespace detail
 		{
 		}
 
-		bool matches(const CmdString& cmdToExecute)
+		bool matches(const String<MaxCommandLength>& cmdToExecute)
 		{
 			if (cmd.size() > cmdToExecute.size())
 				return false;
@@ -161,29 +233,14 @@ namespace detail
 				(cmdToExecute[cmd.size()] == ' '));		//there are parameters after the command (space)
 		}
 
-		bool execute(const CmdString& cmdToExecute)
+		bool execute(const String<MaxCommandLength>& cmdToExecute)
 		{
-			std::array<CmdString::const_iterator, traits::AmountOfArguments> splitPoints;
+			auto parameters = detail::Parameters<traits::AmountOfArguments>::parseParameters(&cmdToExecute);
 
-			if (traits::AmountOfArguments > 0)
-			{
-				splitPoints[0] = findNextSplitter(cmdToExecute.begin(), cmdToExecute.end());
-				if (splitPoints[0] == cmdToExecute.end())
-				{
-					return false; //not enough parameters
-				}
-				for (auto i = size_t{1}; i < traits::AmountOfArguments; ++i)
-				{
-					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+			if (!parameters)
+				return false; //error during parsing
 
-					if (splitPoints[i] == cmdToExecute.end())
-					{
-						return false; //not enough parameters
-					}
-				}
-			}
-
-			return Executor<Fn, traits::AmountOfArguments>::executeImpl(fn, cmdToExecute, splitPoints);
+			return Executor<Fn, traits::AmountOfArguments>::executeImpl(fn, cmdToExecute, *parameters);
 		}
 
 		String<80> getSyntax() const
@@ -201,21 +258,6 @@ namespace detail
 		}
 
 	private:
-		CmdString::const_iterator findNextSplitter(CmdString::const_iterator start, CmdString::const_iterator end)
-		{
-			auto it = start;
-			while (it != end)
-			{
-				if (*it == ' ')
-				{
-					break;
-				}
-				++it;
-			}
-			return it;
-		}
-
-	private:
 		String<10> cmd;
 		Fn fn;
 	};
@@ -224,7 +266,7 @@ namespace detail
 	struct HandleCommandRecursive
 	{
 		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
+		static void doHandleCommand(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 		{
 			auto command = std::get<std::tuple_size<std::tuple<Commands...>>::value - Count>(commands);
 
@@ -250,7 +292,7 @@ namespace detail
 	{
 		//terminating case
 		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
+		static void doHandleCommand(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
 		{
 			String<80> error = cmdToExecute;
 			error.append(" not found");
@@ -259,7 +301,7 @@ namespace detail
 	};
 
 	template <typename ErrorHandler, typename... Commands>
-	void handleCommandRecursive(const ErrorHandler& errorHandler, const CmdString& cmdToExecute, const std::tuple<Commands...>& commands)
+	void handleCommandRecursive(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 	{
 		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(errorHandler, cmdToExecute, commands);
 	}
@@ -274,7 +316,7 @@ detail::Command<Fn> cmd(const String<10>& cmd, Fn fn)
 class CommandParser
 {
 public:
-	virtual void executeCommand(const detail::CmdString& command) = 0;
+	virtual void executeCommand(const String<detail::MaxCommandLength>& command) = 0;
 	virtual void getAvailableCommands(String<10> list[], size_t maxElements) = 0;
 };
 
@@ -317,7 +359,7 @@ public:
 	{
 	}
 
-	void executeCommand(const detail::CmdString& command) override
+	void executeCommand(const String<detail::MaxCommandLength>& command) override
 	{
 		detail::handleCommandRecursive(errorHandler, command, commands);
 	}
