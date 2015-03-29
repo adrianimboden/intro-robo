@@ -47,7 +47,7 @@ namespace detail
 		static optional<Parameters> parseParameters(const String<MaxCommandLength>* pCmdToExecute)
 		{
 			Parameters parameters{pCmdToExecute};
-			auto success = initSplitPoints(*pCmdToExecute, parameters.splitPoints);
+			auto success = tryInitFromCmd(*pCmdToExecute, parameters.parameters);
 			if (success)
 			{
 				return parameters;
@@ -61,60 +61,85 @@ namespace detail
 		template <size_t Index>
 		String<MaxParamLength> getParam() const
 		{
-			return String<MaxParamLength>{
-				splitPoints[Index] + 1,
-				((Index + 1) >= ExpectedAmountOfArguments) ? pCmdToExecute->end() : splitPoints[Index + 1]
-			};
+			return String<MaxParamLength>{parameters[Index].first, parameters[Index].second};
 		}
 
 	private:
-		using ArrayOfSplitPoints = std::array<String<MaxCommandLength>::const_iterator, ExpectedAmountOfArguments>;
+		using ArrayOfParameters = std::array<std::pair<String<MaxCommandLength>::const_iterator, String<MaxCommandLength>::const_iterator>, ExpectedAmountOfArguments>;
 
 		explicit Parameters(const String<MaxCommandLength>* pCmdToExecute)
 			: pCmdToExecute(pCmdToExecute)
 		{
 		}
 
-		static bool initSplitPoints(const String<MaxCommandLength>& cmdToExecute, ArrayOfSplitPoints& splitPoints)
+		static bool tryInitFromCmd(const String<MaxCommandLength>& cmdToExecute, ArrayOfParameters& parameters)
 		{
-			if (ExpectedAmountOfArguments > 0)
+			enum State
 			{
-				splitPoints[0] = findNextSplitter(cmdToExecute.begin(), cmdToExecute.end());
-				if (splitPoints[0] == cmdToExecute.end())
-				{
-					return false; //not enough parameters
-				}
-				for (auto i = size_t{1}; i < ExpectedAmountOfArguments; ++i)
-				{
-					splitPoints[i] = findNextSplitter(splitPoints[i - 1] + 1, cmdToExecute.end());
+				ReadCmd,
+				ReadDelimiter,
+				ReadParam,
+			};
 
-					if (splitPoints[i] == cmdToExecute.end())
+			auto state = ReadCmd;
+
+			auto currParam = 0u;
+			decltype(cmdToExecute.begin()) paramStart;
+
+			const auto cmdSize = cmdToExecute.size();
+			for (auto i = 0u; i <= cmdSize; ++i)
+			{
+				char c = (i < cmdSize) ? cmdToExecute[i] : '\0';
+				switch (state)
+				{
+				case ReadCmd:
 					{
-						return false; //not enough parameters
+						if (isspace(c))
+						{
+							state = ReadDelimiter;
+						}
+						else
+						{
+							state = ReadCmd;
+						}
 					}
-				}
-			}
-
-			return true;
-		}
-
-		static String<MaxCommandLength>::const_iterator findNextSplitter(String<MaxCommandLength>::const_iterator start, String<MaxCommandLength>::const_iterator end)
-		{
-			auto it = start;
-			while (it != end)
-			{
-				if (*it == ' ')
-				{
+					break;
+				case ReadDelimiter:
+					{
+						if (isspace(c))
+						{
+							state = ReadDelimiter;
+						}
+						else
+						{
+							paramStart = cmdToExecute.begin() + i;
+							state = ReadParam;
+						}
+					}
+					break;
+				case ReadParam:
+					{
+						if (isspace(c) || c == '\0')
+						{
+							parameters[currParam] = {paramStart, cmdToExecute.begin() + i};
+							++currParam;
+							state = ReadDelimiter;
+						}
+						else
+						{
+							state = ReadParam;
+						}
+					}
 					break;
 				}
-				++it;
 			}
-			return it;
+
+			return (currParam == ExpectedAmountOfArguments);
 		}
 
 	private:
 		const String<MaxCommandLength>* pCmdToExecute;
-		ArrayOfSplitPoints splitPoints;
+		ArrayOfParameters parameters;
 	};
 
 	template <typename Fn, size_t ArgNo>

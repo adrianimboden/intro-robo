@@ -149,7 +149,7 @@ TEST(CommandParser, error_cmd_not_found)
 	ASSERT_THAT(testParser.lastError, Eq("unknown not found"));
 }
 
-TEST(CommandParser, error_paramters_dont_match)
+TEST(CommandParser, error_parameters_dont_match)
 {
 	ParserTestData testParser;
 
@@ -180,4 +180,12 @@ TEST(CommandParser, get_available_commands)
 	ASSERT_THAT(commands[2], Eq("cmd3"));
 	ASSERT_THAT(commands[3], Eq("cmd4"));
 	ASSERT_THAT(commands[4], Eq("cmd5"));
+}
+
+TEST(CommandParser, when_multiple_spaces_come_after_another_then_they_will_be_ignored)
+{
+	ParserTestData testParser;
+	testParser.getCommandParser().executeCommand("cmd4    a    1");
+	ASSERT_THAT(testParser.cmd4.p1, Eq("a"));
+	ASSERT_THAT(testParser.cmd4.p2, Eq(1));
 }
