@@ -60,7 +60,7 @@
 #define PL_HAS_DEBOUNCE       (PL_L_HAS_DEBOUNCE)
   /*!< Set to 1 for debouncing enabled, 0 otherwise */
 
-#define PL_HAS_RTOS			(1)
+#define PL_HAS_RTOS			(PL_L_HAS_RTOS)
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
 /* if keys are using interrupts or are polled */
