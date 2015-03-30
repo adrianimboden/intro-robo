@@ -132,7 +132,7 @@ TEST(CommandParser, combination)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd5 test3 abcdef -15, 40, -500");
+	testParser.getCommandParser().executeCommand("cmd5 test3 abc -15 40 -500");
 	ASSERT_THAT(testParser.cmd5.callCount, Eq(1));
 	ASSERT_THAT(testParser.cmd5.p1, Eq("test3"));
 	ASSERT_THAT(testParser.cmd5.p2, Eq("abc"));
