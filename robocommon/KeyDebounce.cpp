@@ -9,6 +9,7 @@
 #include "Platform.h"
 #if PL_HAS_DEBOUNCE
 
+#include "KeyDebounce.h"
 #include "Keys.h"
 #include "Debounce.h"
 #include "Trigger.h"
