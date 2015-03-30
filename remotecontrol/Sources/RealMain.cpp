@@ -38,6 +38,8 @@ void systemReady(void);
 void TASK_console(void*)
 {
 	Console& console = getConsole();
+	console.write("console ready...");
+	console.rxChar('\n');
 	for(;;)
 	{
 		byte inputChar;
@@ -111,7 +113,7 @@ void realMain()
 	PL_Init();
 	eventQueue.setEvent(Event::SystemStartup);
 
-	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 400, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 800, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }

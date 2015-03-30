@@ -34,97 +34,114 @@ public:
 	virtual void rxChar(ConsoleChar c) = 0;
 
 	template <typename T>
-	void write(const T& val)
+	uint32_t write(const T& val)
 	{
-		writeImpl<T>(val);
+		return writeImpl<T>(val);
 	}
 
-	void write(const uint8_t* pData, size_t size)
+	uint32_t write(const uint8_t* pData, size_t size)
 	{
 		for (auto i = size_t{0}; i < size; ++i)
 		{
 			writeChar(pData[i]);
 		}
+		return size;
 	}
 
 	template <typename T, size_t Size>
-	void write(T (&data)[Size])
+	uint32_t write(T (&data)[Size])
 	{
+		uint32_t size = 0;
 		for (auto i = size_t{0}; i < Size; ++i)
 		{
 			if (data[i] == '\0')
 			{ //assume that it is a string in this case
 				break;
 			}
+			++size;
 			writeChar(data[i]);
 		}
+		return size;
 	}
 
 	template <typename T, size_t Size>
-	void writeRaw(T (&data)[Size])
+	uint32_t writeRaw(T (&data)[Size])
 	{
 		for (auto i = size_t{0}; i < Size; ++i)
 		{
 			writeChar(data[i]);
 		}
+		return Size;
 	}
 
-	void write(char c)
+	uint32_t write(char c)
 	{
 		writeChar(c);
+		return 1;
 	}
 
-	void write(unsigned char c)
+	uint32_t write(unsigned char c)
 	{
 		writeChar(c);
+		return 1;
 	}
 
 private:
 	template <typename T>
-	void writeImpl(typename std::enable_if<std::is_integral<T>::value, T>::type number)
+	uint32_t writeImpl(typename std::enable_if<std::is_integral<T>::value, T>::type number)
 	{
+		uint32_t size = 0;
 		for (auto c : numberToString(number))
 		{
+			++size;
 			writeChar(c);
 		}
+		return size;
 	}
 
 	template <typename T>
-	void writeImpl(typename std::enable_if<std::is_same<T, const char*>::value, T>::type pStr)
+	uint32_t writeImpl(typename std::enable_if<std::is_same<T, const char*>::value, T>::type pStr)
 	{
 		auto len = strlen(pStr);
 		for (auto i = size_t{0}; i < len; ++i)
 		{
 			writeChar(pStr[i]);
 		}
+		return len;
 	}
 
 	template <typename T>
-	void writeImpl(typename std::enable_if<std::is_same<T, const unsigned char*>::value, T>::type pStr)
+	uint32_t writeImpl(typename std::enable_if<std::is_same<T, const unsigned char*>::value, T>::type pStr)
 	{
 		auto len = strlen(pStr);
 		for (auto i = size_t{0}; i < len; ++i)
 		{
 			writeChar(pStr[i]);
 		}
+		return len;
 	}
 
 	template <typename T>
-	void writeImpl(const typename std::enable_if<is_constsize_string<T>::value, T>::type& str)
+	uint32_t writeImpl(const typename std::enable_if<is_constsize_string<T>::value, T>::type& str)
 	{
+		uint32_t size = 0;
 		for (auto c : str)
 		{
+			++size;
 			writeChar(c);
 		}
+
+		return size;
 	}
 
 	template <typename T>
-	void writeImpl(const typename std::enable_if<is_stdarray<T>::value, T>::type& arr)
+	uint32_t writeImpl(const typename std::enable_if<is_stdarray<T>::value, T>::type& arr)
 	{
 		for (auto c : arr)
 		{
 			writeChar(c);
 		}
+		return arr.size();
 	}
 
 

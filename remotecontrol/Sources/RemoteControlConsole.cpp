@@ -3,6 +3,7 @@
 #include <LineInputStrategy.h>
 #include <CircularBuffer.h>
 #include <HistoryController.h>
+#include <ConsoleHelpers.h>
 
 #include <AS1.h>
 
@@ -106,7 +107,8 @@ RemoteControlConsoleData& getData()
 		{
 			getData().console.write(lhs * rhs);
 			getData().console.write("\r\n");
-		})
+		}),
+		cmd("showstat", []{ showStat(getData().console); })
 	);
 
 	static RemoteControlConsoleData data{parser};
