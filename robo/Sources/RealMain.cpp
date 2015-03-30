@@ -10,6 +10,8 @@
 #include "PE_Const.h"
 #include "IO_Map.h"
 
+#include "RoboConsole.h"
+
 #include "Platform.h"
 #include "EventQueue.h"
 #include "CriticalSection.h"
@@ -20,37 +22,77 @@
 #include "Keys.h"
 #include "Mealy.h"
 #include "Buzzer.h"
-
-extern "C" {
-#include "CLS1.h"
-}
+#include "KeyDebounce.h"
+#include "RTOS.h"
+#include "FRTOS1.h"
+#include "BT1.h"
 
 void doLedHeartbeat(void);
+void systemReady(void);
 
-void Key_A_Pressed(void);
-void Key_B_Pressed(void);
-void Key_C_Pressed(void);
-void Key_D_Pressed(void);
-void Key_E_Pressed(void);
-void Key_F_Pressed(void);
-void Key_J_Pressed(void);
+void TASK_console(void*)
+{
+	Console& console = getConsole();
+	for(;;)
+	{
+		byte inputChar;
+		if (BT1_RecvChar(&inputChar) == ERR_OK)
+		{
+			console.rxChar(inputChar);
+		}
+	}
+}
+
+void TASK_events(void*)
+{
+	Console& console = getConsole();
+	for(;;)
+	{
+		handleOneEvent(eventQueue,
+			systemReady,
+			doLedHeartbeat,
+			[&]{ console.write("Key_A_Pressed!\r\n"); },
+			[&]{ console.write("Key_A_Long_Pressed!\r\n"); },
+			[&]{ console.write("Key_A_Released!\r\n"); }
+		);
+	}
+}
+
+void TASK_keyscan(void*)
+{
+	for(;;)
+	{
+		KEY_Scan();
+	}
+}
+
+void TASK_mealyLamp(void*)
+{
+	for(;;){
+		MEALY_Step();
+	}
+}
 
 /**
  * C++ world main function
  */
 void realMain()
 {
-	for(;;){
-		handleOneEvent(eventQueue, []{}, doLedHeartbeat, Key_A_Pressed, Key_B_Pressed, Key_C_Pressed, Key_D_Pressed, Key_E_Pressed, Key_F_Pressed, Key_J_Pressed);
-		#if PL_HAS_KEYS && PL_NOF_KEYS>0
-			KEY_Scan(); /* scan keys */
-		#endif
-		#if PL_HAS_MEALY
-			MEALY_Step();
-		#endif
-		WAIT1_Waitms(100);
-	}
+	PL_Init();
+	eventQueue.setEvent(Event::SystemStartup);
+
+	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 400, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+#if PL_HAS_KEYS && PL_NOF_KEYS>0
+	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+#endif
+#if PL_HAS_MEALY
+	if (FRTOS1_xTaskCreate(TASK_mealyLamp, "mealyLamp", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+#endif
+
+	RTOS_Run();
 }
+
 
 /**
  * Forward to C++ world
@@ -61,33 +103,18 @@ void _main()
 }
 
 void doLedHeartbeat(void){
-	LED1_On(); // RED RGB LED
-	WAIT1_Waitms(50);
-	LED1_Off();
+	LED1_Neg();
 }
 
-void Key_A_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_A_Pressed!\r\n", CLS1_GetStdio()->stdOut);
+void systemReady(void){
+    LED1_On();
+    WAIT1_Waitms(10);
+    LED1_Off();
+    WAIT1_Waitms(10);
+    LED1_On();
+    WAIT1_Waitms(10);
+    LED1_Off();
 #if PL_HAS_BUZZER
-      BUZ_Beep(300, 1000);
+    BUZ_Beep(300, 500);
 #endif
-}
-
-void Key_B_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_B_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_C_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_C_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_D_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_D_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_E_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_E_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_F_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_F_Pressed!\r\n", CLS1_GetStdio()->stdOut);
-}
-void Key_J_Pressed(void){
-	CLS1_SendStr((const uint8_t* )"Key_J_Pressed!\r\n", CLS1_GetStdio()->stdOut);
 }
