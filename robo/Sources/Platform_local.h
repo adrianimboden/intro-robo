@@ -21,7 +21,7 @@
 #define PL_L_HAS_TIMER		(1)
 /*! Set to 1 to enable TIMER support, 0 otherwise */
 
-#define PL_L_HAS_MEALY		(1)
+#define PL_L_HAS_MEALY		(0)
 /*! Set to 1 to enable MEALY support, 0 otherwise */
 
 #define PL_L_HAS_KEYS		(1)

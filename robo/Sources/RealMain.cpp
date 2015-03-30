@@ -20,7 +20,7 @@
 #include "Event.h"
 #include "LED.h"
 #include "Keys.h"
-#include "Mealy.h"
+//#include "Mealy.h"
 #include "Buzzer.h"
 #include "KeyDebounce.h"
 #include "RTOS.h"
@@ -62,14 +62,14 @@ void TASK_keyscan(void*)
 {
 	for(;;)
 	{
-		KEY_Scan();
+		//KEY_Scan();
 	}
 }
 
 void TASK_mealyLamp(void*)
 {
 	for(;;){
-		MEALY_Step();
+		//MEALY_Step();
 	}
 }
 

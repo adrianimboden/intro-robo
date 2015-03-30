@@ -9,7 +9,7 @@
 #include "Platform.h"
 #include "LED.h"
 #include "Timer.h"
-#include "Mealy.h"
+//#include "Mealy.h"
 #include "Keys.h"
 #include "Trigger.h"
 #include "Buzzer.h"
