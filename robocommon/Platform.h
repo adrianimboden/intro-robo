@@ -57,6 +57,9 @@
 #define PL_HAS_BUZZER         (PL_L_HAS_BUZZER && PL_IS_ROBO)
   /*!< Set to 1 for buzzer enabled, 0 otherwise */
 
+#define PL_HAS_DEBOUNCE       (PL_L_HAS_DEBOUNCE)
+  /*!< Set to 1 for debouncing enabled, 0 otherwise */
+
 #define PL_HAS_RTOS			(1)
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
