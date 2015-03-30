@@ -2,8 +2,8 @@
 <PEproject>
   <Header>
     <Name>robo</Name>
-    <SavedBy>Helyman83</SavedBy>
-    <ModificationStamp>22</ModificationStamp>
+    <SavedBy>adrian</SavedBy>
+    <ModificationStamp>24</ModificationStamp>
     <Date>2015-03-30</Date>
     <IDE>Eclipse IDE</IDE>
     <PEversion>1.10.1.RT6_b1444-1070</PEversion>
@@ -29,7 +29,7 @@
     <UseExistingModules>true</UseExistingModules>
     <RenamePeripheries>false</RenamePeripheries>
     <Autodependency>true</Autodependency>
-    <ProjectCompNumb>61</ProjectCompNumb>
+    <ProjectCompNumb>64</ProjectCompNumb>
     <DelUnusedPreviouslyGenFiles>true</DelUnusedPreviouslyGenFiles>
     <GeneratedCodeFrozen>false</GeneratedCodeFrozen>
     <AssignInitComponentNameToPrph>true</AssignInitComponentNameToPrph>
@@ -24898,8 +24898,8 @@
         <ReadOnly>false</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Value>false</Value>
-        <Expanded>false</Expanded>
+        <Value>true</Value>
+        <Expanded>true</Expanded>
       </ItemState>
       <ItemState>
         <ItemSymbol>LDDRuntimeCounterGroup</ItemSymbol>
@@ -26991,10 +26991,10 @@
         <ReadOnly>true</ReadOnly>
         <UserReadOnly>false</UserReadOnly>
         <PropertyModelIsAutomatic>false</PropertyModelIsAutomatic>
-        <Index>1</Index>
-        <Value>false</Value>
+        <Index>0</Index>
+        <Value>true</Value>
         <LastSelection>true</LastSelection>
-        <LastUserSel>never</LastUserSel>
+        <LastUserSel>always</LastUserSel>
         <UsrMethodName>vTaskGetRunTimeStats</UsrMethodName>
       </ItemState>
       <ItemState>
