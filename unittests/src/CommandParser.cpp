@@ -230,6 +230,7 @@ TEST(CommandParser, when_malicious_input_is_being_received_then_the_program_outp
 	};
 
 	checkError("cmd4 \"a b");
+	checkError("cmd3 a b");
 	checkError("cmd4 \"");
 	checkError("cmd4 \"\"\"");
 }

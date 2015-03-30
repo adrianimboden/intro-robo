@@ -133,6 +133,9 @@ namespace detail
 					{
 						if (isspace(c) || c == '\0')
 						{
+							if (currParam >= parameters.size())
+								return false; //too many arguments
+
 							parameters[currParam] = {paramStart, cmdToExecute.begin() + i};
 							++currParam;
 							state = ReadDelimiter;
@@ -147,6 +150,9 @@ namespace detail
 					{
 						if (c == usedQuotationCharacter)
 						{
+							if (currParam >= parameters.size())
+								return false; //too many arguments
+
 							parameters[currParam] = {paramStart, cmdToExecute.begin() + i};
 							++currParam;
 							state = ReadDelimiter;
