@@ -5,6 +5,6 @@
 #endif
 
 //fwd decls
-class Console;
+class IOStream;
 
-void showStat(Console& console);
+void showStat(IOStream& console);

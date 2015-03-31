@@ -105,11 +105,10 @@ public:
 	}
 
 	String(CharT c)
-		:
-	#ifdef DEBUG
-		pDebugStr(data.data()),
-	#endif
-		currSize(1)
+		: currSize(1)
+  #ifdef DEBUG
+		, pDebugStr(data.data())
+  #endif
 	{
 		data[0] = c;
 	}

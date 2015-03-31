@@ -15,7 +15,7 @@ TEST(LineInputStrategy, lines_will_be_reported_to_line_sink)
 		{
 		}
 
-		void lineCompleted(const String<10>& line)
+		void lineCompleted(int, const String<10>& line)
 		{
 			*pLine = line;
 		}

@@ -12,41 +12,41 @@
 CommandParser& getCommandParser()
 {
 	static auto parser = makeParser(
-		[&](const String<80>& error)
+		[&](IOStream& ioStream, const String<80>& error)
 		{
-			getConsole().write(error);
-			getConsole().write("\r\n");
+			ioStream.write(error);
+			ioStream.write("\r\n");
 		},
-		cmd("help", [&]()
+		cmd("help", [&](IOStream& ioStream)
 		{
 			String<10> cmds[10] = {};
 			getCommandParser().getAvailableCommands(cmds, 10);
-			getConsole().write("available commands:\r\n");
+			ioStream.write("available commands:\r\n");
 			for (const auto& cmd : cmds)
 			{
 				if (cmd.size() > 0)
 				{
-					getConsole().write(cmd);
-					getConsole().write("\r\n");
+					ioStream.write(cmd);
+					ioStream.write("\r\n");
 				}
 			}
 		}),
-		cmd("echo", [&](const String<80>& param)
+		cmd("echo", [&](IOStream& ioStream, const String<80>& param)
 		{
-			getConsole().write(param);
-			getConsole().write("\r\n");
+			ioStream.write(param);
+			ioStream.write("\r\n");
 		}),
-		cmd("add", [&](int32_t lhs, int32_t rhs)
+		cmd("add", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
 		{
-			getConsole().write(lhs + rhs);
-			getConsole().write("\r\n");
+			ioStream.write(lhs + rhs);
+			ioStream.write("\r\n");
 		}),
-		cmd("mult", [&](int32_t lhs, int32_t rhs)
+		cmd("mult", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
 		{
-			getConsole().write(lhs * rhs);
-			getConsole().write("\r\n");
+			ioStream.write(lhs * rhs);
+			ioStream.write("\r\n");
 		}),
-		cmd("showstat", []{ showStat(getConsole()); })
+		cmd("showstat", showStat)
 	);
 
 	return parser;
@@ -63,7 +63,11 @@ Console& getConsole()
 			20 /*max cmdline size*/
 			>(
 				CommandExecutorLineSink{&getCommandParser()},
-				SimpleEchoConsole{}
+				SimpleEchoConsole{},
+				HistoryController<
+					String<20>, //line size
+					5 //history length
+				>{}
 			)
 	);
 
@@ -73,7 +77,7 @@ Console& getConsole()
 void TASK_console(void*)
 {
 	Console& console = getConsole();
-	console.write("console ready...");
+	console.getUnderlyingIoStream()->write("console ready...");
 	for(;;)
 	{
 		console.pollInput();

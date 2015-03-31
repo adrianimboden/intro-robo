@@ -29,7 +29,8 @@ template <size_t MaxLineLength>
 class DiscardingLineSink
 {
 public:
-	void lineCompleted(const String<MaxLineLength>& /*line*/)
+	template <typename TIOStream>
+	void lineCompleted(TIOStream& /*ioStream*/, const String<MaxLineLength>& /*line*/)
 	{
 	}
 };
@@ -99,7 +100,7 @@ private:
 			echoConsole.write(ioStream, "\r\n");
 			if (currentlyReceivingLine.size() > 0)
 			{
-				lineSink.lineCompleted(currentlyReceivingLine);
+				lineSink.lineCompleted(ioStream, currentlyReceivingLine);
 				historyController.newLine(currentlyReceivingLine);
 				currentlyReceivingLine.erase();
 			}

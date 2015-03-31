@@ -6,6 +6,10 @@
 
 #include <type_traits>
 
+#include "FixedSizeString.h"
+#include "Optional.h"
+#include "NumberConversion.h"
+
 template <typename WriteCharFn>
 class StreamHelper
 {

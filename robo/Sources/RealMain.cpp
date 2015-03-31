@@ -37,9 +37,9 @@ void TASK_events(void*)
 		handleOneEvent(eventQueue,
 			systemReady,
 			doLedHeartbeat,
-			[&]{ console.write("Key_A_Pressed!\r\n"); },
-			[&]{ console.write("Key_A_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_A_Released!\r\n"); }
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); }
 		);
 	}
 }

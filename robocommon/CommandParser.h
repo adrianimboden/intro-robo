@@ -4,17 +4,39 @@
 #error sorry, this header is c++ only
 #endif
 
-#include <FixedSizeString.h>
-#include <NumberConversion.h>
+#include "FixedSizeString.h"
+#include "NumberConversion.h"
+#include "IOStream.h"
 
 #include <tuple>
+
+template <typename Fn, typename IOStream, typename... Params>
+class RemoveIoStreamParamAdapter
+{
+public:
+	RemoveIoStreamParamAdapter(IOStream& ioStream, Fn fn)
+		: ioStream(ioStream)
+		, fn(std::move(fn))
+	{
+	}
+
+	void operator()(Params... params) const
+	{
+		fn(ioStream, params...);
+	}
+
+private:
+	IOStream& ioStream;
+	Fn fn;
+};
 
 template <typename T>
 struct function_traits : public function_traits<decltype(&T::operator())>
 {};
 
-template <typename ClassType, typename ReturnType, typename... Args>
-struct function_traits<ReturnType(ClassType::*)(Args...) const>
+//! Free function
+template <typename ReturnType, typename... Args>
+struct function_traits<ReturnType(*)(Args...)>
 {
 	enum { arity = sizeof...(Args) };
 
@@ -25,9 +47,32 @@ struct function_traits<ReturnType(ClassType::*)(Args...) const>
 	template <size_t i>
 	struct arg
 	{
-		typedef typename std::tuple_element<i, arguments>::type type;
+		using type = typename std::tuple_element<i, arguments>::type;
+	};
+
+	template <typename Fn>
+	struct GetIoStreamRemovedAdapter
+	{
+		using type = RemoveIoStreamParamAdapter<Fn, Args...>;
 	};
 };
+
+//! Member function
+template <typename ClassType, typename ReturnType, typename... Args>
+struct function_traits<ReturnType(ClassType::*)(Args...) const> : public function_traits<ReturnType(*)(Args...)>
+{
+};
+
+template <typename Fn, size_t AmountOfArguments>
+struct FirstParameterIsIOStreamImpl : public std::is_same<typename function_traits<Fn>::template arg<0>::type, IOStream&> { };
+
+template <typename Fn>
+struct FirstParameterIsIOStreamImpl<Fn, 0> : public std::false_type { }; //no params -> no iostream param
+
+
+template <typename Fn>
+struct FirstParameterIsIOStream : public FirstParameterIsIOStreamImpl<Fn, function_traits<Fn>::AmountOfArguments>
+{ };
 
 namespace detail
 {
@@ -265,7 +310,6 @@ namespace detail
 		}
 	};
 
-
 	template <typename Fn>
 	class Command
 	{
@@ -295,7 +339,15 @@ namespace detail
 				(cmdToExecute[cmd.size()] == ' '));		//there are parameters after the command (space)
 		}
 
-		bool execute(const String<MaxCommandLength>& cmdToExecute)
+		bool execute(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute)
+		{
+			return executeImpl(ioStream, cmdToExecute,
+				FirstParameterIsIOStream<Fn>()
+			);
+		}
+
+		//! called in case when the stored function does not want do do I/O
+		bool executeImpl(IOStream& /*ioStream*/, const String<MaxCommandLength>& cmdToExecute, std::false_type)
 		{
 			auto parameters = detail::Parameters<traits::AmountOfArguments>::parseParameters(&cmdToExecute);
 
@@ -305,11 +357,40 @@ namespace detail
 			return Executor<Fn, traits::AmountOfArguments>::executeImpl(fn, cmdToExecute, *parameters);
 		}
 
+		//! called in case when the stored function *does* want do do I/O
+		bool executeImpl(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute, std::true_type)
+		{
+			using Adapter = typename traits::template GetIoStreamRemovedAdapter<Fn>::type;
+			auto parameters = detail::Parameters<traits::AmountOfArguments - 1>::parseParameters(&cmdToExecute);
+
+			if (!parameters)
+				return false; //error during parsing
+
+			return Executor<Adapter, traits::AmountOfArguments - 1>::executeImpl(Adapter{ioStream, fn}, cmdToExecute, *parameters);
+		}
+
 		String<80> getSyntax() const
+		{
+			return getSyntaxImpl(FirstParameterIsIOStream<Fn>());
+		}
+
+		//! called in case when the stored function does not want do do I/O
+		String<80> getSyntaxImpl(std::false_type) const
 		{
 			String<80> syntax;
 			syntax.append(cmd);
 			Executor<Fn, traits::AmountOfArguments>::appendParams(syntax);
+
+			return syntax;
+		}
+
+		//! called in case when the stored function *does* want do do I/O
+		String<80> getSyntaxImpl(std::true_type) const
+		{
+			using Adapter = typename traits::template GetIoStreamRemovedAdapter<Fn>::type;
+			String<80> syntax;
+			syntax.append(cmd);
+			Executor<Adapter, traits::AmountOfArguments - 1>::appendParams(syntax);
 
 			return syntax;
 		}
@@ -328,13 +409,13 @@ namespace detail
 	struct HandleCommandRecursive
 	{
 		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
+		static void doHandleCommand(IOStream& ioStream, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 		{
 			auto command = std::get<std::tuple_size<std::tuple<Commands...>>::value - Count>(commands);
 
 			if (command.matches(cmdToExecute))
 			{
-				bool success = command.execute(cmdToExecute);
+				bool success = command.execute(ioStream, cmdToExecute);
 				if (!success)
 				{
 					String<80> err{"error. syntax: "};
@@ -344,7 +425,7 @@ namespace detail
 			}
 			else
 			{
-				HandleCommandRecursive<Count - 1>::doHandleCommand(errorHandler, cmdToExecute, commands);
+				HandleCommandRecursive<Count - 1>::doHandleCommand(ioStream, errorHandler, cmdToExecute, commands);
 			}
 		}
 	};
@@ -354,7 +435,7 @@ namespace detail
 	{
 		//terminating case
 		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
+		static void doHandleCommand(IOStream& /*ioStream*/, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
 		{
 			String<80> error = cmdToExecute;
 			error.append(" not found");
@@ -363,9 +444,9 @@ namespace detail
 	};
 
 	template <typename ErrorHandler, typename... Commands>
-	void handleCommandRecursive(const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
+	void handleCommandRecursive(IOStream& ioStream, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 	{
-		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(errorHandler, cmdToExecute, commands);
+		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(ioStream, errorHandler, cmdToExecute, commands);
 	}
 }
 
@@ -378,7 +459,7 @@ detail::Command<Fn> cmd(const String<10>& cmd, Fn fn)
 class CommandParser
 {
 public:
-	virtual void executeCommand(const String<detail::MaxCommandLength>& command) = 0;
+	virtual void executeCommand(IOStream& ioStream, const String<detail::MaxCommandLength>& command) = 0;
 	virtual void getAvailableCommands(String<10> list[], size_t maxElements) = 0;
 };
 
@@ -421,10 +502,24 @@ public:
 	{
 	}
 
-	void executeCommand(const String<detail::MaxCommandLength>& command) override
+	void executeCommand(IOStream& ioStream, const String<detail::MaxCommandLength>& command) override
 	{
-		detail::handleCommandRecursive(errorHandler, command, commands);
+		return executeCommandImpl(ioStream, command, FirstParameterIsIOStream<ErrorHandler>());
 	}
+
+	//! called in case when the help function does not want do do I/O
+	void executeCommandImpl(IOStream& ioStream, const String<detail::MaxCommandLength>& command, std::false_type)
+	{
+		detail::handleCommandRecursive(ioStream, errorHandler, command, commands);
+	}
+
+	//! called in case when the help function *does* want do do I/O
+	void executeCommandImpl(IOStream& ioStream, const String<detail::MaxCommandLength>& command, std::true_type)
+	{
+		using Adapter = typename function_traits<ErrorHandler>::template GetIoStreamRemovedAdapter<ErrorHandler>::type;
+		detail::handleCommandRecursive(ioStream, Adapter{ioStream, errorHandler}, command, commands);
+	}
+
 
 	detail::AvailableCommands<Commands...> getAvailableCommands()
 	{
@@ -464,9 +559,10 @@ public:
 	{
 	}
 
-	void lineCompleted(const String<80>& line)
+	template <typename TIOStream>
+	void lineCompleted(TIOStream& ioStream, const String<80>& line)
 	{
-		pCommandParser->executeCommand(line);
+		pCommandParser->executeCommand(ioStream, line);
 	}
 
 private:

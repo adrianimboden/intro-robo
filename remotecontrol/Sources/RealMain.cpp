@@ -46,33 +46,33 @@ void TASK_events(void*)
 			systemReady,
 			doLedHeartbeat,
 
-			[&]{ console.write("Key_A_Pressed!\r\n"); },
-			[&]{ console.write("Key_A_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_A_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); },
 
-			[&]{ console.write("Key_B_Pressed!\r\n"); },
-			[&]{ console.write("Key_B_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_B_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_B_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_B_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_B_Released!\r\n"); },
 
-			[&]{ console.write("Key_C_Pressed!\r\n"); },
-			[&]{ console.write("Key_C_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_C_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_C_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_C_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_C_Released!\r\n"); },
 
-			[&]{ console.write("Key_D_Pressed!\r\n"); },
-			[&]{ console.write("Key_D_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_D_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_D_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_D_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_D_Released!\r\n"); },
 
-			[&]{ console.write("Key_E_Pressed!\r\n"); },
-			[&]{ console.write("Key_E_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_E_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_E_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_E_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_E_Released!\r\n"); },
 
-			[&]{ console.write("Key_F_Pressed!\r\n"); },
-			[&]{ console.write("Key_F_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_F_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_F_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_F_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_F_Released!\r\n"); },
 
-			[&]{ console.write("Key_J_Pressed!\r\n"); },
-			[&]{ console.write("Key_J_Long_Pressed!\r\n"); },
-			[&]{ console.write("Key_J_Released!\r\n"); }
+			[&]{ console.getUnderlyingIoStream()->write("Key_J_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_J_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released!\r\n"); }
 		);
 	}
 }

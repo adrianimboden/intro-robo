@@ -1,28 +1,28 @@
 #include "ConsoleHelpers.h"
 
-#include "Console.h"
+#include <IOStream.h>
 #include <FreeRTOS.h>
 
 #include <array>
 
 
 constexpr int16_t tabSize = 2;
-void fillUp(Console& console, int16_t columnSize, int16_t alreadyUsed)
+void fillUp(IOStream& ioStream, int16_t columnSize, int16_t alreadyUsed)
 {
 	for (auto j = 0; j < (columnSize - alreadyUsed) + tabSize; ++j)
 	{
-		console.write(" ");
+		ioStream.write(" ");
 	}
 };
 
 template <typename T>
-void writeColumn(Console& console, const T& content, int16_t columnSize)
+void writeColumn(IOStream& ioStream, const T& content, int16_t columnSize)
 {
-	auto writtenChars = console.write(content);
-	fillUp(console, columnSize, writtenChars);
+	auto writtenChars = ioStream.write(content);
+	fillUp(ioStream, columnSize, writtenChars);
 };
 
-void showStat(Console& console)
+void showStat(IOStream& ioStream)
 {
 	std::array<TaskStatus_t, 10> statusArr;
 	uint32_t totalRunTime;
@@ -47,16 +47,16 @@ void showStat(Console& console)
 		maxTaskNameLength = std::max(maxTaskNameLength, strlen(statusArr[i].pcTaskName));
 	}
 
-	writeColumn(console, "Task", maxTaskNameLength);
-	writeColumn(console, "State", 8);
-	writeColumn(console, "%", 3);
-	console.write("\r\n");
+	writeColumn(ioStream, "Task", maxTaskNameLength);
+	writeColumn(ioStream, "State", 8);
+	writeColumn(ioStream, "%", 3);
+	ioStream.write("\r\n");
 
 	for (auto i = 0u; i < size; ++i)
 	{
-		writeColumn(console, statusArr[i].pcTaskName, maxTaskNameLength);
-		writeColumn(console, stateToString(statusArr[i].eCurrentState), 8);
-		writeColumn(console, statusArr[i].ulRunTimeCounter / (totalRunTime/100), 3);
-		console.write("\r\n");
+		writeColumn(ioStream, statusArr[i].pcTaskName, maxTaskNameLength);
+		writeColumn(ioStream, stateToString(statusArr[i].eCurrentState), 8);
+		writeColumn(ioStream, statusArr[i].ulRunTimeCounter / (totalRunTime/100), 3);
+		ioStream.write("\r\n");
 	}
 }

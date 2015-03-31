@@ -50,7 +50,7 @@ struct ParserTestData
 	ParserTestData()
 	{
 		ptrParser = intoUniquePtr(makeParser(
-			[&](const String<80>& error)
+			[&](IOStream& /*ioStream*/, const String<80>& error)
 			{
 				lastError = error;
 			},
@@ -74,7 +74,7 @@ struct ParserTestData
 				cmd4.p1 = p1;
 				cmd4.p2 = p2;
 			}),
-			cmd("cmd5", [&](const String<10>& p1, String<3> p2, int8_t p3, const int16_t p4, const int32_t& p5)
+			cmd("cmd5", [&](IOStream& ioStream, const String<10>& p1, String<3> p2, int8_t p3, const int16_t p4, const int32_t& p5)
 			{
 				++cmd5.callCount;
 				cmd5.p1 = p1;
@@ -82,6 +82,7 @@ struct ParserTestData
 				cmd5.p3 = p3;
 				cmd5.p4 = p4;
 				cmd5.p5 = p5;
+				ioStream.writeChar(p1[0]);
 			})
 		));
 	}
@@ -96,7 +97,8 @@ TEST(CommandParser, one_value_param)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd1 5");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd1 5");
 	ASSERT_THAT(testParser.cmd1.callCount, Eq(1));
 	ASSERT_THAT(testParser.cmd1.p1, Eq(5));
 }
@@ -105,7 +107,8 @@ TEST(CommandParser, no_prameter)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd2");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd2");
 	ASSERT_THAT(testParser.cmd2.callCount, Eq(1));
 }
 
@@ -113,7 +116,8 @@ TEST(CommandParser, one_string_param)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd3 test");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd3 test");
 	ASSERT_THAT(testParser.cmd3.callCount, Eq(1));
 	ASSERT_THAT(testParser.cmd3.p1, Eq("test"));
 }
@@ -122,7 +126,8 @@ TEST(CommandParser, string_and_number_param)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd4 test2 42");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4 test2 42");
 	ASSERT_THAT(testParser.cmd4.callCount, Eq(1));
 	ASSERT_THAT(testParser.cmd4.p1, Eq("test2"));
 	ASSERT_THAT(testParser.cmd4.p2, Eq(42));
@@ -132,7 +137,8 @@ TEST(CommandParser, combination)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("cmd5 test3 abc -15 40 -500");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd5 test3 abc -15 40 -500");
 	ASSERT_THAT(testParser.cmd5.callCount, Eq(1));
 	ASSERT_THAT(testParser.cmd5.p1, Eq("test3"));
 	ASSERT_THAT(testParser.cmd5.p2, Eq("abc"));
@@ -145,7 +151,8 @@ TEST(CommandParser, error_cmd_not_found)
 {
 	ParserTestData testParser;
 
-	testParser.getCommandParser().executeCommand("unknown");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "unknown");
 	ASSERT_THAT(testParser.lastError, Eq("unknown not found"));
 }
 
@@ -156,7 +163,8 @@ TEST(CommandParser, error_parameters_dont_match)
 	auto checkError = [&](const char* cmd, const char* expectedError)
 	{
 		testParser.lastError.erase();
-		testParser.getCommandParser().executeCommand(cmd);
+		auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+		testParser.getCommandParser().executeCommand(ioStream, cmd);
 		ASSERT_THAT(testParser.lastError, Eq(expectedError)) << testParser.lastError;
 	};
 
@@ -185,7 +193,8 @@ TEST(CommandParser, get_available_commands)
 TEST(CommandParser, when_multiple_spaces_come_after_another_then_they_will_be_ignored)
 {
 	ParserTestData testParser;
-	testParser.getCommandParser().executeCommand("cmd4    a    1");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4    a    1");
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a"));
 	ASSERT_THAT(testParser.cmd4.p2, Eq(1));
 }
@@ -193,28 +202,32 @@ TEST(CommandParser, when_multiple_spaces_come_after_another_then_they_will_be_ig
 TEST(CommandParser, when_a_parameter_is_between_single_quotes_then_the_parameter_can_contain_spaces)
 {
 	ParserTestData testParser;
-	testParser.getCommandParser().executeCommand("cmd4 'a b' 1");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4 'a b' 1");
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a b"));
 }
 
 TEST(CommandParser, when_a_parameter_is_between_double_quotes_then_the_parameter_can_contain_spaces)
 {
 	ParserTestData testParser;
-	testParser.getCommandParser().executeCommand("cmd4 \"a b\" 1");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4 \"a b\" 1");
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a b"));
 }
 
 TEST(CommandParser, when_a_parameter_is_between_double_quotes_then_single_quotes_can_be_in_the_string)
 {
 	ParserTestData testParser;
-	testParser.getCommandParser().executeCommand("cmd4 \"a ' b\" 1");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4 \"a ' b\" 1");
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a ' b"));
 }
 
 TEST(CommandParser, when_a_parameter_is_between_single_quotes_then_double_quotes_can_be_in_the_string)
 {
 	ParserTestData testParser;
-	testParser.getCommandParser().executeCommand("cmd4 \'a \" b\' 1");
+	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd4 \'a \" b\' 1");
 	ASSERT_THAT(testParser.cmd4.p1, Eq("a \" b"));
 }
 
@@ -225,7 +238,8 @@ TEST(CommandParser, when_malicious_input_is_being_received_then_the_program_outp
 	auto checkError = [&](const char* cmd)
 	{
 		testParser.lastError.erase();
-		testParser.getCommandParser().executeCommand(cmd);
+		auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+		testParser.getCommandParser().executeCommand(ioStream, cmd);
 		ASSERT_THAT(testParser.lastError.empty(), Eq(false));
 	};
 
@@ -233,4 +247,13 @@ TEST(CommandParser, when_malicious_input_is_being_received_then_the_program_outp
 	checkError("cmd3 a b");
 	checkError("cmd4 \"");
 	checkError("cmd4 \"\"\"");
+}
+
+TEST(CommandParser, when_a_iostream_is_excepted_then_it_will_be_passed_through)
+{
+	ParserTestData testParser;
+	char writtenChar = '\0';
+	auto ioStream = makeFnIoStream([&](char c){ writtenChar = c; }, []()->optional<char>{ return {}; });
+	testParser.getCommandParser().executeCommand(ioStream, "cmd5 a b 1 2 3");
+	ASSERT_THAT(writtenChar, Eq('a'));
 }
