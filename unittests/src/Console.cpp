@@ -33,7 +33,7 @@ void checkOutputOfWrite(const std::string& str, Args... args)
 		strm << c;
 	};
 
-	ConcreteConsole<decltype(writeTxChar)> console{writeTxChar};
+	auto console = makeConsole(makeFnIoStream(writeTxChar, []()->optional<char>{ return {}; }));
 
 	console.write(args...);
 
@@ -69,7 +69,7 @@ TEST(Console, when_i_write_an_array_then_it_will_be_written_as_data)
 		strm << c;
 	};
 
-	ConcreteConsole<decltype(writeTxChar)> console{writeTxChar};
+	auto console = makeConsole(makeFnIoStream(writeTxChar, []()->optional<char>{ return {}; }));
 
 	console.write(data);
 
@@ -86,7 +86,7 @@ TEST(Console, when_i_receive_data_it_will_be_forwarded_to_input_strategy)
 		{
 		}
 
-		void rxChar(char c)
+		void rxChar(IOStream&, char c)
 		{
 			*pStrm << c;
 		}
@@ -97,8 +97,8 @@ TEST(Console, when_i_receive_data_it_will_be_forwarded_to_input_strategy)
 
 	std::stringstream inStrm;
 
-	ConcreteConsole<void(*)(char c), StoreInStringstreamInputStrategy> console{[](char){}, StoreInStringstreamInputStrategy{&inStrm}};
+	auto console = makeConsole(makeFnIoStream([](char){}, []()->optional<char>{ return 'a'; }), StoreInStringstreamInputStrategy{&inStrm});
 
-	console.rxChar('a');
+	console.pollInput();
 	ASSERT_THAT(inStrm.str(), StrEq("a"));
 }

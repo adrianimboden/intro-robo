@@ -2,13 +2,26 @@
 
 #include <FixedSizeString.h>
 #include <NumberConversion.h>
+#include <StreamHelper.h>
 
 template <size_t MaxLineLength>
 class DiscardingEchoConsole
 {
 public:
-	void write(const String<MaxLineLength>& /*line*/)
+	template <typename TIOStream>
+	void write(TIOStream& /*ioStream*/, const String<MaxLineLength>& /*line*/)
 	{
+	}
+};
+
+class SimpleEchoConsole
+{
+public:
+	template <typename TIOStream, typename... Args>
+	void write(TIOStream& stream, Args... args)
+	{
+		auto fnWriteChar = [&](char c) { stream.writeChar(c); };
+		StreamHelper<decltype(fnWriteChar)>::write(fnWriteChar, args...);
 	}
 };
 
@@ -60,42 +73,44 @@ public:
 	{
 	}
 
-	void rxChar(unsigned char c)
+	template <typename TIOStream>
+	void rxChar(TIOStream& ioStream, unsigned char c)
 	{
 		switch (state)
 		{
 		case InputState::ReceiveNormalCharacter:
-			state = receiveNormalCharacter(c);
+			state = receiveNormalCharacter(ioStream, c);
 			break;
 		case InputState::ReceiveEscapeSequence:
-			state = receiveEscapeCharacter(c);
+			state = receiveEscapeCharacter(ioStream, c);
 			break;
 		case InputState::ReceiveControlSequence:
-			state = receiveControlSequence(c);
+			state = receiveControlSequence(ioStream, c);
 			break;
 		}
 	}
 
 private:
-	InputState receiveNormalCharacter(char c)
+	template <typename TIOStream>
+	InputState receiveNormalCharacter(TIOStream& ioStream, char c)
 	{
 		if (isNewLine(c))
 		{
-			echoConsole.write("\r\n");
+			echoConsole.write(ioStream, "\r\n");
 			if (currentlyReceivingLine.size() > 0)
 			{
 				lineSink.lineCompleted(currentlyReceivingLine);
 				historyController.newLine(currentlyReceivingLine);
 				currentlyReceivingLine.erase();
 			}
-			echoConsole.write("> ");
+			echoConsole.write(ioStream, "> ");
 			return InputState::ReceiveNormalCharacter;
 		}
 		else if (isBackspace(c))
 		{
 			if (currentlyReceivingLine.size() > 0)
 			{
-				echoBackspace();
+				echoBackspace(ioStream);
 				currentlyReceivingLine.erase(currentlyReceivingLine.size() - 1, currentlyReceivingLine.size());
 			}
 			return InputState::ReceiveNormalCharacter;
@@ -105,7 +120,7 @@ private:
 			auto appendResult = currentlyReceivingLine.append(c);
 			if (appendResult == StringManipulationResult::Ok)
 			{
-				echoConsole.write(c);
+				echoConsole.write(ioStream, c);
 			}
 			return InputState::ReceiveNormalCharacter;
 		}
@@ -119,7 +134,8 @@ private:
 		}
 	}
 
-	InputState receiveEscapeCharacter(char c)
+	template <typename TIOStream>
+	InputState receiveEscapeCharacter(TIOStream& /*ioStream*/, char c)
 	{
 		if (c == 0x5b)
 		{ //control sequence introducer
@@ -137,11 +153,12 @@ private:
 		return InputState::ReceiveNormalCharacter;
 	}
 
-	InputState receiveControlSequence(char c)
+	template <typename TIOStream>
+	InputState receiveControlSequence(TIOStream& ioStream, char c)
 	{
 		if (c >= 0x40 && c <= 0x7e)
 		{ //final character
-			handleControlSequence(c, currentControlSequence);
+			handleControlSequence(ioStream, c, currentControlSequence);
 			return InputState::ReceiveNormalCharacter;
 		}
 		else
@@ -151,7 +168,8 @@ private:
 		}
 	}
 
-	void handleControlSequence(char escapeCharacter, const String<10>& controlSequence)
+	template <typename TIOStream>
+	void handleControlSequence(TIOStream& ioStream, char escapeCharacter, const String<10>& controlSequence)
 	{
 		auto getNumFromControlSequenceOr = [&](size_t def)
 		{
@@ -174,14 +192,14 @@ private:
 		{
 			for (auto i = getNumFromControlSequenceOr(1); i > 0; --i)
 			{
-				updateCurrentLine(historyController.up(currentlyReceivingLine));
+				updateCurrentLine(ioStream, historyController.up(currentlyReceivingLine));
 			}
 		}
 		else if (escapeCharacter == 0x42)
 		{
 			for (auto i = getNumFromControlSequenceOr(1); i > 0; --i)
 			{
-				updateCurrentLine(historyController.down(currentlyReceivingLine));
+				updateCurrentLine(ioStream, historyController.down(currentlyReceivingLine));
 			}
 		}
 		else if (escapeCharacter == 0x43)
@@ -194,19 +212,21 @@ private:
 		}
 	}
 
-	void updateCurrentLine(Line line)
+	template <typename TIOStream>
+	void updateCurrentLine(TIOStream& ioStream, Line line)
 	{
 		for (auto i = size_t{0}; i < currentlyReceivingLine.size(); ++i)
 		{
-			echoBackspace();
+			echoBackspace(ioStream);
 		}
-		echoConsole.write(line);
+		echoConsole.write(ioStream, line);
 		currentlyReceivingLine = line;
 	}
 
-	void echoBackspace()
+	template <typename TIOStream>
+	void echoBackspace(TIOStream& ioStream)
 	{
-		echoConsole.write("\b \b");
+		echoConsole.write(ioStream, "\b \b");
 	}
 
 	static bool isBackspace(char c)
@@ -227,3 +247,9 @@ private:
 	EchoConsole echoConsole;
 	HistoryController historyController;
 };
+
+template <size_t MaxLineLength, typename LineSink = DiscardingLineSink<MaxLineLength>, typename EchoConsole = DiscardingEchoConsole<MaxLineLength>, typename HistoryController = NoHistoryController<MaxLineLength>>
+LineInputStrategy<MaxLineLength, LineSink, EchoConsole, HistoryController> makeLineInputStrategy(LineSink lineSink = {}, EchoConsole echoConsole = {}, HistoryController historyController = {})
+{
+	return LineInputStrategy<MaxLineLength, LineSink, EchoConsole, HistoryController>{lineSink, echoConsole, historyController};
+}

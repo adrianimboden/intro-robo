@@ -455,3 +455,20 @@ ConcreteCommandParser<ErrorHandler, Commands...> makeParser(ErrorHandler errorHa
 {
 	return ConcreteCommandParser<ErrorHandler, Commands...>(errorHandler, std::make_tuple(commands...));
 }
+
+class CommandExecutorLineSink
+{
+public:
+	explicit CommandExecutorLineSink(CommandParser* pCommandParser)
+		: pCommandParser(pCommandParser)
+	{
+	}
+
+	void lineCompleted(const String<80>& line)
+	{
+		pCommandParser->executeCommand(line);
+	}
+
+private:
+	CommandParser* pCommandParser;
+};

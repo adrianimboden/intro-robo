@@ -29,19 +29,6 @@
 void doLedHeartbeat(void);
 void systemReady(void);
 
-void TASK_console(void*)
-{
-	Console& console = getConsole();
-	for(;;)
-	{
-		byte inputChar;
-		if (BT1_RecvChar(&inputChar) == ERR_OK)
-		{
-			console.rxChar(inputChar);
-		}
-	}
-}
-
 void TASK_events(void*)
 {
 	Console& console = getConsole();

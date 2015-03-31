@@ -37,21 +37,6 @@ extern "C" {
 void doLedHeartbeat(void);
 void systemReady(void);
 
-void TASK_console(void*)
-{
-	Console& console = getConsole();
-	console.write("console ready...");
-	console.rxChar('\n');
-	for(;;)
-	{
-		byte inputChar;
-		if (CDC1_RecvChar(&inputChar) == ERR_OK)
-		{
-			console.rxChar(inputChar);
-		}
-	}
-}
-
 void TASK_events(void*)
 {
 	Console& console = getConsole();

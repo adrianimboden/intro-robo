@@ -27,20 +27,22 @@ TEST(LineInputStrategy, lines_will_be_reported_to_line_sink)
 	String<10> line;
 	LineInputStrategy<10, TestLineSink> strategy{TestLineSink{&line}};
 
+	int dummy;
+
 	//first line
-	strategy.rxChar('a');
-	strategy.rxChar('b');
-	strategy.rxChar('c');
+	strategy.rxChar(dummy, 'a');
+	strategy.rxChar(dummy, 'b');
+	strategy.rxChar(dummy, 'c');
 	ASSERT_THAT(line, Eq(""));
-	strategy.rxChar('\n');
+	strategy.rxChar(dummy, '\n');
 	ASSERT_THAT(line, Eq("abc"));
 
 	//second line
-	strategy.rxChar('d');
-	strategy.rxChar('e');
-	strategy.rxChar('f');
+	strategy.rxChar(dummy, 'd');
+	strategy.rxChar(dummy, 'e');
+	strategy.rxChar(dummy, 'f');
 	ASSERT_THAT(line, Eq("abc"));
-	strategy.rxChar('\n');
+	strategy.rxChar(dummy, '\n');
 	ASSERT_THAT(line, Eq("def"));
 }
 
@@ -93,7 +95,8 @@ void checkHistoryControllerUsage(const std::vector<char>& input, const NewLineFn
 
 	for (auto c : input)
 	{
-		lineInputStrategy.rxChar(c);
+		int dummy;
+		lineInputStrategy.rxChar(dummy, c);
 	}
 }
 

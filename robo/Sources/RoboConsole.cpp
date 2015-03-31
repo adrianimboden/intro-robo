@@ -1,126 +1,81 @@
 #include "RoboConsole.h"
 
+#include <Platform.h>
 #include <LineInputStrategy.h>
 #include <CircularBuffer.h>
 #include <HistoryController.h>
 #include <ConsoleHelpers.h>
+#include <CdcIOStream.h>
 
 #include <BT1.h>
 
-class EchoConsole;
-
-class CommandExecutorLineSink
-{
-public:
-	explicit CommandExecutorLineSink(CommandParser* pCommandParser)
-		: pCommandParser(pCommandParser)
-	{
-	}
-
-	void lineCompleted(const String<80>& line)
-	{
-		pCommandParser->executeCommand(line);
-	}
-
-private:
-	CommandParser* pCommandParser;
-};
-
-void writeCharToSerialPort(unsigned char c)
-{
-	while (BT1_SendChar(c) == ERR_TXFULL)
-		;
-}
-
-using MyLineInputStrategy = LineInputStrategy<40, CommandExecutorLineSink, EchoConsole, HistoryController<String<40>, 2>>;
-using RemoteControlConsole = ConcreteConsole<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
-
-class EchoConsole
-{
-public:
-	explicit EchoConsole(RemoteControlConsole* pConsole)
-		: pConsole(pConsole)
-	{
-	}
-
-	template <typename... Args>
-	void write(Args... args)
-	{
-		pConsole->write(args...);
-	}
-
-private:
-	RemoteControlConsole* pConsole;
-};
-
-struct RemoteControlConsoleData
-{
-	RemoteControlConsoleData(CommandParser& parser)
-		: parser(parser)
-		, console {
-			writeCharToSerialPort,
-			MyLineInputStrategy {
-				CommandExecutorLineSink{&parser},
-				EchoConsole{&console}
-			}
-		}
-	{
-	}
-
-	CommandParser& parser;
-	RemoteControlConsole console;
-};
-
-RemoteControlConsoleData& getData()
+CommandParser& getCommandParser()
 {
 	static auto parser = makeParser(
 		[&](const String<80>& error)
 		{
-			getData().console.write(error);
-			getData().console.write("\r\n");
+			getConsole().write(error);
+			getConsole().write("\r\n");
 		},
 		cmd("help", [&]()
 		{
 			String<10> cmds[10] = {};
-			getData().parser.getAvailableCommands(cmds, 10);
-			getData().console.write("available commands:\r\n");
+			getCommandParser().getAvailableCommands(cmds, 10);
+			getConsole().write("available commands:\r\n");
 			for (const auto& cmd : cmds)
 			{
 				if (cmd.size() > 0)
 				{
-					getData().console.write(cmd);
-					getData().console.write("\r\n");
+					getConsole().write(cmd);
+					getConsole().write("\r\n");
 				}
 			}
 		}),
 		cmd("echo", [&](const String<80>& param)
 		{
-			getData().console.write(param);
-			getData().console.write("\r\n");
+			getConsole().write(param);
+			getConsole().write("\r\n");
 		}),
 		cmd("add", [&](int32_t lhs, int32_t rhs)
 		{
-			getData().console.write(lhs + rhs);
-			getData().console.write("\r\n");
+			getConsole().write(lhs + rhs);
+			getConsole().write("\r\n");
 		}),
 		cmd("mult", [&](int32_t lhs, int32_t rhs)
 		{
-			getData().console.write(lhs * rhs);
-			getData().console.write("\r\n");
+			getConsole().write(lhs * rhs);
+			getConsole().write("\r\n");
 		}),
-		cmd("showstat", [&]() { showStat(getData().console); })
+		cmd("showstat", []{ showStat(getConsole()); })
 	);
 
-	static RemoteControlConsoleData data{parser};
-	return data;
-}
-
-CommandParser& getCommandParser()
-{
-	return getData().parser;
+	return parser;
 }
 
 Console& getConsole()
 {
-	return getData().console;
+	static auto console = makeConsole(
+		CdcStaticIOStream<
+			Serial2_RecvChar,
+			Serial2_SendChar
+		>{},
+		makeLineInputStrategy<
+			20 /*max cmdline size*/
+			>(
+				CommandExecutorLineSink{&getCommandParser()},
+				SimpleEchoConsole{}
+			)
+	);
+
+	return console;
+}
+
+void TASK_console(void*)
+{
+	Console& console = getConsole();
+	console.write("console ready...");
+	for(;;)
+	{
+		console.pollInput();
+	}
 }

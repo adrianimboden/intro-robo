@@ -5,3 +5,5 @@
 
 CommandParser& getCommandParser();
 Console& getConsole();
+
+void TASK_console(void*);
