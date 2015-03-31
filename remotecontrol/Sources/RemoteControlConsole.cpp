@@ -65,7 +65,11 @@ Console& getConsole()
 			20 /*max cmdline size*/
 			>(
 				CommandExecutorLineSink{&getCommandParser()},
-				SimpleEchoConsole{}
+				SimpleEchoConsole{},
+				HistoryController<
+					String<20>, //line size
+					2 //history length
+				>{}
 			)
 	);
 
