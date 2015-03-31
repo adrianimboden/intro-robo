@@ -22,6 +22,8 @@ public:
 	}
 };
 
+class IOStream;
+
 class Console
 {
 public:
