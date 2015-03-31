@@ -108,6 +108,14 @@ void TASK_mealyLamp(void*)
 	}
 }
 
+void TASK_usb(void*)
+{
+	for(;;){
+		static std::array<uint8_t, CDC1_DATA_BUFF_SIZE> sendBuffer{};
+		CDC1_App_Task(sendBuffer.data(), sendBuffer.size());
+	}
+}
+
 /**
  * C++ world main function
  */
@@ -124,6 +132,7 @@ void realMain()
 #if PL_HAS_MEALY
 	if (FRTOS1_xTaskCreate(TASK_mealyLamp, "mealyLamp", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #endif
+	if (FRTOS1_xTaskCreate(TASK_usb, "usb", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 
 	RTOS_Run();
 }
