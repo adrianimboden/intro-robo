@@ -21,9 +21,6 @@
 #define PL_L_HAS_TIMER		(1)
 /*! Set to 1 to enable TIMER support, 0 otherwise */
 
-#define PL_L_HAS_MEALY        (1)
-  /*!< Set to 1 to enable Mealy sequential state machine, 0 otherwise */
-
 #define PL_L_HAS_KEYS		(1)
 /*! Set to 1 to enable KEYS support,  otherwise */
 

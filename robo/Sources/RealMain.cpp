@@ -20,9 +20,6 @@
 #include "Event.h"
 #include "LED.h"
 #include "Keys.h"
-#if PL_HAS_MEALY
-//#include "Mealy.h"
-#endif
 #include "Buzzer.h"
 #include "KeyDebounce.h"
 #include "RTOS.h"
@@ -67,14 +64,6 @@ void TASK_keyscan(void*)
 		KEY_Scan();
 	}
 }
-#if PL_HAS_MEALY
-void TASK_mealyLamp(void*)
-{
-	for(;;){
-		MEALY_Step();
-	}
-}
-#endif
 
 /**
  * C++ world main function
@@ -88,9 +77,6 @@ void realMain()
 	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
-#endif
-#if PL_HAS_MEALY
-	if (FRTOS1_xTaskCreate(TASK_mealyLamp, "mealyLamp", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #endif
 
 	RTOS_Run();

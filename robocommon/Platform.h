@@ -39,9 +39,6 @@
 #define PL_HAS_KBI_NMI        ((PL_L_HAS_KBI_NMI) && PL_IS_FRDM && PL_HAS_JOYSTICK)
   /*!< Set to 1 for special case on NMI/PTA pin on FRDM board, 0 otherwise */
 
-#define PL_HAS_MEALY          ((PL_L_HAS_MEALY) && PL_NOF_LEDS>=1 && PL_NOF_KEYS>=1)
-  /*!< Set to 1 to enable Mealy sequential state machine, 0 otherwise */
-
 #define PL_HAS_RESET_KEY      ((PL_L_HAS_RESET_KEY) && PL_IS_FRDM && PL_HAS_KEYS)
   /*!< Set to 1 to use reset switch on FRDM as button, 0 otherwise */
 

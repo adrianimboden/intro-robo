@@ -25,7 +25,6 @@
 #include "Event.h"
 #include "LED.h"
 #include "Keys.h"
-#include "Mealy.h"
 #include "KeyDebounce.h"
 #include "RTOS.h"
 #include "FRTOS1.h"
@@ -101,13 +100,6 @@ void TASK_keyscan(void*)
 	}
 }
 
-void TASK_mealyLamp(void*)
-{
-	for(;;){
-		MEALY_Step();
-	}
-}
-
 void TASK_usb(void*)
 {
 	for(;;){
@@ -128,9 +120,6 @@ void realMain()
 	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
-#endif
-#if PL_HAS_MEALY
-	if (FRTOS1_xTaskCreate(TASK_mealyLamp, "mealyLamp", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #endif
 	if (FRTOS1_xTaskCreate(TASK_usb, "usb", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 

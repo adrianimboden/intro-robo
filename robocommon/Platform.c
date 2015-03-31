@@ -9,7 +9,6 @@
 #include "Platform.h"
 #include "LED.h"
 #include "Timer.h"
-#include "Mealy.h"
 #include "Keys.h"
 #include "Trigger.h"
 #include "Buzzer.h"
@@ -33,9 +32,6 @@ void PL_Init(void){
 #endif
 #if PL_HAS_KEYS
 	KEY_Init();
-#endif
-#if PL_HAS_MEALY
-	MEALY_Init();
 #endif
 #if PL_HAS_TRIGGER
   TRG_Init();
@@ -64,9 +60,6 @@ void PL_Deinit(void){
 #endif
 #if PL_HAS_TRIGGER
   TRG_Init();
-#endif
-#if PL_HAS_MEALY
-	MEALY_Deinit();
 #endif
 #if PL_HAS_KEYS
 	KEY_Deinit();
