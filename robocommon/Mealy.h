@@ -5,10 +5,13 @@
  *
  * We are using a Mealy Sequential Machine to test the LED driver.
  */
-#pragma once
 
-#ifndef __cplusplus
-#error sorry, this header is c++ only
+#ifndef MEALY_H_
+#define MEALY_H_
+
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /*! \brief This implements our Mealy Sequential Machine. On each call the FSM will perform a check/test advances as necessary. */
@@ -19,3 +22,11 @@ void MEALY_Init(void);
 
 /*! \brief De-iinitialization routine of the state machine */
 void MEALY_Deinit(void);
+
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
+
+
+
+#endif /* MEALY_H_ */
