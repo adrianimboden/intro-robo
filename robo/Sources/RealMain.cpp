@@ -20,7 +20,9 @@
 #include "Event.h"
 #include "LED.h"
 #include "Keys.h"
+#if PL_HAS_MEALY
 //#include "Mealy.h"
+#endif
 #include "Buzzer.h"
 #include "KeyDebounce.h"
 #include "RTOS.h"
@@ -62,16 +64,17 @@ void TASK_keyscan(void*)
 {
 	for(;;)
 	{
-		//KEY_Scan();
+		KEY_Scan();
 	}
 }
-
+#if PL_HAS_MEALY
 void TASK_mealyLamp(void*)
 {
 	for(;;){
-		//MEALY_Step();
+		MEALY_Step();
 	}
 }
+#endif
 
 /**
  * C++ world main function
