@@ -4,11 +4,13 @@
 #error sorry, this header is c++ only
 #endif
 
-#include <Assert.h>
 
 #include <array>
 #include <type_traits>
 #include <cstring>
+
+#include "Assert.h"
+#include "CommonTraits.h"
 
 enum class StringManipulationResult
 {
@@ -22,6 +24,8 @@ template <size_t MaxSize>
 class String
 {
 public:
+	using size_type = typename FindSmallestIntegerFor<MaxSize>::type;
+
 	using iterator = CharT*;
 	using const_iterator = const CharT*;
 
@@ -47,8 +51,8 @@ public:
 	}
 
 	explicit String(const String& other)
-		: data(other.data)
-		, currSize(other.currSize)
+		: currSize(other.currSize)
+		, data(other.data)
 #ifdef DEBUG
 		, pDebugStr(data.data())
 #endif
@@ -66,8 +70,8 @@ public:
 	}
 
 	explicit String(String&& other)
-		: data(other.data)
-		, currSize(other.currSize)
+		: currSize(other.currSize)
+		, data(other.data)
 #ifdef DEBUG
 		, pDebugStr(data.data())
 #endif
@@ -101,10 +105,11 @@ public:
 	}
 
 	String(CharT c)
-		: currSize(1)
+		:
 	#ifdef DEBUG
-		, pDebugStr(data.data())
+		pDebugStr(data.data()),
 	#endif
+		currSize(1)
 	{
 		data[0] = c;
 	}
@@ -204,7 +209,7 @@ public:
 	}
 
 	//! erases part of the string  (from 'from' to ('to'-1))
-	void erase(size_t from, size_t to)
+	void erase(size_type from, size_type to)
 	{
 		ASSERT(from <= to);
 
@@ -212,7 +217,7 @@ public:
 		if (from == to)
 			return ;
 
-		for (auto i = size_t{0}; i < (to - from); ++i)
+		for (auto i = size_type{0}; i < (to - from); ++i)
 		{
 			auto src = (to + i);
 			auto dst = from + i;
@@ -253,8 +258,8 @@ private:
 	}
 
 private:
+	size_type currSize;
 	std::array<CharT, MaxSize + 1> data{};
-	size_t currSize;
 
 #ifdef DEBUG
 	CharT* pDebugStr;

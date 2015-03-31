@@ -5,8 +5,10 @@
 #endif
 
 #include <array>
+#include <limits>
 
-#include <Optional.h>
+#include "Optional.h"
+#include "CommonTraits.h"
 
 enum class CircularBufferFullStrategy
 {
@@ -34,6 +36,7 @@ class CircularBuffer
 public:
 	static_assert(MaxSize >= 1, "circular buffer must be at least one element big");
 
+	using size_type = typename FindSmallestIntegerFor<MaxSize>::type;
 	using element_type = T;
 
 	explicit CircularBuffer(LockingStrategy lockingStrategy = {})
@@ -85,7 +88,7 @@ public:
 		return impl_pop_front();
 	}
 
-	size_t size() const
+	size_type size() const
 	{
 		auto lock = lockingStrategy.lock();
 		return currSize;
@@ -107,13 +110,13 @@ private:
 		return element;
 	}
 
-	void incrementAndWrapAround(size_t& pos)
+	void incrementAndWrapAround(size_type& pos)
 	{
 		pos += 1;
 		pos %= MaxSize;
 	}
 
-	void decrementAndWrapAround(size_t& pos)
+	void decrementAndWrapAround(size_type& pos)
 	{
 		pos -= 1;
 		pos %= MaxSize;
@@ -122,8 +125,8 @@ private:
 private:
 	mutable LockingStrategy lockingStrategy;
 
-	size_t currSize = 0;
-	size_t pushPos = 0;
-	size_t popPos = 0;
+	size_type currSize = 0;
+	size_type pushPos = 0;
+	size_type popPos = 0;
 	std::array<T, MaxSize> data{};
 };
