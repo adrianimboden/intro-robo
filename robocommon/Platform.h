@@ -63,6 +63,8 @@
 #define PL_HAS_RTOS			(PL_L_HAS_RTOS)
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
+#define PL_HAS_USB_CDC		(PL_L_HAS_USB_CDC)
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

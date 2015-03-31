@@ -30,7 +30,10 @@
 #include "RTOS.h"
 #include "FRTOS1.h"
 
-#include "AS1.h"
+//#include "AS1.h"
+extern "C" {
+#include "CDC1.h"
+}
 
 void doLedHeartbeat(void);
 void systemReady(void);
@@ -43,7 +46,7 @@ void TASK_console(void*)
 	for(;;)
 	{
 		byte inputChar;
-		if (AS1_RecvChar(&inputChar) == ERR_OK)
+		if (CDC1_RecvChar(&inputChar) == ERR_OK)
 		{
 			console.rxChar(inputChar);
 		}

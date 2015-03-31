@@ -54,6 +54,9 @@
 #define PL_L_HAS_RTOS			(1)
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
+#define PL_L_HAS_USB_CDC		(1)
+  /*!< Set to 1 for USB_CDC enabled, 0 otherwise */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

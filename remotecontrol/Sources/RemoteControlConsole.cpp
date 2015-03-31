@@ -1,11 +1,16 @@
 #include "RemoteControlConsole.h"
 
+#include <Platform.h>
 #include <LineInputStrategy.h>
 #include <CircularBuffer.h>
 #include <HistoryController.h>
 #include <ConsoleHelpers.h>
 
-#include <AS1.h>
+//#include <AS1.h>
+
+extern "C" {
+#include <CDC1.h>
+}
 
 class EchoConsole;
 
@@ -28,11 +33,10 @@ private:
 
 void writeCharToSerialPort(unsigned char c)
 {
-	while (AS1_SendChar(c) == ERR_TXFULL)
-		;
+	while (CDC1_SendChar(c) == ERR_TXFULL);
 }
 
-using MyLineInputStrategy = LineInputStrategy<40, CommandExecutorLineSink, EchoConsole, HistoryController<String<40>, 2>>;
+using MyLineInputStrategy = LineInputStrategy<20, CommandExecutorLineSink, EchoConsole>;
 using RemoteControlConsole = ConcreteConsole<decltype(writeCharToSerialPort)*, MyLineInputStrategy>;
 
 class EchoConsole
