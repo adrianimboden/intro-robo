@@ -50,7 +50,7 @@ public:
 #endif
 	}
 
-	explicit String(const String& other)
+	String(const String& other)
 		: currSize(other.currSize)
 		, data(other.data)
 #ifdef DEBUG
