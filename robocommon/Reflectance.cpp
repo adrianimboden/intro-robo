@@ -30,8 +30,8 @@
 #endif
 #define REF_NOF_SENSORS 6 /* number of sensors */
 #define REF_SENSOR1_IS_LEFT   1 /* sensor number one is on the left side */
-#define REF_MIN_LINE_VAL      0x60   /* minimum value indicating a line */
-#define REF_MIN_NOISE_VAL     0x40   /* values below this are not added to the weighted sum */
+constexpr uint8_t REF_MIN_LINE_VAL = 0x60;   /* minimum value indicating a line */
+constexpr uint8_t REF_MIN_NOISE_VAL = 0x40;   /* values below this are not added to the weighted sum */
 #define REF_USE_WHITE_LINE    0  /* if set to 1, then the robot is using a white (on black) line, otherwise a black (on white) line */
 
 typedef enum {
