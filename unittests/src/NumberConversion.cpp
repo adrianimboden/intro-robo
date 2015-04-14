@@ -101,3 +101,16 @@ TEST(NumberConversion, _int64_t)
 	ASSERT_THAT(*stringToNumber<int64_t>("-9223372036854775806"), Eq(-9223372036854775806));
 	ASSERT_THAT(*stringToNumber<int64_t>("-9223372036854775807"), Eq(-9223372036854775807));
 }
+
+TEST(NumberConversion, numberToHex)
+{
+	ASSERT_THAT(numberToHex<uint8_t>(0xff), Eq("ff"));
+	ASSERT_THAT(numberToHex<uint16_t>(0xffff), Eq("ffff"));
+	ASSERT_THAT(numberToHex<uint32_t>(0xffffffff), Eq("ffffffff"));
+	ASSERT_THAT(numberToHex<uint64_t>(0xffffffffffffffff), Eq("ffffffffffffffff"));
+
+	ASSERT_THAT(numberToHex<uint8_t>(0x1), Eq("01"));
+	ASSERT_THAT(numberToHex<uint16_t>(0x1), Eq("0001"));
+	ASSERT_THAT(numberToHex<uint32_t>(0x1), Eq("00000001"));
+	ASSERT_THAT(numberToHex<uint64_t>(0x1), Eq("0000000000000001"));
+}

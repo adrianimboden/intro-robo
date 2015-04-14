@@ -194,9 +194,24 @@ optional<TVal> stringToNumber(const unsigned char* pStr)
 	}
 }
 
-
 }
 
+template <typename TVal>
+String<sizeof(TVal)*2> numberToHex(TVal num)
+{
+	std::array<char, sizeof(TVal)*2> buf;
+
+	int8_t i = sizeof(TVal)*2 - 1;
+	do
+	{
+		auto hex = (char)(num & 0x0F);
+		buf[i] = (char)(hex + ((hex <= 9) ? '0' : ('a'-10)));
+		num >>= 4;                          /* next nibble */
+		i--;
+	} while (i>=0);
+
+	return String<sizeof(TVal)*2>(buf.data(), sizeof(TVal)*2);
+}
 
 template <typename TVal>
 auto numberToString(TVal val) -> decltype(detail::numberToStringImpl<std::is_signed<TVal>::value, TVal>(val))
