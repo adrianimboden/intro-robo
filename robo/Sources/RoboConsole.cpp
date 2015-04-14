@@ -6,6 +6,7 @@
 #include <HistoryController.h>
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
+#include <Reflectance.h>
 
 #include <BT1.h>
 
@@ -46,7 +47,8 @@ CommandParser& getCommandParser()
 			ioStream.write(lhs * rhs);
 			ioStream.write("\r\n");
 		}),
-		cmd("showstat", showStat)
+		cmd("showstat", showStat),
+		cmd("refstat", REF_PrintStatus)
 	);
 
 	return parser;

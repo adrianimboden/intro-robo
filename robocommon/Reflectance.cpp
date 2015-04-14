@@ -240,96 +240,83 @@ static void REF_Measure(void) {
 //  return ERR_OK;
 //}
 //
-//static unsigned char*REF_GetStateString(void) {
-//  switch (refState) {
-//    case REF_STATE_INIT:                return (unsigned char*)"INIT";
-//    case REF_STATE_NOT_CALIBRATED:      return (unsigned char*)"NOT CALIBRATED";
-//    case REF_STATE_START_CALIBRATION:   return (unsigned char*)"START CALIBRATION";
-//    case REF_STATE_CALIBRATING:         return (unsigned char*)"CALIBRATING";
-//    case REF_STATE_STOP_CALIBRATION:    return (unsigned char*)"STOP CALIBRATION";
-//    case REF_STATE_READY:               return (unsigned char*)"READY";
-//    default:
-//      break;
-//  } /* switch */
-//  return (unsigned char*)"UNKNOWN";
-//}
-//
-//static uint8_t PrintStatus(const CLS1_StdIOType *io) {
+static const char* REF_GetStateString(void) {
+  switch (refState) {
+    case REF_STATE_INIT:                return "INIT";
+    case REF_STATE_NOT_CALIBRATED:      return "NOT CALIBRATED";
+    case REF_STATE_START_CALIBRATION:   return "START CALIBRATION";
+    case REF_STATE_CALIBRATING:         return "CALIBRATING";
+    case REF_STATE_STOP_CALIBRATION:    return "STOP CALIBRATION";
+    case REF_STATE_READY:               return "READY";
+    default:
+      break;
+  } /* switch */
+  return "UNKNOWN";
+}
+
+
+template <typename TName, typename TStr>
+void writeStatus(IOStream& ioStream, const TName& name, const TStr& val)
+{
+	ioStream.write("  ");
+	ioStream.write(name);
+	ioStream.write(" ");
+	ioStream.write(val);
+	ioStream.write("\r\n");
+}
+
+template <typename TName, typename TValue>
+void writeHexStatus(IOStream& ioStream, const TName& name, TValue val)
+{
+	ioStream.write("  ");
+	ioStream.write(name);
+	ioStream.write(" 0x");
+	ioStream.write(numberToHex(val));
+	ioStream.write("\r\n");
+}
+
+template <typename TName, typename TValues>
+void writeHexValuesLine(IOStream& ioStream, const TName& name, const TValues& values)
+{
+	ioStream.write("  ");
+	ioStream.write(name);
+	for (const auto& value : values)
+	{
+		ioStream.write(" 0x");
+		ioStream.write(numberToHex(value));
+	}
+	ioStream.write("\r\n");
+}
+
+template <size_t Size, typename T>
+std::array<T, Size> makeArray(T* src)
+{
+	std::array<T, Size> arr;
+	for (auto i = 0u; i < Size; ++i)
+	{
+		arr[i] = src[i];
+	}
+	return arr;
+}
+
+void REF_PrintStatus(IOStream& ioStream)
+{
 //  unsigned char buf[24];
 //  int i;
-//
-//  CLS1_SendStatusStr((unsigned char*)"reflectance", (unsigned char*)"\r\n", io->stdOut);
-//
-//  CLS1_SendStatusStr((unsigned char*)"  state", REF_GetStateString(), io->stdOut);
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//
-//  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)"0x");
-//  UTIL1_strcatNum16Hex(buf, sizeof(buf), REF_MIN_NOISE_VAL);
-//  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
-//  CLS1_SendStatusStr((unsigned char*)"  min noise", buf, io->stdOut);
-//
-//  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)"0x");
-//  UTIL1_strcatNum16Hex(buf, sizeof(buf), REF_MIN_LINE_VAL);
-//  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
-//  CLS1_SendStatusStr((unsigned char*)"  min line", buf, io->stdOut);
-//
-//  UTIL1_Num16uToStr(buf, sizeof(buf), REF_SENSOR_TIMEOUT_US);
-//  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)" us\r\n");
-//  CLS1_SendStatusStr((unsigned char*)"  timeout", buf, io->stdOut);
-//
-//  CLS1_SendStatusStr((unsigned char*)"  line val", (unsigned char*)"", io->stdOut);
-//  buf[0] = '\0'; UTIL1_strcatNum16s(buf, sizeof(buf), refCenterLineVal);
-//  CLS1_SendStr(buf, io->stdOut);
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//
-//  CLS1_SendStatusStr((unsigned char*)"  raw val", (unsigned char*)"", io->stdOut);
-//  for (i=0;i<REF_NOF_SENSORS;i++) {
-//    if (i==0) {
-//      CLS1_SendStr((unsigned char*)"0x", io->stdOut);
-//    } else {
-//      CLS1_SendStr((unsigned char*)" 0x", io->stdOut);
-//    }
-//    buf[0] = '\0'; UTIL1_strcatNum16Hex(buf, sizeof(buf), SensorRaw[i]);
-//    CLS1_SendStr(buf, io->stdOut);
-//  }
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//
-//  CLS1_SendStatusStr((unsigned char*)"  min val", (unsigned char*)"", io->stdOut);
-//  for (i=0;i<REF_NOF_SENSORS;i++) {
-//    if (i==0) {
-//      CLS1_SendStr((unsigned char*)"0x", io->stdOut);
-//    } else {
-//      CLS1_SendStr((unsigned char*)" 0x", io->stdOut);
-//    }
-//    buf[0] = '\0'; UTIL1_strcatNum16Hex(buf, sizeof(buf), SensorCalibMinMax.minVal[i]);
-//    CLS1_SendStr(buf, io->stdOut);
-//  }
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//  CLS1_SendStatusStr((unsigned char*)"  max val", (unsigned char*)"", io->stdOut);
-//  for (i=0;i<REF_NOF_SENSORS;i++) {
-//    if (i==0) {
-//      CLS1_SendStr((unsigned char*)"0x", io->stdOut);
-//    } else {
-//      CLS1_SendStr((unsigned char*)" 0x", io->stdOut);
-//    }
-//    buf[0] = '\0'; UTIL1_strcatNum16Hex(buf, sizeof(buf), SensorCalibMinMax.maxVal[i]);
-//    CLS1_SendStr(buf, io->stdOut);
-//  }
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//
-//  CLS1_SendStatusStr((unsigned char*)"  calib val", (unsigned char*)"", io->stdOut);
-//  for (i=0;i<REF_NOF_SENSORS;i++) {
-//    if (i==0) {
-//      CLS1_SendStr((unsigned char*)"0x", io->stdOut);
-//    } else {
-//      CLS1_SendStr((unsigned char*)" 0x", io->stdOut);
-//    }
-//    buf[0] = '\0'; UTIL1_strcatNum16Hex(buf, sizeof(buf), SensorCalibrated[i]);
-//    CLS1_SendStr(buf, io->stdOut);
-//  }
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
-//  return ERR_OK;
-//}
+
+	ioStream.write("reflectance\r\n");
+
+	writeStatus(ioStream,        "state           ", REF_GetStateString());
+	writeHexStatus(ioStream,     "min noise       ", REF_MIN_NOISE_VAL);
+	writeHexStatus(ioStream,     "REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
+	//writeHexStatus(ioStream,   "timeout         ", REF_SENSOR_TIMEOUT_US);
+	writeHexStatus(ioStream,     "line val        ", refCenterLineVal);
+
+	writeHexValuesLine(ioStream, "raw val         ", makeArray<REF_NOF_SENSORS>(SensorRaw));
+	writeHexValuesLine(ioStream, "min val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.minVal));
+	writeHexValuesLine(ioStream, "max val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.maxVal));
+	writeHexValuesLine(ioStream, "calib val       ", makeArray<REF_NOF_SENSORS>(SensorCalibrated));
+}
 //
 //byte REF_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io) {
 //  if (UTIL1_strcmp((char*)cmd, CLS1_CMD_HELP)==0 || UTIL1_strcmp((char*)cmd, "ref help")==0) {

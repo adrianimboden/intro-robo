@@ -44,6 +44,10 @@ void REF_Deinit(void);
  */
 void REF_Init(void);
 
+class IOStream;
+
+void REF_PrintStatus(IOStream& ioStream);
+
 #endif /* PL_HAS_LINE_SENSOR */
 
 #endif /* REFLECTANCE_H_ */
