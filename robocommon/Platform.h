@@ -61,6 +61,10 @@
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
 #define PL_HAS_USB_CDC		(PL_L_HAS_USB_CDC)
+ /*!< Set to 1 for USB CDC enabled, 0 otherwise */
+
+#define PL_HAS_LINE_SENSOR	(PL_L_HAS_LINE_SENSOR)
+ /*!< Set to 1 for Line Sensors enabled, 0 otherwise */
 
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM

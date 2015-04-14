@@ -26,6 +26,10 @@
 #include "FRTOS1.h"
 #include "BT1.h"
 
+extern "C" {
+#include "Reflectance.h"
+}
+
 void doLedHeartbeat(void);
 void systemReady(void);
 
@@ -39,7 +43,8 @@ void TASK_events(void*)
 			doLedHeartbeat,
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); },
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); }
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); },
+			[]{}
 		);
 	}
 }
@@ -57,6 +62,7 @@ void TASK_keyscan(void*)
  */
 void realMain()
 {
+	getConsole();
 	PL_Init();
 	eventQueue.setEvent(Event::SystemStartup);
 

@@ -51,6 +51,9 @@
 #define PL_L_HAS_RTOS			(1)
   /*!< Set to 1 for rtos enabled, 0 otherwise */
 
+#define PL_L_HAS_LINE_SENSOR	(1)
+ /*!< Set to 1 for Line Sensors enabled, 0 otherwise */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

@@ -14,6 +14,7 @@
 #include "Buzzer.h"
 #include "Debounce.h"
 #include "RTOS.h"
+#include "Reflectance.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,10 +46,16 @@ void PL_Init(void){
 #if PL_HAS_RTOS
   RTOS_Init();
 #endif
+#if PL_HAS_LINE_SENSOR
+  REF_Init();
+#endif
 }
 
 
 void PL_Deinit(void){
+#if PL_HAS_LINE_SENSOR
+  REF_Deinit();
+#endif
 #if PL_HAS_RTOS
   RTOS_Deinit();
 #endif
