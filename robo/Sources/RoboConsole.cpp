@@ -7,6 +7,7 @@
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
 #include <Reflectance.h>
+#include "Event.h"
 
 #include <BT1.h>
 
@@ -48,7 +49,9 @@ CommandParser& getCommandParser()
 			ioStream.write("\r\n");
 		}),
 		cmd("showstat", showStat),
-		cmd("refstat", REF_PrintStatus)
+		cmd("refstat", REF_PrintStatus),
+		cmd("startcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);}),
+		cmd("stopcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);})
 	);
 
 	return parser;

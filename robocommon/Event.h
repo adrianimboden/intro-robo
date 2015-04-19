@@ -17,9 +17,6 @@ enum class Event : uint8_t
 	Sw1LongPressed,
 	Sw1Released,
 #endif
-#if PL_HAS_LINE_SENSOR
-	RefStartStopCalibration,
-#endif
 #if PL_NOF_KEYS >= 2
 	Sw2Pressed,
 	Sw2LongPressed,
@@ -49,6 +46,9 @@ enum class Event : uint8_t
 	Sw7Pressed,
 	Sw7LongPressed,
 	Sw7Released,
+#endif
+#if PL_HAS_LINE_SENSOR
+	RefStartStopCalibration,
 #endif
 	/*!< add your events here */
 	AmountOfEvents		/*!< must be the last */

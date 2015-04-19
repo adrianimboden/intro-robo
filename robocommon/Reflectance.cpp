@@ -34,6 +34,19 @@ constexpr uint8_t REF_MIN_LINE_VAL = 0x60;   /* minimum value indicating a line 
 constexpr uint8_t REF_MIN_NOISE_VAL = 0x40;   /* values below this are not added to the weighted sum */
 #define REF_USE_WHITE_LINE    0  /* if set to 1, then the robot is using a white (on black) line, otherwise a black (on white) line */
 
+#define REF_START_STOP_CALIB  1 /* start/stop calibration commands */
+#define REF_MEASURE_TIMEOUT   1 /* use timeout for measurement */
+
+#if REF_MEASURE_TIMEOUT
+  #define REF_SENSOR_TIMEOUT_US  1500  /* after this time, consider no reflection (black). Must be smaller than the timeout period of the RefCnt timer! */
+  #define REF_SENSOR_TIMOUT_VAL  ((RefCnt_CNT_INP_FREQ_U_0/1000)*REF_SENSOR_TIMEOUT_US)/1000
+#endif
+
+#if REF_START_STOP_CALIB
+  static xSemaphoreHandle REF_StartStopSem = NULL;
+#endif
+
+
 typedef enum {
   REF_STATE_INIT,
   REF_STATE_NOT_CALIBRATED,
@@ -107,9 +120,23 @@ static const SensorFctType SensorFctArray[REF_NOF_SENSORS] = {
   {S6_SetOutput, S6_SetInput, S6_SetVal, S6_GetVal},
 };
 
+#if REF_START_STOP_CALIB
+void REF_CalibrateStartStop(void) {
+  if (refState==REF_STATE_NOT_CALIBRATED || refState==REF_STATE_CALIBRATING || refState==REF_STATE_READY) {
+    (void)xSemaphoreGive(REF_StartStopSem);
+  }
+}
+#endif
+
+/*!
+ * \brief Measures the time until the sensor discharges
+ * \param raw Array to store the raw values.
+ * \return ERR_OVERFLOW if there is a timeout, ERR_OK otherwise
+ */
 static void REF_MeasureRaw(SensorTimeType raw[REF_NOF_SENSORS]) {
   uint8_t cnt; /* number of sensor */
   uint8_t i;
+  RefCnt_TValueType timerVal;
 
   LED_IR_On(); /* IR LED's on */
   WAIT1_Waitus(200); /*! \todo adjust time as needed */
@@ -124,9 +151,15 @@ static void REF_MeasureRaw(SensorTimeType raw[REF_NOF_SENSORS]) {
   for(i=0;i<REF_NOF_SENSORS;i++) {
     SensorFctArray[i].SetInput(); /* turn I/O line as input */
   }
+  (void)RefCnt_ResetCounter(timerHandle); /* reset timer counter */
   do {
-    /*! \todo Be aware that this might block for a long time, if discharging takes long. Consider using a timeout. */
     cnt = 0;
+    timerVal = RefCnt_GetCounterValue(timerHandle);
+#if REF_MEASURE_TIMEOUT
+    if (timerVal>REF_SENSOR_TIMOUT_VAL) {
+      break; /* get out of while loop */
+    }
+#endif
     for(i=0;i<REF_NOF_SENSORS;i++) {
       if (raw[i]==MAX_SENSOR_VALUE) { /* not measured yet? */
         if (SensorFctArray[i].GetVal()==0) {
@@ -306,16 +339,18 @@ void REF_PrintStatus(IOStream& ioStream)
 
 	ioStream.write("reflectance\r\n");
 
-	writeStatus(ioStream,        "state           ", REF_GetStateString());
-	writeHexStatus(ioStream,     "min noise       ", REF_MIN_NOISE_VAL);
-	writeHexStatus(ioStream,     "REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
-	//writeHexStatus(ioStream,   "timeout         ", REF_SENSOR_TIMEOUT_US);
-	writeHexStatus(ioStream,     "line val        ", refCenterLineVal);
+	writeStatus(ioStream,			"state           ", REF_GetStateString());
+	writeHexStatus(ioStream,		"min noise       ", REF_MIN_NOISE_VAL);
+	writeHexStatus(ioStream,		"REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
+#if REF_MEASURE_TIMEOUT
+	writeHexStatus(ioStream,		"timeout         ", REF_SENSOR_TIMEOUT_US);
+#endif
+	writeHexStatus(ioStream,		"line val        ", refCenterLineVal);
 
-	writeHexValuesLine(ioStream, "raw val         ", makeArray<REF_NOF_SENSORS>(SensorRaw));
-	writeHexValuesLine(ioStream, "min val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.minVal));
-	writeHexValuesLine(ioStream, "max val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.maxVal));
-	writeHexValuesLine(ioStream, "calib val       ", makeArray<REF_NOF_SENSORS>(SensorCalibrated));
+	writeHexValuesLine(ioStream,	"raw val         ", makeArray<REF_NOF_SENSORS>(SensorRaw));
+	writeHexValuesLine(ioStream,	"min val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.minVal));
+	writeHexValuesLine(ioStream,	"max val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.maxVal));
+	writeHexValuesLine(ioStream,	"calib val       ", makeArray<REF_NOF_SENSORS>(SensorCalibrated));
 }
 //
 //byte REF_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io) {
@@ -335,50 +370,49 @@ static void REF_StateMachine(void) {
   Console& console = getConsole();
 
   switch (refState) {
-    case REF_STATE_INIT:
-    	console.getUnderlyingIoStream()->write("INFO: No calibration data present.\r\n");
-      refState = REF_STATE_NOT_CALIBRATED;
-      break;
-      
-    case REF_STATE_NOT_CALIBRATED:
-      REF_MeasureRaw(SensorRaw);
-      if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
-        refState = REF_STATE_START_CALIBRATION;
-        break;
-      }
-      break;
-    
-    case REF_STATE_START_CALIBRATION:
-    	console.getUnderlyingIoStream()->write("start calibration...\r\n");
-      for(i=0;i<REF_NOF_SENSORS;i++) {
-        SensorCalibMinMax.minVal[i] = MAX_SENSOR_VALUE;
-        SensorCalibMinMax.maxVal[i] = 0;
-        SensorCalibrated[i] = 0;
-      }
-      refState = REF_STATE_CALIBRATING;
-      break;
-    
-    case REF_STATE_CALIBRATING:
-      REF_CalibrateMinMax(SensorCalibMinMax.minVal, SensorCalibMinMax.maxVal, SensorRaw);
+  	  case REF_STATE_INIT:
+  		  console.getUnderlyingIoStream()->write("INFO: No calibration data present.\r\n");
+  		  refState = REF_STATE_NOT_CALIBRATED;
+  		  break;
+
+  	  case REF_STATE_NOT_CALIBRATED:
+  		  REF_MeasureRaw(SensorRaw);
+  		  if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
+  			  refState = REF_STATE_START_CALIBRATION;
+  		  }
+  		  break;
+
+  	  case REF_STATE_START_CALIBRATION:
+  		  console.getUnderlyingIoStream()->write("start calibration...\r\n");
+  		  for(i=0;i<REF_NOF_SENSORS;i++) {
+  			  SensorCalibMinMax.minVal[i] = MAX_SENSOR_VALUE;
+  			  SensorCalibMinMax.maxVal[i] = 0;
+  			  SensorCalibrated[i] = 0;
+  		  }
+  		  refState = REF_STATE_CALIBRATING;
+  		  break;
+
+  	  case REF_STATE_CALIBRATING:
+  		  REF_CalibrateMinMax(SensorCalibMinMax.minVal, SensorCalibMinMax.maxVal, SensorRaw);
 #if PL_HAS_BUZZER
-      (void)BUZ_Beep(300, 20);
+  		  (void)BUZ_Beep(300, 20);
 #endif
-      if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
-        refState = REF_STATE_STOP_CALIBRATION;
-      }
-      break;
-    
-    case REF_STATE_STOP_CALIBRATION:
-    	console.getUnderlyingIoStream()->write("...stopping calibration.\r\n");
-      refState = REF_STATE_READY;
-      break;
-        
-    case REF_STATE_READY:
-      REF_Measure();
-      if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
-        refState = REF_STATE_START_CALIBRATION;
-      }
-      break;
+  		  if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
+  			  refState = REF_STATE_STOP_CALIBRATION;
+  		  }
+  		  break;
+
+  	  case REF_STATE_STOP_CALIBRATION:
+  		  console.getUnderlyingIoStream()->write("...stopping calibration.\r\n");
+  		  refState = REF_STATE_READY;
+  		  break;
+
+  	  case REF_STATE_READY:
+  		  REF_Measure();
+  		  if (eventQueue.getAndResetEvent(Event::RefStartStopCalibration)) {
+  			  refState = REF_STATE_START_CALIBRATION;
+  		  }
+  		  break;
   } /* switch */
 }
 

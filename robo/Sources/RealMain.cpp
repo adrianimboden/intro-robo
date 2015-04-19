@@ -42,9 +42,9 @@ void TASK_events(void*)
 			systemReady,
 			doLedHeartbeat,
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); },
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); },
-			[]{}
+			[]{eventQueue.setEvent(Event::RefStartStopCalibration);}
 		);
 	}
 }
