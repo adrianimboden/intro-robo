@@ -110,83 +110,56 @@ MOT_Direction MOT_GetDirection(MOT_MotorDevice *motor) {
   }
 }
 
-#if PL_HAS_SHELL
-static void MOT_PrintHelp(const CLS1_StdIOType *io) {
-  CLS1_SendHelpStr((unsigned char*)"motor", (unsigned char*)"Group of motor commands\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Shows motor help or status\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  (L|R) forward|backward", (unsigned char*)"Change motor direction\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  (L|R) duty <number>", (unsigned char*)"Change motor PWM (-100..+100)%\r\n", io->stdOut);
+void MOT_CmdStatus(IOStream& ioStream)
+{
+	ioStream << "Motor\r\n";
+	ioStream << " Motor L: " << motorL.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorL)) << "\r\n";
+	ioStream << " Motor R: " << motorR.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorR)) << "\r\n";
 }
 
-static void MOT_PrintStatus(const CLS1_StdIOType *io) {
-  unsigned char buf[32];
+void MOT_CmdDir(IOStream& out, const String<1>& motor, const String<8>& cmd)
+{
+	if (motor != 'L' && motor != 'R')
+	{
+		out << "usage: cmd L|R forward|backward\r\n";
+		return;
+	}
+	MOT_MotorDevice& motorDev = (motor == 'L') ? motorL : motorR;
 
-  CLS1_SendStatusStr((unsigned char*)"Motor", (unsigned char*)"\r\n", io->stdOut);
-  
-  CLS1_SendStatusStr((unsigned char*)"  motor L", (unsigned char*)"", io->stdOut);
-  buf[0] = '\0';
-  UTIL1_Num16sToStrFormatted(buf, sizeof(buf), (int16_t)motorL.currSpeedPercent, ' ', 4);
-  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"% 0x");
-  UTIL1_strcatNum16Hex(buf, sizeof(buf), MOT_GetVal(&motorL));
-  UTIL1_strcat(buf, sizeof(buf),(unsigned char*)(MOT_GetDirection(&motorL)==MOT_DIR_FORWARD?", fw":", bw"));
-  CLS1_SendStr(buf, io->stdOut);
-  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
+	if (cmd != "forward" || cmd != "backward")
+	{
+		out << "usage: cmd L|R forward|backward\r\n";
+	}
+	enum class Dir{Forward, Backward};
+	Dir dir = (cmd == "forward" ? Dir::Forward : Dir::Backward);
 
-  CLS1_SendStatusStr((unsigned char*)"  motor R", (unsigned char*)"", io->stdOut);
-  buf[0] = '\0';
-  UTIL1_Num16sToStrFormatted(buf, sizeof(buf), (int16_t)motorR.currSpeedPercent, ' ', 4);
-  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"% 0x");
-  UTIL1_strcatNum16Hex(buf, sizeof(buf), MOT_GetVal(&motorR));
-  UTIL1_strcat(buf, sizeof(buf),(unsigned char*)(MOT_GetDirection(&motorR)==MOT_DIR_FORWARD?", fw":", bw"));
-  CLS1_SendStr(buf, io->stdOut);
-  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
+	if (dir == Dir::Forward)
+	{
+		MOT_SetDirection(&motorDev, MOT_DIR_FORWARD);
+	}
+	else
+	{
+		MOT_SetDirection(&motorDev, MOT_DIR_BACKWARD);
+	}
 }
 
-uint8_t MOT_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io) {
-  uint8_t res = ERR_OK;
-  int32_t val;
-  const unsigned char *p;
+void MOT_CmdDuty(IOStream& out, const String<1>& motor, uint8_t duty)
+{
+	if (motor != 'L' && motor != 'R')
+	{
+		out << "usage: cmd L|R 0-100\r\n";
+		return;
+	}
+	MOT_MotorDevice& motorDev = motor == 'L' ? motorL : motorR;
 
-  if (UTIL1_strcmp((char*)cmd, (char*)CLS1_CMD_HELP)==0 || UTIL1_strcmp((char*)cmd, (char*)"motor help")==0) {
-    MOT_PrintHelp(io);
-    *handled = TRUE;
-  } else if (UTIL1_strcmp((char*)cmd, (char*)CLS1_CMD_STATUS)==0 || UTIL1_strcmp((char*)cmd, (char*)"motor status")==0) {
-    MOT_PrintStatus(io);
-    *handled = TRUE;
-  } else if (UTIL1_strcmp((char*)cmd, (char*)"motor L forward")==0) {
-    MOT_SetDirection(&motorL, MOT_DIR_FORWARD);
-    *handled = TRUE;
-  } else if (UTIL1_strcmp((char*)cmd, (char*)"motor R forward")==0) {
-    MOT_SetDirection(&motorR, MOT_DIR_FORWARD);
-    *handled = TRUE;
-  } else if (UTIL1_strcmp((char*)cmd, (char*)"motor L backward")==0) {
-    MOT_SetDirection(&motorL, MOT_DIR_BACKWARD);
-    *handled = TRUE;
-  } else if (UTIL1_strcmp((char*)cmd, (char*)"motor R backward")==0) {
-    MOT_SetDirection(&motorR, MOT_DIR_BACKWARD);
-    *handled = TRUE;
-  } else if (UTIL1_strncmp((char*)cmd, (char*)"motor L duty ", sizeof("motor L duty ")-1)==0) {
-    p = cmd+sizeof("motor L duty");
-    if (UTIL1_xatoi(&p, &val)==ERR_OK && val >=-100 && val<=100) {
-      MOT_SetSpeedPercent(&motorL, (MOT_SpeedPercent)val);
-      *handled = TRUE;
-    } else {
-      CLS1_SendStr((unsigned char*)"Wrong argument, must be in the range -100..100\r\n", io->stdErr);
-      res = ERR_FAILED;
-    }
-  } else if (UTIL1_strncmp((char*)cmd, (char*)"motor R duty ", sizeof("motor R duty ")-1)==0) {
-    p = cmd+sizeof("motor R duty");
-    if (UTIL1_xatoi(&p, &val)==ERR_OK && val >=-100 && val<=100) {
-      MOT_SetSpeedPercent(&motorR, (MOT_SpeedPercent)val);
-      *handled = TRUE;
-    } else {
-      CLS1_SendStr((unsigned char*)"Wrong argument, must be in the range -100..100\r\n", io->stdErr);
-      res = ERR_FAILED;
-    }
-  }
-  return res;
+	if (duty > 100)
+	{
+		out << "usage: cmd L|R 0-100\r\n";
+		return;
+	}
+
+    MOT_SetSpeedPercent(&motorDev, duty);
 }
-#endif /* PL_HAS_SHELL */
 
 void MOT_Deinit(void) {
   /*! \todo What could you do here? */

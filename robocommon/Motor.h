@@ -10,6 +10,7 @@
 #define MOTOR_H_
 
 #include "Platform.h"
+#include <IOStream.h>
 #if PL_HAS_MOTOR
 
 typedef enum {
@@ -80,16 +81,9 @@ void MOT_SetDirection(MOT_MotorDevice *motor, MOT_Direction dir);
  */
 MOT_Direction MOT_GetDirection(MOT_MotorDevice *motor);
 
-#if PL_HAS_SHELL
-#include "CLS1.h"
-/*!
- * \brief Shell command line parser.
- * \param[in] cmd Pointer to command string
- * \param[out] handled If command is handled by the parser
- * \param[in] io Std I/O handler of shell
- */
-uint8_t MOT_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io);
-#endif /* PL_HAS_SHELL */
+void MOT_CmdStatus(IOStream& ioStream);
+void MOT_CmdDir(IOStream& out, const String<1>& motor, const String<8>& cmd);
+void MOT_CmdDuty(IOStream& out, const String<1>& motor, uint8_t duty);
 
 /*!
  * \brief Deinitialization function.

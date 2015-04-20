@@ -7,6 +7,7 @@
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
 #include <Reflectance.h>
+#include <Motor.h>
 #include "Event.h"
 
 #include <BT1.h>
@@ -33,25 +34,13 @@ CommandParser& getCommandParser()
 				}
 			}
 		}),
-		cmd("echo", [&](IOStream& ioStream, const String<80>& param)
-		{
-			ioStream.write(param);
-			ioStream.write("\r\n");
-		}),
-		cmd("add", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
-		{
-			ioStream.write(lhs + rhs);
-			ioStream.write("\r\n");
-		}),
-		cmd("mult", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
-		{
-			ioStream.write(lhs * rhs);
-			ioStream.write("\r\n");
-		}),
 		cmd("showstat", showStat),
 		cmd("refstat", REF_PrintStatus),
 		cmd("startcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);}),
-		cmd("stopcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);})
+		cmd("stopcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);}),
+		cmd("motstat", MOT_CmdStatus),
+		cmd("motdir", MOT_CmdDir),
+		cmd("motduty", MOT_CmdDuty)
 	);
 
 	return parser;
