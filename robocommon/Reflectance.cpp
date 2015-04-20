@@ -289,36 +289,26 @@ static const char* REF_GetStateString(void) {
 
 
 template <typename TName, typename TStr>
-void writeStatus(IOStream& ioStream, const TName& name, const TStr& val)
+void writeStatus(IOStream& out, const TName& name, const TStr& val)
 {
-	ioStream.write("  ");
-	ioStream.write(name);
-	ioStream.write(" ");
-	ioStream.write(val);
-	ioStream.write("\r\n");
+	out << "  " << name << " " << val << "\r\n";
 }
 
 template <typename TName, typename TValue>
-void writeHexStatus(IOStream& ioStream, const TName& name, TValue val)
+void writeHexStatus(IOStream& out, const TName& name, TValue val)
 {
-	ioStream.write("  ");
-	ioStream.write(name);
-	ioStream.write(" 0x");
-	ioStream.write(numberToHex(val));
-	ioStream.write("\r\n");
+	out << "  " << name << " 0x" << numberToHex(val) << "\r\n";
 }
 
 template <typename TName, typename TValues>
-void writeHexValuesLine(IOStream& ioStream, const TName& name, const TValues& values)
+void writeHexValuesLine(IOStream& out, const TName& name, const TValues& values)
 {
-	ioStream.write("  ");
-	ioStream.write(name);
+	out << "  " << name;
 	for (const auto& value : values)
 	{
-		ioStream.write(" 0x");
-		ioStream.write(numberToHex(value));
+		out << " 0x" << numberToHex(value);
 	}
-	ioStream.write("\r\n");
+	out << "\r\n";
 }
 
 template <size_t Size, typename T>
@@ -332,25 +322,24 @@ std::array<T, Size> makeArray(T* src)
 	return arr;
 }
 
-void REF_PrintStatus(IOStream& ioStream)
+void REF_PrintStatus(IOStream& out)
 {
 //  unsigned char buf[24];
 //  int i;
 
-	ioStream.write("reflectance\r\n");
-
-	writeStatus(ioStream,			"state           ", REF_GetStateString());
-	writeHexStatus(ioStream,		"min noise       ", REF_MIN_NOISE_VAL);
-	writeHexStatus(ioStream,		"REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
+	out << "reflectance\r\n";
+	writeStatus(out,		"state           ", REF_GetStateString());
+	writeHexStatus(out,		"min noise       ", REF_MIN_NOISE_VAL);
+	writeHexStatus(out,		"REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
 #if REF_MEASURE_TIMEOUT
-	writeHexStatus(ioStream,		"timeout         ", REF_SENSOR_TIMEOUT_US);
+	writeHexStatus(out,		"timeout         ", REF_SENSOR_TIMEOUT_US);
 #endif
-	writeHexStatus(ioStream,		"line val        ", refCenterLineVal);
+	writeHexStatus(out,		"line val        ", refCenterLineVal);
 
-	writeHexValuesLine(ioStream,	"raw val         ", makeArray<REF_NOF_SENSORS>(SensorRaw));
-	writeHexValuesLine(ioStream,	"min val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.minVal));
-	writeHexValuesLine(ioStream,	"max val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.maxVal));
-	writeHexValuesLine(ioStream,	"calib val       ", makeArray<REF_NOF_SENSORS>(SensorCalibrated));
+	writeHexValuesLine(out,	"raw val         ", makeArray<REF_NOF_SENSORS>(SensorRaw));
+	writeHexValuesLine(out,	"min val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.minVal));
+	writeHexValuesLine(out,	"max val         ", makeArray<REF_NOF_SENSORS>(SensorCalibMinMax.maxVal));
+	writeHexValuesLine(out,	"calib val       ", makeArray<REF_NOF_SENSORS>(SensorCalibrated));
 }
 //
 //byte REF_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io) {
