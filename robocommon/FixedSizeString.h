@@ -325,3 +325,29 @@ bool operator!=(const CharT* pStr, const String<OtherSize>& str)
 {
 	return str != pStr;
 }
+
+template <size_t OtherSize>
+bool operator==(CharT c, const String<OtherSize>& str)
+{
+	if (str.size() != 1)
+		return false;
+	return str[0] == c;
+}
+
+template <size_t OtherSize>
+bool operator!=(CharT c, const String<OtherSize>& str)
+{
+	return (c == str);
+}
+
+template <size_t OtherSize>
+bool operator==(const String<OtherSize>& str, CharT c)
+{
+	return c == str;
+}
+
+template <size_t OtherSize>
+bool operator!=(const String<OtherSize>& str, CharT c)
+{
+	return (c == str);
+}
