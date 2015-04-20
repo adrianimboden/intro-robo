@@ -143,7 +143,7 @@ void MOT_CmdDir(IOStream& out, const String<1>& motor, const String<8>& cmd)
 	}
 }
 
-void MOT_CmdDuty(IOStream& out, const String<1>& motor, uint8_t duty)
+void MOT_CmdDuty(IOStream& out, const String<1>& motor, int8_t duty)
 {
 	if (motor != 'L' && motor != 'R')
 	{
