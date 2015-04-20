@@ -34,6 +34,13 @@ public:
 	virtual void writeChar(char c) = 0;
 };
 
+template <typename TVal>
+IOStream& operator<<(IOStream& out, const TVal& val)
+{
+	out.write(val);
+	return out;
+}
+
 template <typename FnWrite, typename FnRead>
 class FnIOStream final : public IOStream
 {
