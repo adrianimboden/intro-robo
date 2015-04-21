@@ -175,7 +175,7 @@ static uint8_t PrintStatus(const CLS1_StdIOType *io) {
   QuadTime_t timing;
   int i;
   
-  //CLS1_SendStatusStr((unsigned char*)"quadcalib", (unsigned char*)"\r\n", io->stdOut);
+  CLS1_SendStatusStr((unsigned char*)"quadcalib", (unsigned char*)"\r\n", io->stdOut);
   for(i=0; i<NOF_SIGNALS; i++) {
     if (Measure(i, &timing)==ERR_OK) {
       buf[0] = '\0';
@@ -200,7 +200,7 @@ static uint8_t PrintStatus(const CLS1_StdIOType *io) {
     } else {
       UTIL1_strcpy(buf2, sizeof(buf2), (uint8_t*)"  Left  D,C3");
     }
-    //CLS1_SendStatusStr(buf2, buf, io->stdOut);
+    CLS1_SendStatusStr(buf2, buf, io->stdOut);
   }
   return ERR_OK;
 }

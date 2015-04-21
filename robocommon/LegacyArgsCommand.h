@@ -32,15 +32,17 @@ namespace detail
 	public:
 		virtual void sendHelpStr(const unsigned char* name, const unsigned char* text) const = 0;
 		virtual void sendStr(const unsigned char* text) const = 0;
+		virtual void sendStatus(const unsigned char* key, const unsigned char* value) const = 0;
 	};
 
-	template <typename FnSendHelpStr, typename FnSendStr>
+	template <typename FnSendHelpStr, typename FnSendStr, typename FnSendStatus>
 	class ConcreteAdapter : public CppAdapter
 	{
 	public:
-		ConcreteAdapter(FnSendHelpStr fnSendHelpStr, FnSendStr fnSendStr)
+		ConcreteAdapter(FnSendHelpStr fnSendHelpStr, FnSendStr fnSendStr, FnSendStatus fnSendStatus)
 			: fnSendHelpStr(fnSendHelpStr)
 			, fnSendStr(fnSendStr)
+			, fnSendStatus(fnSendStatus)
 		{
 		}
 
@@ -54,30 +56,40 @@ namespace detail
 			fnSendStr(text);
 		}
 
+		void sendStatus(const unsigned char* key, const unsigned char* value) const override
+		{
+			fnSendStatus(key, value);
+		}
+
 	private:
 		FnSendHelpStr fnSendHelpStr;
 		FnSendStr fnSendStr;
+		FnSendStatus fnSendStatus;
 	};
 
-	template <typename FnSendHelpStr, typename FnSendStr>
-	ConcreteAdapter<FnSendHelpStr, FnSendStr> makeAdapter(FnSendHelpStr fnSendHelpStr, FnSendStr fnSendStr)
+	template <typename FnSendHelpStr, typename FnSendStr, typename FnSendStatus>
+	ConcreteAdapter<FnSendHelpStr, FnSendStr, FnSendStatus> makeAdapter(FnSendHelpStr fnSendHelpStr, FnSendStr fnSendStr, FnSendStatus fnSendStatus)
 	{
-		return ConcreteAdapter<FnSendHelpStr, FnSendStr>(fnSendHelpStr, fnSendStr);
+		return ConcreteAdapter<FnSendHelpStr, FnSendStr, FnSendStatus>(fnSendHelpStr, fnSendStr, fnSendStatus);
 	}
 }
 
-using ParseCommandFn = uint8_t(*)(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io);
+using ParseCommandFn = uint8_t(*)(const unsigned char *cmd, bool *handled, const CLS1_StdIOType* io);
 
 inline void CLS1_SendHelpStr(const unsigned char* name, const unsigned char* text, const Adapter *io)
 {
 	static_cast<const detail::CppAdapter*>(io)->sendHelpStr(name, text);
 }
 
-inline void CLS1_SendStr(const unsigned char* text, const Adapter *io)
+inline void CLS1_SendStr(const unsigned char* text, const Adapter* io)
 {
 	static_cast<const detail::CppAdapter*>(io)->sendStr(text);
 }
 
+inline void CLS1_SendStatusStr(const unsigned char* key, const unsigned char* value, const Adapter* io)
+{
+	static_cast<const detail::CppAdapter*>(io)->sendStatus(key, value);
+}
 
 namespace detail
 {
@@ -100,6 +112,10 @@ public:
 			[&](const unsigned char* text)
 			{
 				ioStream << reinterpret_cast<const char*>(text);
+			},
+			[&](const unsigned char* key, const unsigned char* value)
+			{
+				ioStream << reinterpret_cast<const char*>(key) << "\t" << reinterpret_cast<const char*>(value);
 			}
 		);
 		CLS1_StdIOType io{&adapter, &adapter, &adapter, &adapter};
@@ -139,6 +155,9 @@ public:
 				}
 			},
 			[](const unsigned char* /*text*/)
+			{
+			},
+			[&](const unsigned char* /*key*/, const unsigned char* /*value*/)
 			{
 			}
 		);
