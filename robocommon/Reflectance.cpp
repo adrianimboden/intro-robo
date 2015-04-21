@@ -369,6 +369,7 @@ static void REF_StateMachine(void) {
   		  }
   		  else {
   			  SensorCalibMinMax = *(SensorCalibT*)p;
+  			  refState = REF_STATE_READY;
   		  }
   		  break;
 
@@ -401,6 +402,7 @@ static void REF_StateMachine(void) {
 
   	  case REF_STATE_STOP_CALIBRATION:
   		  console.getUnderlyingIoStream()->write("...stopping calibration.\r\n");
+  		  NVMC_SaveReflectanceData((void *)&SensorCalibMinMax,sizeof(SensorCalibT));
   		  refState = REF_STATE_READY;
   		  break;
 

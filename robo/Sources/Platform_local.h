@@ -65,6 +65,8 @@
 #define PL_L_HAS_QUAD_CALIBRATION	(1)
 /*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
 
+#define PL_IS_INTRO_ZUMO_K22_V2		(1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
