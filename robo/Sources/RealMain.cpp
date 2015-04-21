@@ -25,6 +25,7 @@
 #include "RTOS.h"
 #include "FRTOS1.h"
 #include "BT1.h"
+#include "MainControl.h"
 
 extern "C" {
 #include "Reflectance.h"
@@ -41,7 +42,7 @@ void TASK_events(void*)
 		handleOneEvent(eventQueue,
 			systemReady,
 			doLedHeartbeat,
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); MainControl::notifyStartMove(); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); },
 			[]{eventQueue.setEvent(Event::RefStartStopCalibration);}
@@ -71,6 +72,7 @@ void realMain()
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 #endif
+	if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
 
 	RTOS_Run();
 }

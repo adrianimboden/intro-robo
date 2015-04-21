@@ -8,6 +8,8 @@
 #include <CdcIOStream.h>
 #include <Reflectance.h>
 #include <Motor.h>
+#include <MainControl.h>
+#include <AutoArgsCommand.h>
 #include "Event.h"
 
 #include <BT1.h>
@@ -40,7 +42,9 @@ CommandParser& getCommandParser()
 		cmd("stopcalib",[&](){eventQueue.setEvent(Event::RefStartStopCalibration);}),
 		cmd("motstat", MOT_CmdStatus),
 		cmd("motdir", MOT_CmdDir),
-		cmd("motduty", MOT_CmdDuty)
+		cmd("motduty", MOT_CmdDuty),
+		cmd("start", MainControl::notifyStartMove),
+		cmd("setSpeed", MainControl::setSpeed)
 	);
 
 	return parser;
