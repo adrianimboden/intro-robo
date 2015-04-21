@@ -17,7 +17,6 @@ std::unique_ptr<T> intoUniquePtr(T data)
 
 struct ParserTestData
 {
-	String<80> lastError;
 	struct {
 		size_t callCount = 0;
 		uint16_t p1 = 0;
@@ -52,10 +51,6 @@ struct ParserTestData
 	ParserTestData()
 	{
 		ptrParser = intoUniquePtr(makeParser(
-			[&](IOStream& /*ioStream*/, const String<80>& error)
-			{
-				lastError = error;
-			},
 			cmd("cmd1", [&](uint16_t p1)
 			{
 				++cmd1.callCount;
@@ -153,9 +148,10 @@ TEST(CommandParser, error_cmd_not_found)
 {
 	ParserTestData testParser;
 
-	auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+	std::stringstream err;
+	auto ioStream = makeFnIoStream([&](char c){ err << c; }, []()->optional<char>{ return {}; });
 	testParser.getCommandParser().executeCommand(ioStream, "unknown");
-	ASSERT_THAT(testParser.lastError, Eq("unknown not found"));
+	ASSERT_THAT(err.str(), Eq("unknown not found"));
 }
 
 TEST(CommandParser, error_parameters_dont_match)
@@ -164,10 +160,10 @@ TEST(CommandParser, error_parameters_dont_match)
 
 	auto checkError = [&](const char* cmd, const char* expectedError)
 	{
-		testParser.lastError.erase();
-		auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+		std::stringstream err;
+		auto ioStream = makeFnIoStream([&](char c){ err << c; }, []()->optional<char>{ return {}; });
 		testParser.getCommandParser().executeCommand(ioStream, cmd);
-		ASSERT_THAT(testParser.lastError, Eq(expectedError)) << testParser.lastError;
+		ASSERT_THAT(err.str(), Eq(expectedError)) << err.str();
 	};
 
 	checkError("cmd1", "error. syntax: cmd1 num");
@@ -239,10 +235,10 @@ TEST(CommandParser, when_malicious_input_is_being_received_then_the_program_outp
 
 	auto checkError = [&](const char* cmd)
 	{
-		testParser.lastError.erase();
-		auto ioStream = makeFnIoStream([](char){}, []()->optional<char>{ return {}; });
+		std::stringstream err;
+		auto ioStream = makeFnIoStream([&](char c){ err << c; }, []()->optional<char>{ return {}; });
 		testParser.getCommandParser().executeCommand(ioStream, cmd);
-		ASSERT_THAT(testParser.lastError.empty(), Eq(false));
+		ASSERT_THAT(err.str().empty(), Eq(false));
 	};
 
 	checkError("cmd4 \"a b");

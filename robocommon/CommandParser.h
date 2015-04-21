@@ -313,15 +313,15 @@ namespace detail
 	template <size_t Count>
 	struct HandleCommandRecursive
 	{
-		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(IOStream& ioStream, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
+		template <typename... Commands>
+		static void doHandleCommand(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 		{
 			auto command = std::get<std::tuple_size<std::tuple<Commands...>>::value - Count>(commands);
 
 			auto result = command.executeIfMatching(ioStream, cmdToExecute);
 			if (!result)
 			{
-				HandleCommandRecursive<Count - 1>::doHandleCommand(ioStream, errorHandler, cmdToExecute, commands);
+				HandleCommandRecursive<Count - 1>::doHandleCommand(ioStream, cmdToExecute, commands);
 			}
 		}
 	};
@@ -330,19 +330,17 @@ namespace detail
 	struct HandleCommandRecursive<0>
 	{
 		//terminating case
-		template <typename ErrorHandler, typename... Commands>
-		static void doHandleCommand(IOStream& /*ioStream*/, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
+		template <typename... Commands>
+		static void doHandleCommand(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& /*commands*/)
 		{
-			String<80> error = cmdToExecute;
-			error.append(" not found");
-			errorHandler(error);
+			ioStream << cmdToExecute << " not found";
 		}
 	};
 
-	template <typename ErrorHandler, typename... Commands>
-	void handleCommandRecursive(IOStream& ioStream, const ErrorHandler& errorHandler, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
+	template <typename... Commands>
+	void handleCommandRecursive(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute, const std::tuple<Commands...>& commands)
 	{
-		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(ioStream, errorHandler, cmdToExecute, commands);
+		HandleCommandRecursive<std::tuple_size<std::tuple<Commands...>>::value>::doHandleCommand(ioStream, cmdToExecute, commands);
 	}
 }
 
@@ -382,34 +380,19 @@ struct AddCommandImpl<0>
 
 }
 
-template <typename ErrorHandler, typename... Commands>
+template <typename... Commands>
 class ConcreteCommandParser : public CommandParser
 {
 public:
-	explicit ConcreteCommandParser(ErrorHandler errorHandler, std::tuple<Commands...> commands)
-		: errorHandler(std::move(errorHandler))
-		, commands(std::move(commands))
+	explicit ConcreteCommandParser(std::tuple<Commands...> commands)
+		: commands(std::move(commands))
 	{
 	}
 
 	void executeCommand(IOStream& ioStream, const String<detail::MaxCommandLength>& command) override
 	{
-		return executeCommandImpl(ioStream, command, FirstParameterIsIOStream<ErrorHandler>());
+		detail::handleCommandRecursive(ioStream, command, commands);
 	}
-
-	//! called in case when the help function does not want do do I/O
-	void executeCommandImpl(IOStream& ioStream, const String<detail::MaxCommandLength>& command, std::false_type)
-	{
-		detail::handleCommandRecursive(ioStream, errorHandler, command, commands);
-	}
-
-	//! called in case when the help function *does* want do do I/O
-	void executeCommandImpl(IOStream& ioStream, const String<detail::MaxCommandLength>& command, std::true_type)
-	{
-		using Adapter = typename function_traits<ErrorHandler>::template GetIoStreamRemovedAdapter<ErrorHandler>::type;
-		detail::handleCommandRecursive(ioStream, Adapter{ioStream, errorHandler}, command, commands);
-	}
-
 
 	detail::AvailableCommands<Commands...> getAvailableCommands()
 	{
@@ -431,14 +414,13 @@ public:
 	}
 
 private:
-	ErrorHandler errorHandler;
 	std::tuple<Commands...> commands;
 };
 
-template <typename ErrorHandler, typename... Commands>
-ConcreteCommandParser<ErrorHandler, Commands...> makeParser(ErrorHandler errorHandler, Commands... commands)
+template <typename... Commands>
+ConcreteCommandParser<Commands...> makeParser(Commands... commands)
 {
-	return ConcreteCommandParser<ErrorHandler, Commands...>(errorHandler, std::make_tuple(commands...));
+	return ConcreteCommandParser<Commands...>(std::make_tuple(commands...));
 }
 
 class CommandExecutorLineSink
