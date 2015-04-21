@@ -21,11 +21,6 @@
 CommandParser& getCommandParser()
 {
 	static auto parser = makeParser(
-		[&](IOStream& ioStream, const String<80>& error)
-		{
-			ioStream.write(error);
-			ioStream.write("\r\n");
-		},
 		cmd("help", [&](IOStream& ioStream)
 		{
 			std::array<String<10>, 20>cmds{};

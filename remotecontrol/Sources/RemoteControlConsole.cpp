@@ -15,11 +15,6 @@ extern "C" {
 CommandParser& getCommandParser()
 {
 	static auto parser = makeParser(
-		[&](IOStream& ioStream, const String<80>& error)
-		{
-			ioStream.write(error);
-			ioStream.write("\r\n");
-		},
 		cmd("help", [&](IOStream& ioStream)
 		{
 			String<10> cmds[10] = {};
