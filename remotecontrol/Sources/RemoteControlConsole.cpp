@@ -6,6 +6,7 @@
 #include <HistoryController.h>
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
+#include <AutoArgsCommand.h>
 
 extern "C" {
 #include <CDC1.h>

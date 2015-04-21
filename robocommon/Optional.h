@@ -5,6 +5,7 @@
 #endif
 
 #include <type_traits>
+#include <Assert.h>
 
 template <typename T>
 class optional

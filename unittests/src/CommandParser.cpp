@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <CommandParser.h>
+#include <AutoArgsCommand.h>
 
 using namespace testing;
 
