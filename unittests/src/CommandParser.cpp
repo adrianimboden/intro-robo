@@ -5,6 +5,7 @@
 
 #include <CommandParser.h>
 #include <AutoArgsCommand.h>
+#include <LegacyArgsCommand.h>
 
 using namespace testing;
 

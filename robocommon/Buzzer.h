@@ -9,8 +9,7 @@
 #ifndef BUZZER_H_
 #define BUZZER_H_
 
-#if PL_HAS_SHELL
-  #include "CLS1.h"
+#include <LegacyArgsCommand.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,8 +26,6 @@ extern "C" {
 
 #ifdef __cplusplus
 }  /* extern "C" */
-#endif
-
 #endif
 
 #ifdef __cplusplus

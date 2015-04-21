@@ -1,5 +1,9 @@
 #pragma once
 
+#include "CommandParser.h"
+#include "Optional.h"
+#include "FixedSizeString.h"
+
 namespace detail
 {
 
@@ -13,6 +17,37 @@ public:
 		: cmd(cmd)
 		, fn(fn)
 	{
+	}
+
+	bool executeIfMatching(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute)
+	{
+		if (matches(cmdToExecute))
+		{
+			auto result = executeImpl(ioStream, cmdToExecute,
+				FirstParameterIsIOStream<Fn>()
+			);
+
+			if (!result)
+			{
+				ioStream << "error: " << getSyntax();
+			}
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	const String<10>& getCmd() const
+	{
+		return cmd;
+	}
+
+private:
+	String<80> getSyntax() const
+	{
+		return getSyntaxImpl(FirstParameterIsIOStream<Fn>());
 	}
 
 	bool matches(const String<MaxCommandLength>& cmdToExecute)
@@ -30,13 +65,6 @@ public:
 		return //either
 			((cmd.size() == cmdToExecute.size()) || //the command matches, or:
 			(cmdToExecute[cmd.size()] == ' '));		//there are parameters after the command (space)
-	}
-
-	bool execute(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute)
-	{
-		return executeImpl(ioStream, cmdToExecute,
-			FirstParameterIsIOStream<Fn>()
-		);
 	}
 
 	//! called in case when the stored function does not want do do I/O
@@ -62,11 +90,6 @@ public:
 		return Executor<Adapter, traits::AmountOfArguments - 1>::executeImpl(Adapter{ioStream, fn}, cmdToExecute, *parameters);
 	}
 
-	String<80> getSyntax() const
-	{
-		return getSyntaxImpl(FirstParameterIsIOStream<Fn>());
-	}
-
 	//! called in case when the stored function does not want do do I/O
 	String<80> getSyntaxImpl(std::false_type) const
 	{
@@ -86,11 +109,6 @@ public:
 		Executor<Adapter, traits::AmountOfArguments - 1>::appendParams(syntax);
 
 		return syntax;
-	}
-
-	const String<10>& getCmd() const
-	{
-		return cmd;
 	}
 
 private:

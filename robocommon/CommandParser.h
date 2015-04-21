@@ -318,17 +318,8 @@ namespace detail
 		{
 			auto command = std::get<std::tuple_size<std::tuple<Commands...>>::value - Count>(commands);
 
-			if (command.matches(cmdToExecute))
-			{
-				bool success = command.execute(ioStream, cmdToExecute);
-				if (!success)
-				{
-					String<80> err{"error. syntax: "};
-					err.append(command.getSyntax());
-					errorHandler(err);
-				}
-			}
-			else
+			auto result = command.executeIfMatching(ioStream, cmdToExecute);
+			if (!result)
 			{
 				HandleCommandRecursive<Count - 1>::doHandleCommand(ioStream, errorHandler, cmdToExecute, commands);
 			}

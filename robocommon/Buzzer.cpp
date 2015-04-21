@@ -12,7 +12,10 @@
 #include "BUZ1.h"
 #include "Trigger.h"
 //#include "CLS1.h"
+extern "C"
+{
 #include "UTIL1.h"
+}
 
 typedef struct {
   uint16_t buzPeriodTicks; /*!< number of trigger ticks for a PWM period */
@@ -44,7 +47,6 @@ uint8_t BUZ_Beep(uint16_t freq, uint16_t durationMs) {
   }
 }
 
-#if PL_HAS_SHELL
 static uint8_t BUZ_PrintHelp(const CLS1_StdIOType *io) {
   CLS1_SendHelpStr((unsigned char*)"buzzer", (unsigned char*)"Group of buzzer commands\r\n", io->stdOut);
   CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Shows radio help or status\r\n", io->stdOut);
@@ -80,7 +82,6 @@ uint8_t BUZ_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_Std
   }
   return ERR_OK;
 }
-#endif
 
 void BUZ_Deinit(void) {
   /* nothing to do */

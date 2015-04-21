@@ -10,7 +10,10 @@
 #include <Motor.h>
 #include <MainControl.h>
 #include <AutoArgsCommand.h>
+#include <LegacyArgsCommand.h>
+
 #include "Event.h"
+#include "Buzzer.h"
 
 #include <BT1.h>
 
@@ -24,8 +27,8 @@ CommandParser& getCommandParser()
 		},
 		cmd("help", [&](IOStream& ioStream)
 		{
-			String<10> cmds[10] = {};
-			getCommandParser().getAvailableCommands(cmds, 10);
+			std::array<String<10>, 20>cmds{};
+			getCommandParser().getAvailableCommands(cmds.data(), cmds.size());
 			ioStream.write("available commands:\r\n");
 			for (const auto& cmd : cmds)
 			{
@@ -44,7 +47,8 @@ CommandParser& getCommandParser()
 		cmd("motdir", MOT_CmdDir),
 		cmd("motduty", MOT_CmdDuty),
 		cmd("start", MainControl::notifyStartMove),
-		cmd("setSpeed", MainControl::setSpeed)
+		cmd("setSpeed", MainControl::setSpeed),
+		legacyCmd(BUZ_ParseCommand)
 	);
 
 	return parser;
