@@ -93,8 +93,9 @@ public:
 	bool executeIfMatching(IOStream& ioStream, const String<MaxCommandLength>& cmdToExecute)
 	{
 		auto adapter = makeAdapter(
-			[](const unsigned char* /*name*/, const unsigned char* /*text*/)
+			[&](const unsigned char* name, const unsigned char* text)
 			{
+				ioStream << reinterpret_cast<const char*>(name) << "\t" << reinterpret_cast<const char*>(text);
 			},
 			[&](const unsigned char* text)
 			{
@@ -112,7 +113,16 @@ public:
 		}
 		else
 		{
-			return false;
+			if (matches(cmdToExecute))
+			{
+				ioStream << "could not execute command:\r\n";
+				fn(reinterpret_cast<const unsigned char*>(CLS1_CMD_HELP), &handled, &io);
+				return true;
+			}
+			else
+			{
+				return false;
+			}
 		}
 	}
 
@@ -138,6 +148,25 @@ public:
 		fn(reinterpret_cast<const unsigned char*>(CLS1_CMD_HELP), &handled, &io);
 
 		return cmd;
+	}
+
+private:
+	bool matches(const String<MaxCommandLength>& cmdToExecute)
+	{
+		auto cmd = getCmd();
+		if (cmd.size() > cmdToExecute.size())
+			return false;
+
+		for (auto i = size_t{0}; i < cmd.size(); ++i)
+		{
+			if (cmd[i] != cmdToExecute[i])
+			{
+				return false;
+			}
+		}
+		return //either
+			((cmd.size() == cmdToExecute.size()) || //the command matches, or:
+			(cmdToExecute[cmd.size()] == ' '));		//there are parameters after the command (space)
 	}
 
 private:
