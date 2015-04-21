@@ -76,7 +76,7 @@ TEST(HistoryController, when_going_up_and_down_twice_without_newline_then_the_be
 	ASSERT_THAT(historyController.down(1), Eq(10));
 }
 
-TEST(HistoryController, _)
+TEST(HistoryController, when_going_up_and_down_two_times_twice_without_newline_then_the_behaviour_is_correct)
 {
 	HistoryController<uint32_t, 4> historyController;
 
@@ -91,4 +91,37 @@ TEST(HistoryController, _)
 	ASSERT_THAT(historyController.up(1), Eq(1));
 	ASSERT_THAT(historyController.down(1), Eq(2));
 	ASSERT_THAT(historyController.down(1), Eq(10));
+}
+
+TEST(HistoryController, when_calling_a_command_from_history_then_the_history_will_be_preserved)
+{
+	HistoryController<uint32_t, 4> historyController;
+
+	historyController.newLine(1);
+	historyController.newLine(2);
+	ASSERT_THAT(historyController.up(0), Eq(2));
+	ASSERT_THAT(historyController.up(2), Eq(1));
+
+	historyController.newLine(1);
+	ASSERT_THAT(historyController.up(0), Eq(1));
+	ASSERT_THAT(historyController.up(1), Eq(2));
+	ASSERT_THAT(historyController.up(2), Eq(1));
+}
+
+TEST(HistoryController, when_calling_a_command_from_history_and_the_queue_overflows_then_the_history_will_be_preserved)
+{
+	HistoryController<uint32_t, 2> historyController;
+
+	historyController.newLine(1);
+	historyController.newLine(2);
+	ASSERT_THAT(historyController.up(0), Eq(2));
+	ASSERT_THAT(historyController.up(2), Eq(1));
+
+	historyController.newLine(1);
+	ASSERT_THAT(historyController.up(0), Eq(1));
+	ASSERT_THAT(historyController.up(1), Eq(2));
+
+	historyController.newLine(1);
+	ASSERT_THAT(historyController.up(0), Eq(1));
+	ASSERT_THAT(historyController.up(1), Eq(1));
 }
