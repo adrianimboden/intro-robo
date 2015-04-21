@@ -16,6 +16,8 @@
 #include "RTOS.h"
 #include "Reflectance.h"
 #include "Motor.h"
+#include "NVM_Config.h"
+#include "QuadCalib.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,10 +55,22 @@ void PL_Init(void){
 #if PL_HAS_MOTOR
   MOT_Init();
 #endif
+#if PL_HAS_CONFIG_NVM
+  NVMC_Init();
+#endif
+#if PL_HAS_QUAD_CALIBRATION
+  //
+#endif
 }
 
 
 void PL_Deinit(void){
+#if PL_HAS_QUAD_CALIBRATION
+  //
+#endif
+#if PL_HAS_CONFIG_NVM
+  NVMC_Deinit();
+#endif
 #if PL_HAS_MOTOR
   MOT_Deinit();
 #endif

@@ -14,6 +14,7 @@
 
 #include "Event.h"
 #include "Buzzer.h"
+#include "QuadCalib.h"
 
 #include <BT1.h>
 
@@ -48,7 +49,8 @@ CommandParser& getCommandParser()
 		cmd("motduty", MOT_CmdDuty),
 		cmd("start", MainControl::notifyStartMove),
 		cmd("setSpeed", MainControl::setSpeed),
-		legacyCmd(BUZ_ParseCommand)
+		legacyCmd(BUZ_ParseCommand),
+		legacyCmd(QUADCALIB_ParseCommand)
 	);
 
 	return parser;

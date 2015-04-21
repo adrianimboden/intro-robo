@@ -11,6 +11,7 @@
 
 #include "Platform_local.h"
 #include "CharBit.h"
+#include "stddef.h"
 
 #include "PE_Types.h" /* for common Processor Expert types used throughout the project, e.g. 'bool' */
 #include "PE_Error.h" /* global error constants */
@@ -68,6 +69,14 @@
 
 #define PL_HAS_MOTOR		(PL_L_HAS_MOTOR)
  /*!< Set to 1 for Motor enabled, 0 otherwise */
+
+#define PL_HAS_CONFIG_NVM	(PL_L_HAS_CONFIG_NVM)
+/*! Set to 1 for NVM enabled, 0 otherwise */
+
+#define PL_HAS_MCP4728		(PL_L_HAS_MCP4728)
+
+#define PL_HAS_QUAD_CALIBRATION	(PL_L_HAS_QUAD_CALIBRATION)
+/*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
 
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM

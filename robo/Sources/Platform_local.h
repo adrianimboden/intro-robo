@@ -57,6 +57,14 @@
 #define PL_L_HAS_MOTOR			(1)
  /*!< Set to 1 for Motor enabled, 0 otherwise */
 
+#define PL_L_HAS_CONFIG_NVM		(1)
+/*! Set to 1 for NVM enabled, 0 otherwise */
+
+#define PL_L_HAS_MCP4728		(1)
+
+#define PL_L_HAS_QUAD_CALIBRATION	(1)
+/*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

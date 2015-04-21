@@ -20,14 +20,15 @@
 #include "IR6.h"
 #include "UTIL1.h"
 #include "FRTOS1.h"
-//#include "Application.h"
 #include "Event.h"
-//#include "Shell.h"
 #include "RoboConsole.h"
-//#include "NVM_Config.h"
 #if PL_HAS_BUZZER
   #include "Buzzer.h"
 #endif
+#if PL_HAS_CONFIG_NVM
+  #include "NVM_Config.h"
+#endif
+
 #define REF_NOF_SENSORS 6 /* number of sensors */
 #define REF_SENSOR1_IS_LEFT   1 /* sensor number one is on the left side */
 constexpr uint8_t REF_MIN_LINE_VAL = 0x60;   /* minimum value indicating a line */
@@ -43,7 +44,7 @@ constexpr uint8_t REF_MIN_NOISE_VAL = 0x40;   /* values below this are not added
 #endif
 
 #if REF_START_STOP_CALIB
-  static xSemaphoreHandle REF_StartStopSem = NULL;
+  //static xSemaphoreHandle REF_StartStopSem = NULL;
 #endif
 
 
@@ -123,7 +124,7 @@ static const SensorFctType SensorFctArray[REF_NOF_SENSORS] = {
 #if REF_START_STOP_CALIB
 void REF_CalibrateStartStop(void) {
   if (refState==REF_STATE_NOT_CALIBRATED || refState==REF_STATE_CALIBRATING || refState==REF_STATE_READY) {
-    (void)xSemaphoreGive(REF_StartStopSem);
+    //(void)xSemaphoreGive(REF_StartStopSem);
   }
 }
 #endif
@@ -355,13 +356,20 @@ void REF_PrintStatus(IOStream& out)
 
 static void REF_StateMachine(void) {
   int i;
+  void *p;
 
   Console& console = getConsole();
 
   switch (refState) {
   	  case REF_STATE_INIT:
   		  console.getUnderlyingIoStream()->write("INFO: No calibration data present.\r\n");
-  		  refState = REF_STATE_NOT_CALIBRATED;
+  		  p = NVMC_GetReflectanceData();
+  		  if(p == NULL){
+  			refState = REF_STATE_NOT_CALIBRATED;
+  		  }
+  		  else {
+  			  SensorCalibMinMax = *(SensorCalibT*)p;
+  		  }
   		  break;
 
   	  case REF_STATE_NOT_CALIBRATED:
