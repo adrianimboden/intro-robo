@@ -216,12 +216,15 @@ private:
 	template <typename TIOStream>
 	void updateCurrentLine(TIOStream& ioStream, Line line)
 	{
-		for (auto i = size_t{0}; i < currentlyReceivingLine.size(); ++i)
+		if (currentlyReceivingLine != line)
 		{
-			echoBackspace(ioStream);
+			for (auto i = size_t{0}; i < currentlyReceivingLine.size(); ++i)
+			{
+				echoBackspace(ioStream);
+			}
+			echoConsole.write(ioStream, line);
+			currentlyReceivingLine = line;
 		}
-		echoConsole.write(ioStream, line);
-		currentlyReceivingLine = line;
 	}
 
 	template <typename TIOStream>
