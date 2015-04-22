@@ -34,8 +34,8 @@ public:
 	virtual void writeChar(char c) = 0;
 };
 
-template <typename TVal>
-IOStream& operator<<(IOStream& out, const TVal& val)
+template <typename TIOStream, typename TVal>
+typename std::enable_if<std::is_base_of<IOStream, TIOStream>::value || std::is_same<IOStream, TIOStream>::value, TIOStream&>::type operator<<(TIOStream& out, const TVal& val)
 {
 	out.write(val);
 	return out;
