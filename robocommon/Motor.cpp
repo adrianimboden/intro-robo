@@ -112,23 +112,23 @@ MOT_Direction MOT_GetDirection(MOT_MotorDevice *motor) {
 
 void MOT_CmdStatus(IOStream& ioStream)
 {
-	ioStream << "Motor\r\n";
-	ioStream << " Motor L: " << motorL.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorL)) << "\r\n";
-	ioStream << " Motor R: " << motorR.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorR)) << "\r\n";
+	ioStream << "Motor\n";
+	ioStream << " Motor L: " << motorL.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorL)) << "\n";
+	ioStream << " Motor R: " << motorR.currSpeedPercent << "%" << " 0x" << numberToHex(MOT_GetVal(&motorR)) << "\n";
 }
 
 void MOT_CmdDir(IOStream& out, const String<1>& motor, const String<8>& cmd)
 {
 	if (motor != 'L' && motor != 'R')
 	{
-		out << "usage: cmd L|R forward|backward\r\n";
+		out << "usage: cmd L|R forward|backward\n";
 		return;
 	}
 	MOT_MotorDevice& motorDev = (motor == 'L') ? motorL : motorR;
 
 	if (cmd != "forward" || cmd != "backward")
 	{
-		out << "usage: cmd L|R forward|backward\r\n";
+		out << "usage: cmd L|R forward|backward\n";
 	}
 	enum class Dir{Forward, Backward};
 	Dir dir = (cmd == "forward" ? Dir::Forward : Dir::Backward);
@@ -147,14 +147,14 @@ void MOT_CmdDuty(IOStream& out, const String<1>& motor, int8_t duty)
 {
 	if (motor != 'L' && motor != 'R')
 	{
-		out << "usage: cmd L|R 0-100\r\n";
+		out << "usage: cmd L|R 0-100\n";
 		return;
 	}
 	MOT_MotorDevice& motorDev = motor == 'L' ? motorL : motorR;
 
 	if (duty > 100)
 	{
-		out << "usage: cmd L|R 0-100\r\n";
+		out << "usage: cmd L|R 0-100\n";
 		return;
 	}
 

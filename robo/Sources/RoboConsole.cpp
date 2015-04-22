@@ -11,6 +11,7 @@
 #include <MainControl.h>
 #include <AutoArgsCommand.h>
 #include <LegacyArgsCommand.h>
+#include <LineEndingNormalizerIOStream.h>
 
 #include "Event.h"
 #include "Buzzer.h"
@@ -25,13 +26,13 @@ CommandParser& getCommandParser()
 		{
 			std::array<String<10>, 20>cmds{};
 			getCommandParser().getAvailableCommands(cmds.data(), cmds.size());
-			ioStream.write("available commands:\r\n");
+			ioStream.write("available commands:\n");
 			for (const auto& cmd : cmds)
 			{
 				if (cmd.size() > 0)
 				{
 					ioStream.write(cmd);
-					ioStream.write("\r\n");
+					ioStream.write("\n");
 				}
 			}
 		}),
@@ -54,9 +55,11 @@ CommandParser& getCommandParser()
 Console& getConsole()
 {
 	static auto console = makeConsole(
-		CdcStaticIOStream<
-			Serial2_RecvChar,
-			Serial2_SendChar
+		LineEndingNormalizerIOStream<
+			CdcStaticIOStream<
+				Serial2_RecvChar,
+				Serial2_SendChar
+			>
 		>{},
 		makeLineInputStrategy<
 			20 /*max cmdline size*/

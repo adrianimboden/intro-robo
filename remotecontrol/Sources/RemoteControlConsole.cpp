@@ -7,6 +7,7 @@
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
 #include <AutoArgsCommand.h>
+#include <LineEndingNormalizerIOStream.h>
 
 extern "C" {
 #include <CDC1.h>
@@ -19,30 +20,30 @@ CommandParser& getCommandParser()
 		{
 			String<10> cmds[10] = {};
 			getCommandParser().getAvailableCommands(cmds, 10);
-			ioStream.write("available commands:\r\n");
+			ioStream.write("available commands:\n");
 			for (const auto& cmd : cmds)
 			{
 				if (cmd.size() > 0)
 				{
 					ioStream.write(cmd);
-					ioStream.write("\r\n");
+					ioStream.write("\n");
 				}
 			}
 		}),
 		cmd("echo", [&](IOStream& ioStream, const String<80>& param)
 		{
 			ioStream.write(param);
-			ioStream.write("\r\n");
+			ioStream.write("\n");
 		}),
 		cmd("add", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
 		{
 			ioStream.write(lhs + rhs);
-			ioStream.write("\r\n");
+			ioStream.write("\n");
 		}),
 		cmd("mult", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
 		{
 			ioStream.write(lhs * rhs);
-			ioStream.write("\r\n");
+			ioStream.write("\n");
 		}),
 		cmd("showstat", showStat)
 	);
@@ -53,9 +54,11 @@ CommandParser& getCommandParser()
 Console& getConsole()
 {
 	static auto console = makeConsole(
-		CdcStaticIOStream<
-			CDC1_RecvChar,
-			CDC1_SendChar
+			LineEndingNormalizerIOStream<
+			CdcStaticIOStream<
+				CDC1_RecvChar,
+				CDC1_SendChar
+			>
 		>{},
 		makeLineInputStrategy<
 			20 /*max cmdline size*/

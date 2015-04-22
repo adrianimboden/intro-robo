@@ -269,8 +269,8 @@ static void REF_Measure(void) {
 }
 
 //static uint8_t PrintHelp(const CLS1_StdIOType *io) {
-//  CLS1_SendHelpStr((unsigned char*)"ref", (unsigned char*)"Group of Reflectance commands\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\r\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"ref", (unsigned char*)"Group of Reflectance commands\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\n", io->stdOut);
 //  return ERR_OK;
 //}
 //
@@ -292,13 +292,13 @@ static const char* REF_GetStateString(void) {
 template <typename TName, typename TStr>
 void writeStatus(IOStream& out, const TName& name, const TStr& val)
 {
-	out << "  " << name << " " << val << "\r\n";
+	out << "  " << name << " " << val << "\n";
 }
 
 template <typename TName, typename TValue>
 void writeHexStatus(IOStream& out, const TName& name, TValue val)
 {
-	out << "  " << name << " 0x" << numberToHex(val) << "\r\n";
+	out << "  " << name << " 0x" << numberToHex(val) << "\n";
 }
 
 template <typename TName, typename TValues>
@@ -309,7 +309,7 @@ void writeHexValuesLine(IOStream& out, const TName& name, const TValues& values)
 	{
 		out << " 0x" << numberToHex(value);
 	}
-	out << "\r\n";
+	out << "\n";
 }
 
 template <size_t Size, typename T>
@@ -328,7 +328,7 @@ void REF_PrintStatus(IOStream& out)
 //  unsigned char buf[24];
 //  int i;
 
-	out << "reflectance\r\n";
+	out << "reflectance\n";
 	writeStatus(out,		"state           ", REF_GetStateString());
 	writeHexStatus(out,		"min noise       ", REF_MIN_NOISE_VAL);
 	writeHexStatus(out,		"REF_MIN_LINE_VAL", REF_MIN_LINE_VAL);
@@ -362,7 +362,7 @@ static void REF_StateMachine(void) {
 
   switch (refState) {
   	  case REF_STATE_INIT:
-  		  console.getUnderlyingIoStream()->write("INFO: No calibration data present.\r\n");
+  		  console.getUnderlyingIoStream()->write("INFO: No calibration data present.\n");
   		  p = NVMC_GetReflectanceData();
   		  if(p == NULL){
   			refState = REF_STATE_NOT_CALIBRATED;
@@ -381,7 +381,7 @@ static void REF_StateMachine(void) {
   		  break;
 
   	  case REF_STATE_START_CALIBRATION:
-  		  console.getUnderlyingIoStream()->write("start calibration...\r\n");
+  		  console.getUnderlyingIoStream()->write("start calibration...\n");
   		  for(i=0;i<REF_NOF_SENSORS;i++) {
   			  SensorCalibMinMax.minVal[i] = MAX_SENSOR_VALUE;
   			  SensorCalibMinMax.maxVal[i] = 0;
@@ -401,7 +401,7 @@ static void REF_StateMachine(void) {
   		  break;
 
   	  case REF_STATE_STOP_CALIBRATION:
-  		  console.getUnderlyingIoStream()->write("...stopping calibration.\r\n");
+  		  console.getUnderlyingIoStream()->write("...stopping calibration.\n");
   		  NVMC_SaveReflectanceData((void *)&SensorCalibMinMax,sizeof(SensorCalibT));
   		  refState = REF_STATE_READY;
   		  break;

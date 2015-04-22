@@ -29,7 +29,7 @@
 #define MCP4728_GC_READ             0x0C /* general call read address bits command */
 
 #if !PL_IS_INTRO_ZUMO_K22_V2
-  #define MCP4728_I2C_ADDRESS 0x60 /* default address of device (4728UN) */
+  #define MCP4728_I2C_ADDRESS 0x61 /* default address of device (4728UN) */
 #else
   #define MCP4728_I2C_ADDRESS 0x61 /* default address of device (4728A1) */
 #endif
@@ -214,17 +214,17 @@ void MCP4728_Init(void) {
 //  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)" 0x");
 //  UTIL1_strcatNum8Hex(buf, sizeof(buf), data[2]);
 //  CLS1_SendStatusStr(info, buf, io->stdOut);
-//  CLS1_SendStr((unsigned char*)"\r\n", io->stdOut);
+//  CLS1_SendStr((unsigned char*)"\n", io->stdOut);
 //}
 
 //static uint8_t PrintStatus(const CLS1_StdIOType *io) {
 //  uint8_t data[2*3*4];
 //  uint8_t buf[16];
 //
-//  CLS1_SendStatusStr((unsigned char*)"MCP4728", (unsigned char*)"\r\n", io->stdOut);
+//  CLS1_SendStatusStr((unsigned char*)"MCP4728", (unsigned char*)"\n", io->stdOut);
 //  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)"0x");
 //  UTIL1_strcatNum8Hex(buf, sizeof(buf), MCP4728_I2C_ADDRESS);
-//  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
+//  UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\n");
 //  CLS1_SendStatusStr((unsigned char*)"  I2C addr", buf, io->stdOut);
 //
 //  if (MCP4728_Read(data, sizeof(data))==ERR_OK) {
@@ -237,26 +237,26 @@ void MCP4728_Init(void) {
 //    DecodeChannelDACInputRegister((unsigned char*)"  D DAC Reg", &data[18], io);
 //    DecodeChannelDACInputRegister((unsigned char*)"  D EEPROM",  &data[21], io);
 //  } else {
-//    CLS1_SendStatusStr((unsigned char*)"  device", (unsigned char*)"ERROR!\r\n", io->stdOut);
+//    CLS1_SendStatusStr((unsigned char*)"  device", (unsigned char*)"ERROR!\n", io->stdOut);
 //  }
 //#if PL_HAS_MCP4728_RDY
-//  CLS1_SendStatusStr((unsigned char*)"  RDY Pin", MCP4728_RDY_GetVal()!=0?(unsigned char*)"input: HIGH, ready\r\n":(unsigned char*)"input: LOW, busy\r\n", io->stdOut);
+//  CLS1_SendStatusStr((unsigned char*)"  RDY Pin", MCP4728_RDY_GetVal()!=0?(unsigned char*)"input: HIGH, ready\n":(unsigned char*)"input: LOW, busy\n", io->stdOut);
 //#endif
 //#if PL_HAS_MCP4728_LDAC
-//  CLS1_SendStatusStr((unsigned char*)"  LDAC Pin", MCP4728_LDAC_GetVal()!=0?(unsigned char*)"output: HIGH, output with UDAC bit\r\n":(unsigned char*)"output: LOW, immediate\r\n", io->stdOut);
+//  CLS1_SendStatusStr((unsigned char*)"  LDAC Pin", MCP4728_LDAC_GetVal()!=0?(unsigned char*)"output: HIGH, output with UDAC bit\n":(unsigned char*)"output: LOW, immediate\n", io->stdOut);
 //#endif
 //  return ERR_OK;
 //}
 
 //static uint8_t PrintHelp(const CLS1_StdIOType *io) {
-//  CLS1_SendHelpStr((unsigned char*)"MCP4728", (unsigned char*)"Group of MCP4728 commands\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  reset", (unsigned char*)"General Call Reset\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  wakeup", (unsigned char*)"General Call Wake-Up\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  update", (unsigned char*)"General Call software update\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  fastwrite all 0x...", (unsigned char*)"Fast write all channel DAC values with four 12bit hex values (EEPROM not affected)\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  fastwrite <ch> 0x...", (unsigned char*)"Fast write single channel (0..3) DAC value with a 12bit hex value (EEPROM not affected)\r\n", io->stdOut);
-//  CLS1_SendHelpStr((unsigned char*)"  write <ch> <val>", (unsigned char*)"Single write EEPROM and DAC value channel (hex 12bit) for channel 0-3\r\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"MCP4728", (unsigned char*)"Group of MCP4728 commands\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  reset", (unsigned char*)"General Call Reset\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  wakeup", (unsigned char*)"General Call Wake-Up\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  update", (unsigned char*)"General Call software update\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  fastwrite all 0x...", (unsigned char*)"Fast write all channel DAC values with four 12bit hex values (EEPROM not affected)\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  fastwrite <ch> 0x...", (unsigned char*)"Fast write single channel (0..3) DAC value with a 12bit hex value (EEPROM not affected)\n", io->stdOut);
+//  CLS1_SendHelpStr((unsigned char*)"  write <ch> <val>", (unsigned char*)"Single write EEPROM and DAC value channel (hex 12bit) for channel 0-3\n", io->stdOut);
 //  return ERR_OK;
 //}
 
@@ -308,11 +308,11 @@ void MCP4728_Init(void) {
 //      dac[i] &= MCP4728_MAX_DAC_VAL; /* ensure it is 12 bits */
 //    }
 //    if (i!=4) {
-//      CLS1_SendStr((unsigned char*)"**** Not enough values, 4 expected!\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** Not enough values, 4 expected!\n", io->stdErr);
 //      return ERR_FAILED;
 //    }
 //    if (MCP4728_FastWriteAllDAC(dac, sizeof(dac), pd, sizeof(pd))!=ERR_OK) {
-//      CLS1_SendStr((unsigned char*)"**** FastWrite failed.\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** FastWrite failed.\n", io->stdErr);
 //      return ERR_FAILED;
 //    } else {
 //      return ERR_OK;
@@ -325,16 +325,16 @@ void MCP4728_Init(void) {
 //    *handled = TRUE;
 //    p = cmd+sizeof("MCP4728 fastwrite ")-1;
 //    if (UTIL1_ScanDecimal8uNumber(&p, &channel)!=ERR_OK || channel>3) {
-//      CLS1_SendStr((unsigned char*)"**** error parsing channel, must be 0, 1, 2 or 3!\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** error parsing channel, must be 0, 1, 2 or 3!\n", io->stdErr);
 //      return ERR_FAILED;
 //    }
 //    if (UTIL1_ScanHex16uNumber(&p, &dac)!=ERR_OK || dac>MCP4728_MAX_DAC_VAL) {
-//      CLS1_SendStr((unsigned char*)"**** error parsing 12bit hex value, must start with 0x!\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** error parsing 12bit hex value, must start with 0x!\n", io->stdErr);
 //      return ERR_FAILED;
 //    }
 //    dac &= MCP4728_MAX_DAC_VAL; /* ensure it is 12 bits */
 //    if (MCP4728_FastWriteDAC(channel, dac)!=ERR_OK) {
-//      CLS1_SendStr((unsigned char*)"**** Write channel DAC failed!\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** Write channel DAC failed!\n", io->stdErr);
 //      return ERR_FAILED;
 //    } else {
 //      return ERR_OK;
@@ -347,15 +347,15 @@ void MCP4728_Init(void) {
 //    res = ERR_OK;
 //    p = cmd+sizeof("MCP4728 write ")-1;
 //    if (UTIL1_ScanDecimal8uNumber(&p, &ch)!=ERR_OK || ch>3) {
-//      CLS1_SendStr((unsigned char*)"**** Failed reading channel. Must be 0, 1, 2 or 3\r\n", io->stdErr);
+//      CLS1_SendStr((unsigned char*)"**** Failed reading channel. Must be 0, 1, 2 or 3\n", io->stdErr);
 //      res = ERR_FAILED;
 //    } else {
 //      if (UTIL1_ScanHex16uNumber(&p, &dac)!=ERR_OK) {
-//        CLS1_SendStr((unsigned char*)"**** Failed DAC value, must start with 0x\r\n", io->stdErr);
+//        CLS1_SendStr((unsigned char*)"**** Failed DAC value, must start with 0x\n", io->stdErr);
 //        res = ERR_FAILED;
 //      } else {
 //        if (MCP4728_WriteDACandEE(ch, dac)!=ERR_OK) {
-//          CLS1_SendStr((unsigned char*)"**** Write failed.\r\n", io->stdErr);
+//          CLS1_SendStr((unsigned char*)"**** Write failed.\n", io->stdErr);
 //          res = ERR_FAILED;
 //        }
 //      }

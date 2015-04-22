@@ -50,13 +50,13 @@ void showStat(IOStream& ioStream)
 	writeColumn(ioStream, "Task", maxTaskNameLength);
 	writeColumn(ioStream, "State", 8);
 	writeColumn(ioStream, "%", 3);
-	ioStream.write("\r\n");
+	ioStream.write("\n");
 
 	for (auto i = 0u; i < size; ++i)
 	{
 		writeColumn(ioStream, statusArr[i].pcTaskName, maxTaskNameLength);
 		writeColumn(ioStream, stateToString(statusArr[i].eCurrentState), 8);
 		writeColumn(ioStream, statusArr[i].ulRunTimeCounter / (totalRunTime/100), 3);
-		ioStream.write("\r\n");
+		ioStream.write("\n");
 	}
 }

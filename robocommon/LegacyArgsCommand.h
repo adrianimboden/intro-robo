@@ -115,7 +115,7 @@ public:
 		{
 			if (matches(cmdToExecute))
 			{
-				ioStream << "could not execute command:\r\n";
+				ioStream << "could not execute command:\n";
 				fn(reinterpret_cast<const unsigned char*>(CLS1_CMD_HELP), &handled, &io);
 				return true;
 			}

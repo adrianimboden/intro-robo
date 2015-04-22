@@ -97,7 +97,7 @@ private:
 	{
 		if (isNewLine(c))
 		{
-			echoConsole.write(ioStream, "\r\n");
+			echoConsole.write(ioStream, "\n");
 			if (currentlyReceivingLine.size() > 0)
 			{
 				lineSink.lineCompleted(ioStream, currentlyReceivingLine);

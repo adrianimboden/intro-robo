@@ -122,7 +122,7 @@ static uint8_t Tune(const CLS1_StdIOType *io, uint8_t channel, MOT_MotorDevice *
   uint8_t res;
  
   MOT_SetSpeedPercent(motorHandle, TUNE_MOTOR_PERCENT);
-  CLS1_SendStr((uint8_t*)"Tuning channel...\r\n", io->stdOut);
+  CLS1_SendStr((uint8_t*)"Tuning channel...\n", io->stdOut);
   res = ERR_FAILED;
   for(i=0,dac=0;dac<=MCP4728_MAX_DAC_VAL;i++) {
     UTIL1_strcpy(buf, sizeof(buf), (uint8_t*)"Channel: ");
@@ -132,7 +132,7 @@ static uint8_t Tune(const CLS1_StdIOType *io, uint8_t channel, MOT_MotorDevice *
     UTIL1_chcat(buf, sizeof(buf), ' ');
     CLS1_SendStr(buf, io->stdOut);
     if (MCP4728_FastWriteDAC(channel, dac)!=ERR_OK) { /* writes single channel DAC value, not updating EEPROM */
-      CLS1_SendStr((uint8_t*)"ERROR writing DAC channel!\r\n", io->stdErr);
+      CLS1_SendStr((uint8_t*)"ERROR writing DAC channel!\n", io->stdErr);
       res = ERR_FAILED;
       break;
     }
@@ -142,31 +142,31 @@ static uint8_t Tune(const CLS1_StdIOType *io, uint8_t channel, MOT_MotorDevice *
       UTIL1_strcatNum8u(buf, sizeof(buf), timing.highPercent);
       UTIL1_strcat(buf, sizeof(buf), (uint8_t*)"% high, low ");
       UTIL1_strcatNum8u(buf, sizeof(buf), timing.lowPercent);
-      UTIL1_strcat(buf, sizeof(buf), (uint8_t*)"%\r\n");
+      UTIL1_strcat(buf, sizeof(buf), (uint8_t*)"%\n");
       CLS1_SendStr(buf, io->stdOut);
       if (timing.highPercent==50 || timing.lowPercent==50) {
-        CLS1_SendStr((uint8_t*)"Set!\r\n", io->stdErr);
-        CLS1_SendStr((uint8_t*)"Writing to EEPROM...\r\n", io->stdOut);
+        CLS1_SendStr((uint8_t*)"Set!\n", io->stdErr);
+        CLS1_SendStr((uint8_t*)"Writing to EEPROM...\n", io->stdOut);
         if (MCP4728_WriteDACandEE(channel, dac)!=ERR_OK) {
-          CLS1_SendStr((uint8_t*)"ERROR writing DAC/EEPROM\r\n", io->stdErr);
+          CLS1_SendStr((uint8_t*)"ERROR writing DAC/EEPROM\n", io->stdErr);
           res = ERR_FAILED;
           break;
         }
-        CLS1_SendStr((uint8_t*)"...done!\r\n", io->stdOut);
+        CLS1_SendStr((uint8_t*)"...done!\n", io->stdOut);
         res = ERR_OK;
         break; /* go to next channel */
       }
       dac += 0x1; /* smaller increase */
     } else {
-      CLS1_SendStr((uint8_t*)"No signal\r\n", io->stdErr);
+      CLS1_SendStr((uint8_t*)"No signal\n", io->stdErr);
       dac += 0x10; /* larger increase */
     }
   } /* for finding DAC value */
   MOT_SetSpeedPercent(motorHandle, 0); /* turn off again */
   if (res!=ERR_OK) {
-    CLS1_SendStr((uint8_t*)"ERROR!\r\n", io->stdErr);
+    CLS1_SendStr((uint8_t*)"ERROR!\n", io->stdErr);
   }
-  CLS1_SendStr((uint8_t*)"Tuning finished!\r\n", io->stdOut);
+  CLS1_SendStr((uint8_t*)"Tuning finished!\n", io->stdOut);
   return res;
 }
 
@@ -175,7 +175,7 @@ static uint8_t PrintStatus(const CLS1_StdIOType *io) {
   QuadTime_t timing;
   int i;
   
-  //CLS1_SendStatusStr((unsigned char*)"quadcalib", (unsigned char*)"\r\n", io->stdOut);
+  //CLS1_SendStatusStr((unsigned char*)"quadcalib", (unsigned char*)"\n", io->stdOut);
   for(i=0; i<NOF_SIGNALS; i++) {
     if (Measure(i, &timing)==ERR_OK) {
       buf[0] = '\0';
@@ -187,9 +187,9 @@ static uint8_t PrintStatus(const CLS1_StdIOType *io) {
       UTIL1_strcatNum32u(buf, sizeof(buf), timing.highTicks);
       UTIL1_strcat(buf, sizeof(buf), (uint8_t*)" ticks, low: ");
       UTIL1_strcatNum32u(buf, sizeof(buf), timing.lowTicks);
-      UTIL1_strcat(buf, sizeof(buf), (uint8_t*)" ticks\r\n");
+      UTIL1_strcat(buf, sizeof(buf), (uint8_t*)" ticks\n");
     } else {
-      UTIL1_strcpy(buf, sizeof(buf), (uint8_t*)"TIMEOUT\r\n");
+      UTIL1_strcpy(buf, sizeof(buf), (uint8_t*)"TIMEOUT\n");
     }
     if (i==0) {
       UTIL1_strcpy(buf2, sizeof(buf2), (uint8_t*)"  Right A,C0");
@@ -206,9 +206,9 @@ static uint8_t PrintStatus(const CLS1_StdIOType *io) {
 }
 
 static uint8_t PrintHelp(const CLS1_StdIOType *io) {
-  CLS1_SendHelpStr((unsigned char*)"quadcalib", (unsigned char*)"Group of application commands\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  tune <ch>", (unsigned char*)"Tune channel (0..3)\r\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"quadcalib", (unsigned char*)"Group of application commands\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Print help or status information\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"  tune <ch>", (unsigned char*)"Tune channel (0..3)\n", io->stdOut);
   return ERR_OK;
 }
 

@@ -42,9 +42,9 @@ void TASK_events(void*)
 		handleOneEvent(eventQueue,
 			systemReady,
 			doLedHeartbeat,
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\r\n"); MainControl::notifyStartMove(); },
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\r\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\r\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); MainControl::notifyStartMove(); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
 			[]{eventQueue.setEvent(Event::RefStartStopCalibration);}
 		);
 	}

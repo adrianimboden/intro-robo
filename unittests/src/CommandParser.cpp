@@ -166,12 +166,12 @@ TEST(CommandParser, error_parameters_dont_match)
 		ASSERT_THAT(err.str(), Eq(expectedError)) << err.str();
 	};
 
-	checkError("cmd1", "error. syntax: cmd1 num\r\n");
-	checkError("cmd3", "error. syntax: cmd3 str\r\n");
-	checkError("cmd4", "error. syntax: cmd4 str num\r\n");
+	checkError("cmd1", "error. syntax: cmd1 num\n");
+	checkError("cmd3", "error. syntax: cmd3 str\n");
+	checkError("cmd4", "error. syntax: cmd4 str num\n");
 
-	checkError("cmd1 text", "error. syntax: cmd1 num\r\n");
-	checkError("cmd4 45 text", "error. syntax: cmd4 str num\r\n");
+	checkError("cmd1 text", "error. syntax: cmd1 num\n");
+	checkError("cmd4 45 text", "error. syntax: cmd4 str num\n");
 }
 
 TEST(CommandParser, get_available_commands)

@@ -48,9 +48,9 @@ uint8_t BUZ_Beep(uint16_t freq, uint16_t durationMs) {
 }
 
 static uint8_t BUZ_PrintHelp(const CLS1_StdIOType *io) {
-  CLS1_SendHelpStr((unsigned char*)"buzzer", (unsigned char*)"Group of buzzer commands\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Shows radio help or status\r\n", io->stdOut);
-  CLS1_SendHelpStr((unsigned char*)"  buz <freq> <time>", (unsigned char*)"Beep for time (ms) and frequency (kHz)\r\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"buzzer", (unsigned char*)"Group of buzzer commands\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"  help|status", (unsigned char*)"Shows radio help or status\n", io->stdOut);
+  CLS1_SendHelpStr((unsigned char*)"  buz <freq> <time>", (unsigned char*)"Beep for time (ms) and frequency (kHz)\n", io->stdOut);
   return ERR_OK;
 }
 
@@ -74,7 +74,7 @@ uint8_t BUZ_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_Std
     p = cmd+sizeof("buzzer buz ")-1;
     if (UTIL1_ScanDecimal16uNumber(&p, &freq)==ERR_OK && UTIL1_ScanDecimal16uNumber(&p, &duration)==ERR_OK) {
       if (BUZ_Beep(freq, duration)!=ERR_OK) {
-        CLS1_SendStr((unsigned char*)"Starting buzzer failed\r\n", io->stdErr);
+        CLS1_SendStr((unsigned char*)"Starting buzzer failed\n", io->stdErr);
         return ERR_FAILED;
       }
       return ERR_OK;
