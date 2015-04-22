@@ -125,3 +125,25 @@ TEST(HistoryController, when_calling_a_command_from_history_and_the_queue_overfl
 	ASSERT_THAT(historyController.up(0), Eq(1));
 	ASSERT_THAT(historyController.up(1), Eq(1));
 }
+
+TEST(HistoryController, when_doing_enter_up_repeatedly_then_the_history_will_not_be_lost)
+{
+	HistoryController<uint32_t, 5> historyController;
+
+	for (auto i = 0; i < 10; ++i)
+	{
+		historyController.newLine(1);
+	}
+	historyController.newLine(2);
+
+	for (auto i = 0; i < 10; ++i)
+	{
+		historyController.up(1);
+	}
+	ASSERT_THAT(historyController.up(1), Eq(1));
+	for (auto i = 0; i < 10; ++i)
+	{
+		historyController.down(0);
+	}
+	ASSERT_THAT(historyController.up(0), Eq(2));
+}
