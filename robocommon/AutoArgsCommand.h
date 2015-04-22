@@ -29,7 +29,7 @@ public:
 
 			if (!result)
 			{
-				ioStream << "error. syntax: " << getSyntax();
+				ioStream << "error. syntax: " << getSyntax() << "\r\n";
 			}
 			return true;
 		}
