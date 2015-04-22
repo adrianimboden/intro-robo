@@ -91,7 +91,57 @@ public:
 	size_type size() const
 	{
 		auto lock = lockingStrategy.lock();
+		(void)lock;
 		return currSize;
+	}
+
+	template <typename TRet>
+	class Iterator
+	{
+	public:
+		explicit Iterator(const CircularBuffer* pBuffer, size_t currIndex = 0)
+			: pBuffer(pBuffer)
+			, currIndex(currIndex)
+		{
+		}
+
+		TRet& operator*() const
+		{
+			auto lock = pBuffer->lockingStrategy.lock();
+			(void)lock;
+			ASSERT(currIndex < pBuffer->size());
+			return pBuffer->data[(pBuffer->popPos + currIndex) % MaxSize];
+		}
+
+		Iterator& operator++()
+		{
+			++currIndex;
+			return *this;
+		}
+
+		bool operator==(Iterator other)
+		{
+			return pBuffer == other.pBuffer && currIndex == other.currIndex;
+		}
+
+		bool operator!=(Iterator other)
+		{
+			return !(*this == other);
+		}
+
+	private:
+		const CircularBuffer* pBuffer;
+		size_t currIndex;
+	};
+
+	Iterator<const T> begin() const
+	{
+		return Iterator<const T>{this, 0};
+	}
+
+	Iterator<const T> end() const
+	{
+		return Iterator<const T>{this, size()};
 	}
 
 private:
@@ -118,8 +168,15 @@ private:
 
 	void decrementAndWrapAround(size_type& pos)
 	{
-		pos -= 1;
-		pos %= MaxSize;
+		if (pos > 0)
+		{
+			pos -= 1;
+			pos %= MaxSize;
+		}
+		else
+		{
+			pos = MaxSize - 1;
+		}
 	}
 
 private:

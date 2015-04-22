@@ -88,3 +88,53 @@ TEST(CircularBuffer, pop_back_after_overflow)
 	ASSERT_THAT(*circularBuffer.pop_back(), Eq(2));
 	ASSERT_THAT(circularBuffer.pop_back().is_initialized(), Eq(false));
 }
+
+TEST(CircularBuffer, pop_back_after_maxing_out)
+{
+	CircularBuffer<size_t, 5, CircularBufferFullStrategy::OverwriteOldest> circularBuffer;
+
+	for (auto i = 0; i < 5; ++i)
+	{
+		circularBuffer.push_back(i);
+	}
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(4));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(3));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(2));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(1));
+	ASSERT_THAT(*circularBuffer.pop_back(), Eq(0));
+	ASSERT_THAT(circularBuffer.pop_back().is_initialized(), Eq(false));
+}
+
+TEST(CircularBuffer, circular_buffer_is_iterable)
+{
+	CircularBuffer<size_t, 5, CircularBufferFullStrategy::OverwriteOldest> circularBuffer;
+
+	circularBuffer.push_back(1);
+	circularBuffer.push_back(2);
+	circularBuffer.push_back(3);
+
+	auto it = circularBuffer.begin();
+	ASSERT_THAT(*it, Eq(1));
+	++it;
+
+	ASSERT_THAT(*it, Eq(2));
+	++it;
+
+	ASSERT_THAT(*it, Eq(3));
+}
+
+TEST(CircularBuffer, circular_buffer_is_iterable_using_foreach)
+{
+	CircularBuffer<size_t, 5, CircularBufferFullStrategy::OverwriteOldest> circularBuffer;
+
+	circularBuffer.push_back(1);
+	circularBuffer.push_back(2);
+	circularBuffer.push_back(3);
+
+	size_t i = 0;
+	for (auto&& elem : circularBuffer)
+	{
+		++i;
+		ASSERT_THAT(elem, Eq(i));
+	}
+}
