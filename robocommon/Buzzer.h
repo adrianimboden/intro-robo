@@ -40,6 +40,8 @@ extern "C" {
  */
 uint8_t BUZ_Beep(uint16_t freqHz, uint16_t durationMs);
 
+void BUZ_BlockingBeep(uint16_t freqHz, uint16_t durationMs);
+
 /*!
  * \brief Initialization of the driver
  */

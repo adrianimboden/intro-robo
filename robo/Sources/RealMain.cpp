@@ -99,6 +99,27 @@ void systemReady(void){
     WAIT1_Waitms(10);
     LED1_Off();
 #if PL_HAS_BUZZER
-    BUZ_Beep(300, 500);
+    constexpr auto baseFreq = 33;
+    constexpr auto baseTime = 60;
+
+	auto f1 = []{ BUZ_BlockingBeep(baseFreq * 6, baseTime * 1); };
+	auto e1 = []{ BUZ_BlockingBeep(baseFreq * 5, baseTime * 1); };
+	auto d1 = []{ BUZ_BlockingBeep(baseFreq * 4, baseTime * 1); };
+	auto c1 = []{ BUZ_BlockingBeep(baseFreq * 3, baseTime * 1); };
+	auto b1 = []{ BUZ_BlockingBeep(baseFreq * 2, baseTime * 1); };
+	auto a1 = []{ BUZ_BlockingBeep(baseFreq * 1, baseTime * 1); };
+
+	auto e2 = []{ BUZ_BlockingBeep(baseFreq * 5, baseTime * 2); };
+	auto c2 = []{ BUZ_BlockingBeep(baseFreq * 3, baseTime * 2); };
+
+	auto e4 = []{ BUZ_BlockingBeep(baseFreq * 5, baseTime * 4); };
+	auto a4 = []{ BUZ_BlockingBeep(baseFreq * 1, baseTime * 4); };
+
+	for (auto&& fn : std::initializer_list<void(*)()>{a1, b1, c1, d1, e2, e2, f1, f1, f1, f1, e4, f1, f1, f1, f1, e4, d1, d1, d1, d1, c2, c2, e1, e1, e1, e1, a4})
+	{
+		fn();
+		FRTOS1_vTaskDelay(30/portTICK_RATE_MS);
+	}
+
 #endif
 }

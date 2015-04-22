@@ -11,6 +11,7 @@
 #include "Buzzer.h"
 #include "BUZ1.h"
 #include "Trigger.h"
+#include "FreeRTOS.h"
 //#include "CLS1.h"
 extern "C"
 {
@@ -45,6 +46,15 @@ uint8_t BUZ_Beep(uint16_t freq, uint16_t durationMs) {
   } else {
     return ERR_BUSY;
   }
+}
+
+void BUZ_BlockingBeep(uint16_t freqHz, uint16_t durationMs)
+{
+	BUZ_Beep(freqHz, durationMs);
+	while (trgInfo.buzIterationCntr > 0)
+	{
+		taskYIELD();
+	}
 }
 
 static uint8_t BUZ_PrintHelp(const CLS1_StdIOType *io) {
