@@ -71,6 +71,12 @@
 #define PL_L_HAS_MOTOR_TACHO		(1)
 /*! Set to 1 for Tacho enabled, 0 otherwise */
 
+#define PL_L_HAS_DRIVE				(1)
+/*! Set to 1 for Drive enabled, 0 otherwise */
+
+#define PL_L_HAS_PID				(1)
+/*! Set to 1 for PID enabled, 0 otherwise */
+
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 
 #ifdef __cplusplus

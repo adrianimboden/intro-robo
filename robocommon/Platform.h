@@ -84,6 +84,12 @@
 #define PL_HAS_MOTOR_TACHO		(PL_L_HAS_MOTOR_TACHO)
 /*! Set to 1 for Tacho enabled, 0 otherwise */
 
+#define PL_HAS_DRIVE				(PL_L_HAS_DRIVE)
+/*! Set to 1 for Drive enabled, 0 otherwise */
+
+#define PL_HAS_PID				(PL_L_HAS_PID)
+/*! Set to 1 for PID enabled, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

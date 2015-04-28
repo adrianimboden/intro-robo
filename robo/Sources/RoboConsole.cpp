@@ -17,6 +17,8 @@
 #include "Buzzer.h"
 #include "QuadCalib.h"
 #include "Tacho.h"
+#include "Drive.h"
+#include "Pid.h"
 
 #include <BT1.h>
 
@@ -48,6 +50,8 @@ CommandParser& getCommandParser()
 		cmd("setSpeed", MainControl::setSpeed),
 		legacyCmd(BUZ_ParseCommand),
 		legacyCmd(QUADCALIB_ParseCommand),
+		legacyCmd(DRV_ParseCommand),
+		legacyCmd(PID_ParseCommand),
 		legacyCmd(TACHO_ParseCommand)
 	);
 
