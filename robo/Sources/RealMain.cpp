@@ -42,11 +42,12 @@ void TASK_events(void*)
 		handleOneEvent(eventQueue,
 			systemReady,
 			doLedHeartbeat,
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); MainControl::notifyStartMove(); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); MainControl::notifyStartMove(!MainControl::hasStartMove()); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
 			[]{eventQueue.setEvent(Event::RefStartStopCalibration);}
 		);
+		WAIT1_WaitOSms(10);
 	}
 }
 
@@ -55,6 +56,7 @@ void TASK_keyscan(void*)
 	for(;;)
 	{
 		KEY_Scan();
+		WAIT1_WaitOSms(10);
 	}
 }
 
@@ -67,10 +69,10 @@ void realMain()
 	PL_Init();
 	eventQueue.setEvent(Event::SystemStartup);
 
-	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 1600, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
-	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 1600, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
-	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 #endif
 	//if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
 
@@ -87,7 +89,6 @@ void _main()
 }
 
 void doLedHeartbeat(void){
-	LED1_Neg();
 }
 
 void systemReady(void){
@@ -101,6 +102,7 @@ void systemReady(void){
 #if PL_HAS_BUZZER
     constexpr auto baseFreq = 33;
     constexpr auto baseTime = 60;
+    return;
 
 	auto f1 = []{ BUZ_BlockingBeep(baseFreq * 6, baseTime * 1); };
 	auto e1 = []{ BUZ_BlockingBeep(baseFreq * 5, baseTime * 1); };

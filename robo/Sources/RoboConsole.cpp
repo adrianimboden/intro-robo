@@ -46,7 +46,7 @@ CommandParser& getCommandParser()
 		cmd("motstat", MOT_CmdStatus),
 		cmd("motdir", MOT_CmdDir),
 		cmd("motduty", MOT_CmdDuty),
-		cmd("start", MainControl::notifyStartMove),
+		cmd("startstop", []{ MainControl::notifyStartMove(!MainControl::hasStartMove()); }),
 		cmd("setSpeed", MainControl::setSpeed),
 		legacyCmd(BUZ_ParseCommand),
 		legacyCmd(QUADCALIB_ParseCommand),
@@ -89,5 +89,6 @@ void TASK_console(void*)
 	for(;;)
 	{
 		console.pollInput();
+		WAIT1_WaitOSms(1);
 	}
 }

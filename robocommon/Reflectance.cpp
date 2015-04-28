@@ -263,6 +263,15 @@ uint16_t REF_GetLineValue(void) {
   return refCenterLineVal;
 }
 
+bool REF_SeesLine(void)
+{
+	  for(size_t i=0;i<REF_NOF_SENSORS;i++) {
+		  if (SensorCalibrated[i] < 800)
+			  return true;
+	  }
+	  return false;
+}
+
 static void REF_Measure(void) {
   ReadCalibrated(SensorCalibrated, SensorRaw);
   refCenterLineVal = ReadLine(SensorCalibrated, SensorRaw, REF_USE_WHITE_LINE);

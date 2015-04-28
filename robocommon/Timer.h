@@ -18,6 +18,8 @@ extern "C" {
 /*! \brief Function called from timer interrupt every TMR_TICK_MS */
 void TMR_OnInterrupt(void);
 
+uint32_t TMR_ValueMs();
+
 /*! \brief Timer driver initialization */
 void TMR_Init(void);
 

@@ -22,9 +22,16 @@
 	#include "Tacho.h"
 #endif
 
+#include <atomic>
+
+std::atomic_uint_fast32_t counter{0};
+
+
 /*! \brief Function called from timer interrupt every TMR_TICK_MS */
 void TMR_OnInterrupt(void){
 	static int cntr = 0;
+
+	counter.fetch_add(1);
 
 #if PL_HAS_TRIGGER
 	TRG_IncTick();
@@ -41,6 +48,13 @@ void TMR_OnInterrupt(void){
 #if PL_HAS_MOTOR_TACHO
 	TACHO_Sample();
 #endif
+}
+
+static_assert(TMR_TICK_MS == 1, "TMR_ValueMs is no longer correct");
+
+uint32_t TMR_ValueMs()
+{
+	return counter.load();
 }
 
 /*! \brief Timer driver initialization */

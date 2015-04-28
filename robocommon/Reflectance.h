@@ -17,6 +17,8 @@
  */
 uint16_t REF_GetLineValue(void);
 
+bool REF_SeesLine(void);
+
 /*!
  * \brief Driver Deinitialization.
  */

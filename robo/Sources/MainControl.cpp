@@ -3,31 +3,157 @@
 #include <Motor.h>
 #include <Reflectance.h>
 #include <FreeRTOS.h>
+#include <LED.h>
+#include <Timer.h>
+#include <WAIT1.h>
+
+#include <BehaviourMachine.h>
 
 MainControl MainControl::globalMainControl;
 
+class ForwardBehaviour
+{
+public:
+	bool wantsToTakeControl() const
+	{
+		return MainControl::hasStartMove();
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		}
+		else
+		{
+			auto speed = MainControl::getSpeed();
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), speed);
+		}
+	}
+};
+
+class StopBehaviour
+{
+	enum class State
+	{
+		Idle,
+		Stopped,
+		StartTurning,
+		Turning
+	};
+
+public:
+	bool wantsToTakeControl() const
+	{
+		return ((state != State::Idle) || (MainControl::hasStartMove() && MainControl::hasEdgeDetected()));
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			state = State::Idle;
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		}
+		else
+		{
+			state = [&]()->State
+			{
+				switch (state)
+				{
+				case State::Idle: return idle();
+				case State::Stopped: return stopped();
+				case State::StartTurning: return startTurning();
+				case State::Turning: return turning();
+				}
+				ASSERT(false);
+				return State::Idle;
+			}();
+		}
+	}
+
+	State idle()
+	{
+		return State::Stopped;
+	}
+
+	State stopped()
+	{
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		return State::StartTurning;
+	}
+
+	State startTurning()
+	{
+		startTurningTime = TMR_ValueMs();
+		return State::Turning;
+	}
+
+	State turning()
+	{
+		if (!MainControl::hasEdgeDetected())
+		{
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			return State::Idle;
+		}
+		else
+		{
+			auto speed = MainControl::getSpeed();
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed/2);
+			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -speed/2);
+			return State::Turning;
+		}
+	}
+
+private:
+	State state = State::Idle;
+	uint32_t startTurningTime;
+};
+
 void MainControl::task(void*)
 {
-	setSpeed(10);
+	auto arbitrator = makeArbitrator(std::make_tuple(
+		ForwardBehaviour(),
+		StopBehaviour())
+	);
+
+	uint8_t counter = 0;
 	for (;;)
 	{
-		if (REF_GetLineValue() < 100)
+		notifyEdgeDetected(REF_SeesLine());
+		if (hasEdgeDetected())
 		{
-			notifyEdgeDetected();
+		    LED1_On();
+		}
+		else
+		{
+		    LED1_Off();
 		}
 
-		globalMainControl.step();
+		arbitrator.step();
+
+		if (++counter % 100)
+		{
+			WAIT1_WaitOSms(1);
+			counter = 0;
+		}
 	}
 }
 
-void MainControl::notifyEdgeDetected()
+void MainControl::notifyEdgeDetected(bool detected)
 {
-	globalMainControl.edgeDetected.store(true);
+	globalMainControl.edgeDetected.store(detected);
 }
 
-void MainControl::notifyStartMove()
+void MainControl::notifyStartMove(bool start)
 {
-	globalMainControl.startMove.store(true);
+	globalMainControl.startMove.store(start);
 }
 
 
@@ -36,69 +162,29 @@ void MainControl::setSpeed(int8_t wantedSpeed)
 	globalMainControl.speed.store(wantedSpeed);
 }
 
-void MainControl::step()
+bool MainControl::hasEdgeDetected()
 {
-	bool hasEdgeDetected = [&]
-	{
-		if (edgeDetected.load())
-		{
-			edgeDetected.store(false);
-			return true;
-		}
-		return false;
-	}();
+	return globalMainControl.edgeDetected.load();
+}
 
-	bool hasStartMove = [&]
-	{
-		if (startMove.load())
-		{
-			startMove.store(false);
-			return true;
-		}
-		return false;
-	}();
+int8_t MainControl::getSpeed()
+{
+	return globalMainControl.speed.load();
+}
 
-	auto wantedSpeed = speed.load();
+bool MainControl::hasStartMove()
+{
+	return globalMainControl.startMove.load();
+}
 
-	auto idle = [&]
-	{
-		vTaskDelay(1000);
-		if (hasStartMove)
-		{
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), wantedSpeed);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), wantedSpeed);
+void MainControl::setConfig(Config config)
+{
+	ScopedGuard guard(globalMainControl.configMutex);
+	globalMainControl.config = config;
+}
 
-			return State::Moving;
-		}
-		return State::Idle;
-	};
-
-	auto moving = [&]
-	{
-		if (hasEdgeDetected)
-		{
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-			return State::SafeBackup;
-		}
-
-		return State::Moving;
-	};
-
-	auto safeBackup = [&]
-	{
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), -wantedSpeed);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -wantedSpeed);
-		vTaskDelay(100);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
-		return State::Idle;
-	};
-
-	switch (state)
-	{
-	case State::Idle: state = idle(); return;
-	case State::Moving: state = moving(); return;
-	case State::SafeBackup: state = safeBackup(); return;
-	}
+Config MainControl::getConfig()
+{
+	ScopedGuard guard(globalMainControl.configMutex);
+	return globalMainControl.config;
 }
