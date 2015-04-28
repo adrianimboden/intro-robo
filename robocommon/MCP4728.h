@@ -12,8 +12,8 @@
 #include "Platform.h"
 
 #if PL_HAS_SHELL
-  #include "CLS1.h"
-  uint8_t MCP4728_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io);
+  //#include "CLS1.h"
+  //uint8_t MCP4728_ParseCommand(const unsigned char *cmd, bool *handled, const CLS1_StdIOType *io);
 #endif
 
 #define MCP4728_MAX_DAC_VAL  0xfff  /* 12bit */

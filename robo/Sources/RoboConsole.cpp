@@ -16,6 +16,7 @@
 #include "Event.h"
 #include "Buzzer.h"
 #include "QuadCalib.h"
+#include "Tacho.h"
 
 #include <BT1.h>
 
@@ -46,7 +47,8 @@ CommandParser& getCommandParser()
 		cmd("start", MainControl::notifyStartMove),
 		cmd("setSpeed", MainControl::setSpeed),
 		legacyCmd(BUZ_ParseCommand),
-		legacyCmd(QUADCALIB_ParseCommand)
+		legacyCmd(QUADCALIB_ParseCommand),
+		legacyCmd(TACHO_ParseCommand)
 	);
 
 	return parser;

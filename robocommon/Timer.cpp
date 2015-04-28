@@ -18,6 +18,9 @@
 #if PL_HAS_TRIGGER
   #include "Trigger.h"
 #endif
+#if PL_HAS_MOTOR_TACHO
+	#include "Tacho.h"
+#endif
 
 /*! \brief Function called from timer interrupt every TMR_TICK_MS */
 void TMR_OnInterrupt(void){
@@ -33,6 +36,10 @@ void TMR_OnInterrupt(void){
 		eventQueue.setEvent(Event::LedHeartbeat);
 		cntr = 0;
 	}
+#endif
+
+#if PL_HAS_MOTOR_TACHO
+	TACHO_Sample();
 #endif
 }
 

@@ -73,6 +73,12 @@ inline void CLS1_SendHelpStr(const unsigned char* name, const unsigned char* tex
 	static_cast<const detail::CppAdapter*>(io)->sendHelpStr(name, text);
 }
 
+inline void CLS1_SendStatusStr(const unsigned char* name, const unsigned char* text, const Adapter *io)
+{
+	static_cast<const detail::CppAdapter*>(io)->sendStr(name);
+	static_cast<const detail::CppAdapter*>(io)->sendStr(text);
+}
+
 inline void CLS1_SendStr(const unsigned char* text, const Adapter *io)
 {
 	static_cast<const detail::CppAdapter*>(io)->sendStr(text);

@@ -39,7 +39,7 @@
 #define PL_L_HAS_TRIGGER        (1)
   /*!< Set to 1 for trigger enabled, 0 otherwise */
 
-#define PL_L_HAS_SHELL          (0)
+#define PL_L_HAS_SHELL          (1)
   /*!< Set to 1 for shell enabled, 0 otherwise */
 
 #define PL_L_HAS_BUZZER         (1)
@@ -64,6 +64,12 @@
 
 #define PL_L_HAS_QUAD_CALIBRATION	(1)
 /*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
+
+#define PL_L_HAS_MOTOR_QUAD	(1)
+/*! Set to 1 for Motor QUAD enabled, 0 otherwise */
+
+#define PL_L_HAS_MOTOR_TACHO		(1)
+/*! Set to 1 for Tacho enabled, 0 otherwise */
 
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 

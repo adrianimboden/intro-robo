@@ -237,7 +237,8 @@ void GI2C1_OnReleaseBus(void)
 */
 void QuadInt_OnInterrupt(void)
 {
-  /* Write your code here ... */
+	Q4CRight_Sample();
+	Q4CLeft_Sample();
 }
 
 /* END Events */

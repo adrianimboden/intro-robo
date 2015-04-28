@@ -9,7 +9,6 @@
 #include "Platform.h"
 #if PL_HAS_QUAD_CALIBRATION
 #include "QuadCalib.h"
-//#include "Shell.h"
 extern "C"{
 #include "FRTOS1.h"
 #include "WAIT1.h"

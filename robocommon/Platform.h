@@ -78,6 +78,12 @@
 #define PL_HAS_QUAD_CALIBRATION	(PL_L_HAS_QUAD_CALIBRATION)
 /*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
 
+#define PL_HAS_MOTOR_QUAD	(PL_L_HAS_MOTOR_QUAD)
+/*! Set to 1 for Motor QUAD enabled, 0 otherwise */
+
+#define PL_HAS_MOTOR_TACHO		(PL_L_HAS_MOTOR_TACHO)
+/*! Set to 1 for Tacho enabled, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

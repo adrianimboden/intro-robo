@@ -18,6 +18,11 @@
 #include "Motor.h"
 #include "NVM_Config.h"
 #include "QuadCalib.h"
+extern "C"{
+#include "Q4CRight.h"
+#include "Q4CLeft.h"
+}
+#include "Tacho.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,10 +66,27 @@ void PL_Init(void){
 #if PL_HAS_QUAD_CALIBRATION
   //
 #endif
+#if PL_HAS_MOTOR_QUAD
+  Q4CLeft_Init();
+  Q4CRight_Init();
+#endif
+#if PL_HAS_MOTOR_TACHO
+  TACHO_Init();
+#endif
 }
 
 
 void PL_Deinit(void){
+
+#if PL_HAS_MOTOR_TACHO
+	TACHO_Deinit();
+#endif
+
+#if PL_HAS_MOTOR_QUAD
+  Q4CLeft_Deinit();
+  Q4CRight_Deinit();
+#endif
+
 #if PL_HAS_QUAD_CALIBRATION
   //
 #endif
