@@ -19,8 +19,10 @@
 #include "NVM_Config.h"
 #include "QuadCalib.h"
 extern "C"{
+#if PL_HAS_MOTOR_QUAD
 #include "Q4CRight.h"
 #include "Q4CLeft.h"
+#endif
 }
 #include "Tacho.h"
 #include "Drive.h"
