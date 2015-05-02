@@ -65,7 +65,7 @@
 #define PL_L_HAS_QUAD_CALIBRATION	(1)
 /*! Set to 1 for QUAD Calibration enabled, 0 otherwise */
 
-#define PL_L_HAS_MOTOR_QUAD	(1)
+#define PL_L_HAS_MOTOR_QUAD			(1)
 /*! Set to 1 for Motor QUAD enabled, 0 otherwise */
 
 #define PL_L_HAS_MOTOR_TACHO		(1)

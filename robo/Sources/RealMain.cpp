@@ -67,15 +67,15 @@ void realMain()
 {
 	getConsole();
 	PL_Init();
-	eventQueue.setEvent(Event::SystemStartup);
 
 	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 1600, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 #endif
-	//if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
 
+	eventQueue.setEvent(Event::SystemStartup);
 	RTOS_Run();
 }
 
@@ -93,11 +93,11 @@ void doLedHeartbeat(void){
 
 void systemReady(void){
     LED1_On();
-    WAIT1_Waitms(10);
+    WAIT1_WaitOSms(10);
     LED1_Off();
-    WAIT1_Waitms(10);
+    WAIT1_WaitOSms(10);
     LED1_On();
-    WAIT1_Waitms(10);
+    WAIT1_WaitOSms(10);
     LED1_Off();
 #if PL_HAS_BUZZER
     constexpr auto baseFreq = 33;

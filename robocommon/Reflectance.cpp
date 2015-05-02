@@ -371,9 +371,9 @@ static void REF_StateMachine(void) {
 
   switch (refState) {
   	  case REF_STATE_INIT:
-  		  console.getUnderlyingIoStream()->write("INFO: No calibration data present.\n");
   		  p = NVMC_GetReflectanceData();
   		  if(p == NULL){
+  			console.getUnderlyingIoStream()->write("INFO: No calibration data present.\n");
   			refState = REF_STATE_NOT_CALIBRATED;
   		  }
   		  else {

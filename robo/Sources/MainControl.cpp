@@ -1,6 +1,7 @@
 #include "MainControl.h"
 
-#include <Motor.h>
+//#include <Motor.h>
+#include <Drive.h>
 #include <Reflectance.h>
 #include <FreeRTOS.h>
 #include <LED.h>
@@ -23,14 +24,16 @@ public:
 	{
 		if (suppress)
 		{
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			DRV_SetSpeed(0,0);
 		}
 		else
 		{
 			auto speed = MainControl::getSpeed();
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), speed);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), speed);
+			DRV_SetSpeed(speed,speed);
 		}
 	}
 };
@@ -56,8 +59,9 @@ public:
 		if (suppress)
 		{
 			state = State::Idle;
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			DRV_SetSpeed(0,0);
 		}
 		else
 		{
@@ -83,8 +87,9 @@ public:
 
 	State stopped()
 	{
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-		MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+		//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+		DRV_SetSpeed(0,0);
 		return State::StartTurning;
 	}
 
@@ -98,15 +103,17 @@ public:
 	{
 		if (!MainControl::hasEdgeDetected())
 		{
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), 0);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), 0);
+			DRV_SetSpeed(0,0);
 			return State::Idle;
 		}
 		else
 		{
 			auto speed = MainControl::getSpeed();
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed/2);
-			MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -speed/2);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_LEFT), speed/2);
+			//MOT_SetSpeedPercent(MOT_GetMotorHandle(MOT_MOTOR_RIGHT), -speed/2);
+			DRV_SetSpeed(speed/2,-speed/2);
 			return State::Turning;
 		}
 	}
@@ -167,9 +174,9 @@ bool MainControl::hasEdgeDetected()
 	return globalMainControl.edgeDetected.load();
 }
 
-int8_t MainControl::getSpeed()
+int16_t MainControl::getSpeed()
 {
-	return globalMainControl.speed.load();
+	return globalMainControl.speed.load()*74; //7450 are the max ticks per rounds pro sec.
 }
 
 bool MainControl::hasStartMove()

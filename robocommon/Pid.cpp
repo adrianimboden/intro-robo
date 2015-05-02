@@ -106,7 +106,7 @@ static void PrintPIDstatus(PID_Config *config, const unsigned char *kindStr, con
 
   UTIL1_strcpy(kindBuf, sizeof(buf), (unsigned char*)"  ");
   UTIL1_strcat(kindBuf, sizeof(buf), kindStr);
-  UTIL1_strcat(kindBuf, sizeof(buf), (unsigned char*)" PID");
+  UTIL1_strcat(kindBuf, sizeof(buf), (unsigned char*)" PID  ");
   UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)"p: ");
   UTIL1_strcatNum32s(buf, sizeof(buf), config->pFactor100);
   UTIL1_strcat(buf, sizeof(buf), (unsigned char*)" i: ");
@@ -118,22 +118,22 @@ static void PrintPIDstatus(PID_Config *config, const unsigned char *kindStr, con
 
   UTIL1_strcpy(kindBuf, sizeof(buf), (unsigned char*)"  ");
   UTIL1_strcat(kindBuf, sizeof(buf), kindStr);
-  UTIL1_strcat(kindBuf, sizeof(buf), (unsigned char*)" windup");
-  UTIL1_Num32sToStr(buf, sizeof(buf), config->iAntiWindup);
+  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)" windup: ");
+  UTIL1_strcatNum32s(buf, sizeof(buf), config->iAntiWindup);
   UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
   CLS1_SendStatusStr(kindBuf, buf, io->stdOut);
 
   UTIL1_strcpy(kindBuf, sizeof(buf), (unsigned char*)"  ");
   UTIL1_strcat(kindBuf, sizeof(buf), kindStr);
-  UTIL1_strcat(kindBuf, sizeof(buf), (unsigned char*)" error");
-  UTIL1_Num32sToStr(buf, sizeof(buf), config->lastError);
+  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)" error: ");
+  UTIL1_strcatNum32s(buf, sizeof(buf), config->lastError);
   UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
   CLS1_SendStatusStr(kindBuf, buf, io->stdOut);
 
   UTIL1_strcpy(kindBuf, sizeof(buf), (unsigned char*)"  ");
   UTIL1_strcat(kindBuf, sizeof(buf), kindStr);
-  UTIL1_strcat(kindBuf, sizeof(buf), (unsigned char*)" integral");
-  UTIL1_Num32sToStr(buf, sizeof(buf), config->integral);
+  UTIL1_strcpy(buf, sizeof(buf), (unsigned char*)" integral: ");
+  UTIL1_strcatNum32s(buf, sizeof(buf), config->integral);
   UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"\r\n");
   CLS1_SendStatusStr(kindBuf, buf, io->stdOut);
 }
@@ -221,17 +221,17 @@ void PID_Deinit(void) {
 
 void PID_Init(void) {
   /*! \todo determine your PID values */
-  speedLeftConfig.pFactor100 = 0;
-  speedLeftConfig.iFactor100 = 0;
-  speedLeftConfig.dFactor100 = 0;
-  speedLeftConfig.iAntiWindup = 0;
+  speedLeftConfig.pFactor100 = 600;
+  speedLeftConfig.iFactor100 = 40;
+  speedLeftConfig.dFactor100 = 100;
+  speedLeftConfig.iAntiWindup = 100000;
   speedLeftConfig.lastError = 0;
   speedLeftConfig.integral = 0;
 
-  speedRightConfig.pFactor100 = 0;
-  speedRightConfig.iFactor100 = 0;
-  speedRightConfig.dFactor100 = 0;
-  speedRightConfig.iAntiWindup = 0;
+  speedRightConfig.pFactor100 = 600;
+  speedRightConfig.iFactor100 = 40;
+  speedRightConfig.dFactor100 = 100;
+  speedRightConfig.iAntiWindup = 100000;
   speedRightConfig.lastError = 0;
   speedRightConfig.integral = 0;
 }

@@ -85,7 +85,7 @@ Console& getConsole()
 void TASK_console(void*)
 {
 	Console& console = getConsole();
-	console.getUnderlyingIoStream()->write("console ready...");
+	console.getUnderlyingIoStream()->write("console ready...\r\n\r\n");
 	for(;;)
 	{
 		console.pollInput();

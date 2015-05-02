@@ -32,7 +32,7 @@ public:
 	static void setSpeed(int8_t wantedSpeed);
 
 	static bool hasEdgeDetected();
-	static int8_t getSpeed();
+	static int16_t getSpeed();
 	static bool hasStartMove();
 
 	static void setConfig(Config config);
