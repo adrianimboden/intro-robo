@@ -27,6 +27,7 @@ typedef enum DBNC_EventKinds {
   DBNC_EVENT_PRESSED,       /*<! Event for key(s) pressed */
   DBNC_EVENT_LONG_PRESSED,  /*<! Event for key(s) pressed for a long time */
   DBNC_EVENT_RELEASED,      /*<! Event for key(s) released */
+  DBNC_EVENT_RELEASED_LONG,	/*<! Event for key(s) released after a long press event */
   DBNC_EVENT_END            /*<! Debouncing end event. This one is called when the FSM finishes. */
 } DBNC_EventKinds;
 

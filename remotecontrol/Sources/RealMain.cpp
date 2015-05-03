@@ -49,30 +49,37 @@ void TASK_events(void*)
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_B_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_B_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_B_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_B_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_C_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_C_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_C_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_C_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_D_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_D_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_D_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_D_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_E_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_E_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_E_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_E_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_F_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_F_Long_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_F_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_F_Released_Long!\n"); },
 
 			[&]{ console.getUnderlyingIoStream()->write("Key_J_Pressed!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_J_Long_Pressed!\n"); },
-			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released!\n"); }
+			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released_Long!\n"); }
 		);
 	}
 }

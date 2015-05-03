@@ -45,6 +45,7 @@ void TASK_events(void*)
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); MainControl::notifyStartMove(!MainControl::hasStartMove()); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released_Long!\n"); },
 			[]{eventQueue.setEvent(Event::RefStartStopCalibration);}
 		);
 		WAIT1_WaitOSms(10);
