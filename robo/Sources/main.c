@@ -92,6 +92,8 @@
 #include "QuadInt.h"
 #include "TimerIntLdd2.h"
 #include "TU_QuadInt.h"
+#include "TU_US.h"
+#include "TRIG.h"
 #include "I2C1.h"
 #include "GI2C1.h"
 /* Including shared modules, which are used for whole project */

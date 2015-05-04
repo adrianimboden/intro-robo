@@ -30,6 +30,10 @@ typedef struct {
 /*! \todo Add your own additional configurations as needed, at least with a position config */
 static PID_Config speedLeftConfig, speedRightConfig;
 
+void PID_Pos(int32_t currPos, int32_t setPos, bool isLeft){
+
+}
+
 static int32_t PID(int32_t currVal, int32_t setVal, PID_Config *config) {
   int32_t error;
   int32_t pid;

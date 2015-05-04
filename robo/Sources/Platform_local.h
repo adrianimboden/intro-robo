@@ -77,6 +77,9 @@
 #define PL_L_HAS_PID				(1)
 /*! Set to 1 for PID enabled, 0 otherwise */
 
+#define PL_L_HAS_ULTRASONIC			(1)
+/*! Set to 1 for Ultrasonic enabled, 0 otherwise */
+
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 
 #ifdef __cplusplus

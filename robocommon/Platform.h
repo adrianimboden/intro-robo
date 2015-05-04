@@ -90,6 +90,9 @@
 #define PL_HAS_PID				(PL_L_HAS_PID)
 /*! Set to 1 for PID enabled, 0 otherwise */
 
+#define PL_HAS_ULTRASONIC		(PL_L_HAS_ULTRASONIC)
+/*! Set to 1 for Ultrasonic enabled, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

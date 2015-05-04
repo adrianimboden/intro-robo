@@ -118,7 +118,7 @@ void TACHO_Sample(void) {
 static void TACHO_PrintStatus(const CLS1_StdIOType *io) {
   unsigned char buf[sizeof("-1234567890")];
 
-  TACHO_CalcSpeed(); /*! \todo only temporary until this is done periodically */
+  //TACHO_CalcSpeed(); /*! \todo only temporary until this is done periodically */
   CLS1_SendStatusStr((unsigned char*)"Tacho", (unsigned char*)"\r\n", io->stdOut);
 
   CLS1_SendStatusStr((unsigned char*)"  L speed ", (unsigned char*)"", io->stdOut);

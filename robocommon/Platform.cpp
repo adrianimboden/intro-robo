@@ -18,6 +18,7 @@
 #include "Motor.h"
 #include "NVM_Config.h"
 #include "QuadCalib.h"
+#include "Ultrasonic.h"
 extern "C"{
 
 #if PL_HAS_MOTOR_QUAD
@@ -84,9 +85,15 @@ void PL_Init(void){
 #if PL_HAS_PID
   PID_Init();
 #endif
+#if PL_HAS_ULTRASONIC
+  US_Init();
+#endif
 }
 
 void PL_Deinit(void){
+#if PL_HAS_ULTRASONIC
+  US_Deinit();
+#endif
 #if PL_HAS_PID
   PID_Deinit();
 #endif

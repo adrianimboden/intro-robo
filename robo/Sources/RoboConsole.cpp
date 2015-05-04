@@ -19,6 +19,7 @@
 #include "Tacho.h"
 #include "Drive.h"
 #include "Pid.h"
+#include "Ultrasonic.h"
 
 #include <BT1.h>
 
@@ -52,7 +53,8 @@ CommandParser& getCommandParser()
 		legacyCmd(QUADCALIB_ParseCommand),
 		legacyCmd(DRV_ParseCommand),
 		legacyCmd(PID_ParseCommand),
-		legacyCmd(TACHO_ParseCommand)
+		legacyCmd(TACHO_ParseCommand),
+		legacyCmd(US_ParseCommand)
 	);
 
 	return parser;

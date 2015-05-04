@@ -1,26 +1,31 @@
 #pragma once
 
-#include "CommandParser.h"
-#include "Optional.h"
-#include "FixedSizeString.h"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-
-extern "C"
+typedef struct
 {
+} Adapter;
 
-struct Adapter
-{
-};
-
-struct CLS1_StdIOType
+typedef struct
 {
 	Adapter* stdIn;
 	Adapter* stdOut;
 	Adapter* stdErr;
 	Adapter* keyPressed;
-};
+} CLS1_StdIOType;
 
+
+#ifdef __cplusplus
 }
+#endif
+
+#ifdef __cplusplus
+
+#include "CommandParser.h"
+#include "Optional.h"
+#include "FixedSizeString.h"
 
 constexpr const char* CLS1_CMD_HELP = "help";
 constexpr const char* CLS1_CMD_STATUS = "status";
@@ -185,3 +190,4 @@ inline detail::LegacyArgsCommand legacyCmd(ParseCommandFn fn)
 {
 	return detail::LegacyArgsCommand(fn);
 }
+#endif
