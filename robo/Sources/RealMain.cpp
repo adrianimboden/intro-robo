@@ -26,6 +26,8 @@
 #include "FRTOS1.h"
 #include "BT1.h"
 #include "MainControl.h"
+#include "Ultrasonic.h"
+#include "Accel.h"
 
 extern "C" {
 #include "Reflectance.h"
@@ -61,6 +63,29 @@ void TASK_keyscan(void*)
 	}
 }
 
+void TASK_ultrasonicScan(void*)
+{
+	uint16_t cm, us;
+	for(;;)
+	{
+		 us = US_Measure_us();
+		 cm = US_usToCentimeters(us, 22);
+		 MainControl::notifyEnemyDetected(cm);
+		 WAIT1_WaitOSms(100);
+	}
+}
+
+void TASK_accelerationMeasure(void*)
+{
+	int16_t xValue, yValue, zValue = 0;
+	for(;;)
+	{
+		ACCEL_GetValues(&xValue,&yValue,&zValue);
+		MainControl::notifyStopMotors(zValue < -500);
+		WAIT1_WaitOSms(250);
+	}
+}
+
 /**
  * C++ world main function
  */
@@ -75,6 +100,8 @@ void realMain()
 	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY + 3, NULL) != pdPASS) { ASSERT(false); }
 #endif
 	if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_ultrasonicScan, "ultrasonicScan", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_accelerationMeasure, "accelerationMeasure", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
 
 	eventQueue.setEvent(Event::SystemStartup);
 	RTOS_Run();
@@ -100,10 +127,14 @@ void systemReady(void){
     LED1_On();
     WAIT1_WaitOSms(10);
     LED1_Off();
+#if PL_HAS_ACCEL
+    ACCEL_LowLevelInit();
+#endif
+
 #if PL_HAS_BUZZER
     constexpr auto baseFreq = 33;
     constexpr auto baseTime = 60;
-    return;
+    //return;
 
 	auto f1 = []{ BUZ_BlockingBeep(baseFreq * 6, baseTime * 1); };
 	auto e1 = []{ BUZ_BlockingBeep(baseFreq * 5, baseTime * 1); };

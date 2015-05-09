@@ -93,6 +93,9 @@
 #define PL_HAS_ULTRASONIC		(PL_L_HAS_ULTRASONIC)
 /*! Set to 1 for Ultrasonic enabled, 0 otherwise */
 
+#define PL_HAS_ACCEL			(PL_L_HAS_ACCEL)
+/*! Set to 1 for Acceleration enabled, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

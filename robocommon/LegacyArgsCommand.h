@@ -26,6 +26,9 @@ typedef struct
 #include "CommandParser.h"
 #include "Optional.h"
 #include "FixedSizeString.h"
+extern "C" {
+#include "UTIL1.h"
+}
 
 constexpr const char* CLS1_CMD_HELP = "help";
 constexpr const char* CLS1_CMD_STATUS = "status";
@@ -87,6 +90,15 @@ inline void CLS1_SendStatusStr(const unsigned char* name, const unsigned char* t
 inline void CLS1_SendStr(const unsigned char* text, const Adapter *io)
 {
 	static_cast<const detail::CppAdapter*>(io)->sendStr(text);
+}
+
+inline void CLS1_SendNum16s(const int16_t num, const Adapter *io)
+{
+	unsigned char buf[sizeof("-12345")];
+
+	UTIL1_Num16sToStr(buf, sizeof(buf), num);
+	UTIL1_strcat(buf, sizeof(buf), (unsigned char*)"");
+	static_cast<const detail::CppAdapter*>(io)->sendStr(buf);
 }
 
 

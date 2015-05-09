@@ -6,18 +6,63 @@
 #include <LED.h>
 #include <Timer.h>
 #include <WAIT1.h>
-#include "Ultrasonic.h"
 
 #include <BehaviourMachine.h>
 
+constexpr auto MAX_TURNING_SPEED = 50*74;
+constexpr auto MAX_BACKUP_SPEED = -60*74;
+
 MainControl MainControl::globalMainControl;
+
+class StopMotorsBehaviour
+{
+public:
+	bool wantsToTakeControl() const
+	{
+		return MainControl::hasStopMotors();
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			DRV_SetSpeed(0,0);
+		}
+		else
+		{
+			DRV_SetSpeed(0,0);
+			MainControl::notifyStartMove(false);
+		}
+	}
+};
+
+class ScanEnemyBehaviour
+{
+public:
+	bool wantsToTakeControl() const
+	{
+		return MainControl::hasStartMove();
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			DRV_SetSpeed(0,0);
+		}
+		else
+		{
+			DRV_SetSpeed(-MAX_TURNING_SPEED,MAX_TURNING_SPEED);
+		}
+	}
+};
 
 class ForwardBehaviour
 {
 public:
 	bool wantsToTakeControl() const
 	{
-		return MainControl::hasStartMove();
+		return ((MainControl::getEnemyDistance()<50) && MainControl::hasStartMove());
 	}
 
 	void step(bool suppress)
@@ -40,6 +85,8 @@ class StopBehaviour
 	{
 		Idle,
 		Stopped,
+		StartBackup,
+		Backup,
 		StartTurning,
 		Turning
 	};
@@ -65,6 +112,8 @@ public:
 				{
 				case State::Idle: return idle();
 				case State::Stopped: return stopped();
+				case State::StartBackup: return startBackup();
+				case State::Backup: return backup();
 				case State::StartTurning: return startTurning();
 				case State::Turning: return turning();
 				}
@@ -82,7 +131,27 @@ public:
 	State stopped()
 	{
 		DRV_SetSpeed(0,0);
-		return State::StartTurning;
+		return State::StartBackup;
+	}
+
+	State startBackup()
+	{
+		startTurningTime = TMR_ValueMs();
+		return State::Backup;
+	}
+
+	State backup()
+	{
+		if ((TMR_ValueMs()-startTurningTime < 100))
+		{
+			DRV_SetSpeed(MAX_BACKUP_SPEED,MAX_BACKUP_SPEED);
+			return State::Backup;
+		}
+		else
+		{
+			DRV_SetSpeed(0, 0);
+			return State::StartTurning;
+		}
 	}
 
 	State startTurning()
@@ -93,16 +162,15 @@ public:
 
 	State turning()
 	{
-		if (!MainControl::hasEdgeDetected())
+		if ((TMR_ValueMs()-startTurningTime < 300))
 		{
-			DRV_SetSpeed(0,0);
-			return State::Idle;
+			DRV_SetSpeed(-MAX_TURNING_SPEED,MAX_TURNING_SPEED);
+			return State::Turning;
 		}
 		else
 		{
-			auto speed = MainControl::getSpeed();
-			DRV_SetSpeed(speed/2,-speed/2);
-			return State::Turning;
+			DRV_SetSpeed(0, 0);
+			return State::Idle;
 		}
 	}
 
@@ -114,8 +182,10 @@ private:
 void MainControl::task(void*)
 {
 	auto arbitrator = makeArbitrator(std::make_tuple(
+		ScanEnemyBehaviour(),
 		ForwardBehaviour(),
-		StopBehaviour())
+		StopBehaviour(),
+		StopMotorsBehaviour())
 	);
 
 	uint8_t counter = 0;
@@ -151,6 +221,16 @@ void MainControl::notifyStartMove(bool start)
 	globalMainControl.startMove.store(start);
 }
 
+void MainControl::notifyStopMotors(bool stop)
+{
+	globalMainControl.stopMotors.store(stop);
+}
+
+void MainControl::notifyEnemyDetected(uint16_t cm)
+{
+	globalMainControl.enemyDistance.store(cm);
+}
+
 
 void MainControl::setSpeed(int8_t wantedSpeed)
 {
@@ -162,6 +242,11 @@ bool MainControl::hasEdgeDetected()
 	return globalMainControl.edgeDetected.load();
 }
 
+uint16_t MainControl::getEnemyDistance()
+{
+	return globalMainControl.enemyDistance.load();
+}
+
 int16_t MainControl::getSpeed()
 {
 	return globalMainControl.speed.load()*74; //7450 are the max ticks per rounds pro sec.
@@ -170,6 +255,11 @@ int16_t MainControl::getSpeed()
 bool MainControl::hasStartMove()
 {
 	return globalMainControl.startMove.load();
+}
+
+bool MainControl::hasStopMotors()
+{
+	return globalMainControl.stopMotors.load();
 }
 
 void MainControl::setConfig(Config config)

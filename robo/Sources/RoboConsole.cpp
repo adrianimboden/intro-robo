@@ -20,6 +20,7 @@
 #include "Drive.h"
 #include "Pid.h"
 #include "Ultrasonic.h"
+#include "Accel.h"
 
 #include <BT1.h>
 
@@ -54,7 +55,8 @@ CommandParser& getCommandParser()
 		legacyCmd(DRV_ParseCommand),
 		legacyCmd(PID_ParseCommand),
 		legacyCmd(TACHO_ParseCommand),
-		legacyCmd(US_ParseCommand)
+		legacyCmd(US_ParseCommand),
+		legacyCmd(ACCEL_ParseCommand)
 	);
 
 	return parser;

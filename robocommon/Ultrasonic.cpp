@@ -91,7 +91,7 @@ uint16_t US_Measure_us(void) {
   if (usDevice.state==ECHO_FINISHED) {
     usDevice.lastValue_us = (usDevice.capture*1000UL)/(TU_US_CNT_INP_FREQ_U_0/1000);
   } else {
-    usDevice.lastValue_us = 0; /* error case */
+    usDevice.lastValue_us = 0xFFFF; /* error case */
   }
   usDevice.state = ECHO_IDLE;
   FRTOS1_xSemaphoreGive(mutexHandle);

@@ -28,12 +28,16 @@ public:
 
 	static void notifyEdgeDetected(bool detected);
 	static void notifyStartMove(bool start);
+	static void notifyEnemyDetected(uint16_t cm);
+	static void notifyStopMotors(bool stop);
 
 	static void setSpeed(int8_t wantedSpeed);
 
 	static bool hasEdgeDetected();
 	static int16_t getSpeed();
 	static bool hasStartMove();
+	static bool hasStopMotors();
+	static uint16_t getEnemyDistance();
 
 	static void setConfig(Config config);
 	static Config getConfig();
@@ -41,6 +45,8 @@ public:
 private:
 	std::atomic_bool edgeDetected;
 	std::atomic_bool startMove;
+	std::atomic_bool stopMotors;
+	std::atomic_uint_fast16_t enemyDistance;
 	State state;
 
 	Mutex configMutex;
