@@ -9,7 +9,7 @@
 
 #include <BehaviourMachine.h>
 
-constexpr auto MAX_TURNING_SPEED = 50*74;
+constexpr auto MAX_TURNING_SPEED = 25*74;
 constexpr auto MAX_BACKUP_SPEED = -60*74;
 
 MainControl MainControl::globalMainControl;
@@ -62,7 +62,7 @@ class ForwardBehaviour
 public:
 	bool wantsToTakeControl() const
 	{
-		return ((MainControl::getEnemyDistance()<50) && MainControl::hasStartMove());
+		return ((MainControl::getEnemyDistance()<80) && MainControl::hasStartMove());
 	}
 
 	void step(bool suppress)
@@ -74,6 +74,7 @@ public:
 		else
 		{
 			auto speed = MainControl::getSpeed();
+			if(speed == 0) speed = 60*74;
 			DRV_SetSpeed(speed,speed);
 		}
 	}

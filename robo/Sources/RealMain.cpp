@@ -28,10 +28,13 @@
 #include "MainControl.h"
 #include "Ultrasonic.h"
 #include "Accel.h"
+#include "LegacyArgsCommand.h"
 
 extern "C" {
 #include "Reflectance.h"
 }
+
+CLS1_StdIOType io;
 
 void doLedHeartbeat(void);
 void systemReady(void);
@@ -44,7 +47,17 @@ void TASK_events(void*)
 		handleOneEvent(eventQueue,
 			systemReady,
 			doLedHeartbeat,
-			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n"); MainControl::notifyStartMove(!MainControl::hasStartMove()); },
+			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n");
+			WAIT1_WaitOSms(1000);
+			BUZ_BlockingBeep(440, 500);
+			WAIT1_WaitOSms(500);
+			BUZ_BlockingBeep(440, 500);
+			WAIT1_WaitOSms(500);
+			BUZ_BlockingBeep(440, 500);
+			WAIT1_WaitOSms(500);
+			BUZ_BlockingBeep(880, 500);
+			WAIT1_WaitOSms(500);
+			MainControl::notifyStartMove(!MainControl::hasStartMove()); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released_Long!\n"); },
@@ -71,7 +84,7 @@ void TASK_ultrasonicScan(void*)
 		 us = US_Measure_us();
 		 cm = US_usToCentimeters(us, 22);
 		 MainControl::notifyEnemyDetected(cm);
-		 WAIT1_WaitOSms(100);
+		 WAIT1_WaitOSms(50);
 	}
 }
 
@@ -81,7 +94,7 @@ void TASK_accelerationMeasure(void*)
 	for(;;)
 	{
 		ACCEL_GetValues(&xValue,&yValue,&zValue);
-		MainControl::notifyStopMotors(zValue < -500);
+		MainControl::notifyStopMotors(zValue < -800);
 		WAIT1_WaitOSms(250);
 	}
 }
@@ -106,6 +119,15 @@ void realMain()
 	eventQueue.setEvent(Event::SystemStartup);
 	RTOS_Run();
 }
+
+#if PL_HAS_RADIO
+void APP_DebugPrint(unsigned char *str) {
+#if PL_HAS_SHELL
+  //CLS1_SendStr(str, CLS1_GetStdio()->stdOut);
+	//*getConsole().getUnderlyingIoStream()<< str;
+#endif
+}
+#endif
 
 
 /**

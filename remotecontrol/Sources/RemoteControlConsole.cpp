@@ -7,11 +7,15 @@
 #include <ConsoleHelpers.h>
 #include <CdcIOStream.h>
 #include <AutoArgsCommand.h>
+#include <LegacyArgsCommand.h>
 #include <LineEndingNormalizerIOStream.h>
 
 extern "C" {
 #include <CDC1.h>
 }
+
+#include "RNet_App.h"
+#include "Remote.h"
 
 CommandParser& getCommandParser()
 {
@@ -30,22 +34,9 @@ CommandParser& getCommandParser()
 				}
 			}
 		}),
-		cmd("echo", [&](IOStream& ioStream, const String<80>& param)
-		{
-			ioStream.write(param);
-			ioStream.write("\n");
-		}),
-		cmd("add", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
-		{
-			ioStream.write(lhs + rhs);
-			ioStream.write("\n");
-		}),
-		cmd("mult", [&](IOStream& ioStream, int32_t lhs, int32_t rhs)
-		{
-			ioStream.write(lhs * rhs);
-			ioStream.write("\n");
-		}),
-		cmd("showstat", showStat)
+		cmd("showstat", showStat),
+		legacyCmd(RNETA_ParseCommand),
+		legacyCmd(REMOTE_ParseCommand)
 	);
 
 	return parser;
@@ -64,11 +55,7 @@ Console& getConsole()
 			20 /*max cmdline size*/
 			>(
 				CommandExecutorLineSink{&getCommandParser()},
-				SimpleEchoConsole{},
-				HistoryController<
-					String<20>, //line size
-					2 //history length
-				>{}
+				SimpleEchoConsole{}
 			)
 	);
 
@@ -78,9 +65,10 @@ Console& getConsole()
 void TASK_console(void*)
 {
 	Console& console = getConsole();
-	console.getUnderlyingIoStream()->write("console ready...");
+	console.getUnderlyingIoStream()->write("console ready...\n\n");
 	for(;;)
 	{
 		console.pollInput();
+		WAIT1_WaitOSms(1);
 	}
 }

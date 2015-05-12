@@ -96,6 +96,15 @@
 #define PL_HAS_ACCEL			(PL_L_HAS_ACCEL)
 /*! Set to 1 for Acceleration enabled, 0 otherwise */
 
+#define PL_HAS_RADIO			(PL_L_HAS_RADIO)
+ /*! Set to 1 for Radio enabled, 0 otherwise */
+
+#define PL_HAS_REMOTE         (PL_L_HAS_REMOTE)
+  /*! Set to 1 for remote controller enabled, 0 otherwise */
+
+#define PL_APP_ACCEL_CONTROL_SENDER  (PL_L_APP_ACCEL_CONTROL_SENDER)
+  /*! Set to 1 if we are the remote control sender, 0 otherwise */
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)
@@ -110,6 +119,10 @@
 #endif
 
 #if PL_IS_FRDM
+  #if PL_HAS_RADIO
+	#define PL_NOF_LEDS       (2)
+      /*!< FRDM board has 2 LEDs (blue is used by nrf24L01+ SPI CLK) */
+  #endif
   #if PL_HAS_JOYSTICK
     #define PL_NOF_LEDS       (2)
       /*!< FRDM board has 2 LEDs (blue is used by joystick shield/nrf24L01+ SPI CLK) */

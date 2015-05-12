@@ -20,6 +20,8 @@
 #include "QuadCalib.h"
 #include "Ultrasonic.h"
 #include "Accel.h"
+#include "RNet_App.h"
+#include "Remote.h"
 extern "C"{
 
 #if PL_HAS_MOTOR_QUAD
@@ -27,9 +29,15 @@ extern "C"{
 #include "Q4CLeft.h"
 #endif
 }
+#if PL_HAS_MOTOR_TACHO
 #include "Tacho.h"
+#endif
+#if PL_HAS_DRIVE
 #include "Drive.h"
+#endif
+#if PL_HAS_PID
 #include "Pid.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -92,9 +100,21 @@ void PL_Init(void){
 #if PL_HAS_ACCEL
   ACCEL_Init();
 #endif
+#if PL_HAS_RADIO
+  RNETA_Init();
+#endif
+#if PL_HAS_REMOTE
+  REMOTE_Init();
+#endif
 }
 
 void PL_Deinit(void){
+#if PL_HAS_REMOTE
+  REMOTE_Deinit();
+#endif
+#if PL_HAS_RADIO
+  RNETA_Deinit();
+#endif
 #if PL_HAS_ACCEL
   ACCEL_Deinit();
 #endif

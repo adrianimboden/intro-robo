@@ -74,7 +74,7 @@ uint16_t US_Measure_us(void) {
   FRTOS1_xSemaphoreTake(mutexHandle, portMAX_DELAY);
   /* send 10us pulse on TRIG line. */
   TRIG_SetVal(usDevice.trigDevice);
-  WAIT1_Waitus(10);
+  WAIT1_Waitus(20);
   usDevice.state = ECHO_TRIGGERED;
   TU_US_Enable(usDevice.echoDevice);
   TRIG_ClrVal(usDevice.trigDevice);

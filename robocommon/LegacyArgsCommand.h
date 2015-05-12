@@ -16,6 +16,10 @@ typedef struct
 	Adapter* keyPressed;
 } CLS1_StdIOType;
 
+typedef const CLS1_StdIOType CLS1_ConstStdIOType; /* constant StdIOType */
+
+typedef const CLS1_ConstStdIOType *CLS1_ConstStdIOTypePtr; /* Pointer to constant standard I/O descriptor */
+
 
 #ifdef __cplusplus
 }
@@ -101,6 +105,13 @@ inline void CLS1_SendNum16s(const int16_t num, const Adapter *io)
 	static_cast<const detail::CppAdapter*>(io)->sendStr(buf);
 }
 
+inline void CLS1_SendNum8u(uint8_t val, const Adapter *io)
+{
+  unsigned char buf[sizeof("123")];
+
+  UTIL1_Num8uToStr(buf, sizeof(buf), val);
+  static_cast<const detail::CppAdapter*>(io)->sendStr(buf);
+}
 
 namespace detail
 {

@@ -12,13 +12,11 @@
 
 #include <RemoteControlConsole.h>
 
-#include <Console.h>
-#include <LineInputStrategy.h>
-#include <CommandParser.h>
+//#include <Console.h>
+//#include <LineInputStrategy.h>
+//#include <CommandParser.h>
 #include "Platform.h"
 #include "EventQueue.h"
-#include "Console.h"
-#include "LineInputStrategy.h"
 #include "CriticalSection.h"
 #include "WAIT1.h"
 #include "EventHandler.h"
@@ -28,6 +26,7 @@
 #include "KeyDebounce.h"
 #include "RTOS.h"
 #include "FRTOS1.h"
+#include "LegacyArgsCommand.h"
 
 //#include "AS1.h"
 extern "C" {
@@ -81,6 +80,7 @@ void TASK_events(void*)
 			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_J_Released_Long!\n"); }
 		);
+		WAIT1_WaitOSms(10);
 	}
 }
 
@@ -89,6 +89,7 @@ void TASK_keyscan(void*)
 	for(;;)
 	{
 		KEY_Scan();
+		WAIT1_WaitOSms(10);
 	}
 }
 
@@ -105,19 +106,27 @@ void TASK_usb(void*)
  */
 void realMain()
 {
+	getConsole();
 	PL_Init();
-	eventQueue.setEvent(Event::SystemStartup);
 
-	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 800, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
-	if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	if (FRTOS1_xTaskCreate(TASK_console, "consoleInput", 500, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
+	//if (FRTOS1_xTaskCreate(TASK_events, "events", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_KEYS && PL_NOF_KEYS>0
-	if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
+	//if (FRTOS1_xTaskCreate(TASK_keyscan, "keyscan", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
 #endif
 	if (FRTOS1_xTaskCreate(TASK_usb, "usb", configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL) != pdPASS) { ASSERT(false); }
 
+	eventQueue.setEvent(Event::SystemStartup);
 	RTOS_Run();
 }
 
+#if PL_HAS_RADIO
+void APP_DebugPrint(unsigned char *str) {
+#if PL_HAS_SHELL
+  //CLS1_SendStr(str, CLS1_GetStdio()->stdOut);
+#endif
+}
+#endif
 
 /**
  * Forward to C++ world
@@ -126,6 +135,7 @@ void _main()
 {
 	realMain();
 }
+
 
 void doLedHeartbeat(void){
 	LED1_Neg();
@@ -139,7 +149,7 @@ void systemReady(void){
     LED1_On();
     WAIT1_Waitms(10);
     LED1_Off();
-#if PL_HAS_BUZZER
-    BUZ_Beep(300, 500);
+#if PL_HAS_ACCEL
+    ACCEL_LowLevelInit();
 #endif
 }

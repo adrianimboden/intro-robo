@@ -39,7 +39,7 @@
 #define PL_L_HAS_TRIGGER        (1)
   /*!< Set to 1 for trigger enabled, 0 otherwise */
 
-#define PL_L_HAS_SHELL          (0)
+#define PL_L_HAS_SHELL          (1)
   /*!< Set to 1 for shell enabled, 0 otherwise */
 
 #define PL_L_HAS_BUZZER         (0)
@@ -53,6 +53,16 @@
 
 #define PL_L_HAS_USB_CDC		(1)
   /*!< Set to 1 for USB_CDC enabled, 0 otherwise */
+
+#define PL_L_HAS_RADIO			(1)
+ /*! Set to 1 for Radio enabled, 0 otherwise */
+
+#define PL_L_HAS_REMOTE         (1)
+  /*! Set to 1 for remote controller enabled, 0 otherwise */
+
+#define PL_L_APP_ACCEL_CONTROL_SENDER  (1)
+  /*! Set to 1 if we are the remote control sender, 0 otherwise */
+
 
 #ifdef __cplusplus
 extern "C" {

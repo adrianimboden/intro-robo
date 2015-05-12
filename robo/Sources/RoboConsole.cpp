@@ -21,6 +21,8 @@
 #include "Pid.h"
 #include "Ultrasonic.h"
 #include "Accel.h"
+#include "RNet_App.h"
+#include "RNET1.h"
 
 #include <BT1.h>
 
@@ -56,7 +58,8 @@ CommandParser& getCommandParser()
 		legacyCmd(PID_ParseCommand),
 		legacyCmd(TACHO_ParseCommand),
 		legacyCmd(US_ParseCommand),
-		legacyCmd(ACCEL_ParseCommand)
+		legacyCmd(ACCEL_ParseCommand),
+		legacyCmd(RNETA_ParseCommand)
 	);
 
 	return parser;
@@ -67,8 +70,10 @@ Console& getConsole()
 	static auto console = makeConsole(
 		LineEndingNormalizerIOStream<
 			CdcStaticIOStream<
-				Serial2_RecvChar,
-				Serial2_SendChar
+				//Serial2_RecvChar,
+				Serial1_RecvChar,
+				//Serial2_SendChar
+				Serial1_SendChar
 			>
 		>{},
 		makeLineInputStrategy<

@@ -12,6 +12,7 @@ extern "C" {
 #endif
 
 void _main();
+void APP_DebugPrint(unsigned char *str);
 
 #ifdef __cplusplus
 }  /* extern "C" */
