@@ -17,7 +17,7 @@
   #include "Accel.h"
 #endif
 #if PL_HAS_PID
-  #include "PID.h"
+  #include "Pid.h"
 #endif
 #if PL_HAS_MOTOR
   #include "Motor.h"
