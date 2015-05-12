@@ -140,7 +140,11 @@ static void REF_MeasureRaw(SensorTimeType raw[REF_NOF_SENSORS]) {
   RefCnt_TValueType timerVal;
 
   LED_IR_On(); /* IR LED's on */
+#if PL_HAS_LONG_REF_HEADER
   WAIT1_Waitus(200); /*! \todo adjust time as needed */
+#else
+  WAIT1_Waitus(200); /*! \todo adjust time as needed */
+#endif
 
   for(i=0;i<REF_NOF_SENSORS;i++) {
     SensorFctArray[i].SetOutput(); /* turn I/O line as output */
@@ -266,7 +270,11 @@ uint16_t REF_GetLineValue(void) {
 bool REF_SeesLine(void)
 {
 	  for(size_t i=0;i<REF_NOF_SENSORS;i++) {
+#if PL_HAS_LONG_REF_HEADER
+		  if (SensorCalibrated[i] < 300)
+#else
 		  if (SensorCalibrated[i] < 800)
+#endif
 			  return true;
 	  }
 	  return false;

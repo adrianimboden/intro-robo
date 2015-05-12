@@ -94,6 +94,8 @@
 
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 
+#define PL_HAS_LONG_REF_HEADER		(1)
+
 #ifdef __cplusplus
 extern "C" {
 #endif
