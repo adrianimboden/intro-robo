@@ -23,6 +23,10 @@
 #include "Accel.h"
 #include "RNet_App.h"
 #include "RNET1.h"
+#if PL_HAS_MUSIC_SHIELD
+#include "Music.h"
+#include "VS1053.h"
+#endif
 
 #include <BT1.h>
 
@@ -57,9 +61,15 @@ CommandParser& getCommandParser()
 		legacyCmd(DRV_ParseCommand),
 		legacyCmd(PID_ParseCommand),
 		legacyCmd(TACHO_ParseCommand),
-		legacyCmd(US_ParseCommand),
-		legacyCmd(ACCEL_ParseCommand),
-		legacyCmd(RNETA_ParseCommand)
+		legacyCmd(US_ParseCommand)
+#if PL_HAS_ACCEL
+		, legacyCmd(ACCEL_ParseCommand)
+#endif
+		, legacyCmd(RNETA_ParseCommand)
+#if PL_HAS_MUSIC_SHIELD
+		, legacyCmd(MUSIC_ParseCommand)
+		, legacyCmd(VS_ParseCommand)
+#endif
 	);
 
 	return parser;

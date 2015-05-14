@@ -105,6 +105,20 @@
 #define PL_APP_ACCEL_CONTROL_SENDER  (PL_L_APP_ACCEL_CONTROL_SENDER)
   /*! Set to 1 if we are the remote control sender, 0 otherwise */
 
+/* Music Shield */
+#define PL_HAS_SD_CARD                (1 && PL_L_HAS_MUSIC_SHIELD)
+#define PL_HAS_MUSIC_SHIELD           (PL_L_HAS_MUSIC_SHIELD && PL_HAS_SD_CARD)
+#define PL_HAS_MUSIC_POWERUP          (1 && PL_HAS_MUSIC_SHIELD) /* sound on startup/power-up */
+#define PL_HAS_MUSIC_START_SUMO       (1 && PL_HAS_MUSIC_SHIELD) /* sound at starting sumo countdown */
+#define PL_HAS_MUSIC_CHASE            (1 && PL_HAS_MUSIC_SHIELD) /* sound for laser touch/chase */
+#define PL_HAS_MUSIC_RUN_SUMO         (1 && PL_HAS_MUSIC_SHIELD) /* sound for driving, doing sumo */
+#define PL_HAS_MUSIC_ACCEL_STOP       (1 && PL_HAS_MUSIC_SHIELD && PL_HAS_ACCEL_STOP) /* sound for stopping sumo because of accelerometer */
+#define PL_HAS_MUSIC_LASER_LEFT       (1 && PL_HAS_MUSIC_SHIELD) /* sound for left laser contact only */
+#define PL_HAS_MUSIC_LASER_RIGHT      (1 && PL_HAS_MUSIC_SHIELD) /* sound for right laser contact only */
+#define PL_HAS_MUSIC_LASER_BOTH       (1 && PL_HAS_MUSIC_SHIELD) /* sound for both laser contact  */
+
+#define PL_HAS_SPI						(PL_HAS_MUSIC_SHIELD)
+
 /* if keys are using interrupts or are polled */
 #if PL_IS_FRDM
   #define PL_KEY_POLLED_KEY1    (0)

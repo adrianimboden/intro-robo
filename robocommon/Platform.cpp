@@ -39,6 +39,16 @@ extern "C"{
 #include "Pid.h"
 #endif
 
+#if PL_HAS_MUSIC_SHIELD
+#include "Music.h"
+#endif
+
+#if PL_HAS_SPI
+extern "C"{
+  #include "SPI.h"
+}
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -106,9 +116,21 @@ void PL_Init(void){
 #if PL_HAS_REMOTE
   REMOTE_Init();
 #endif
+#if PL_HAS_MUSIC_SHIELD
+  MUSIC_Init();
+#endif
+#if PL_HAS_SPI
+  SPI_Init();
+#endif
 }
 
 void PL_Deinit(void){
+#if PL_HAS_SPI
+  SPI_Deinit();
+#endif
+#if PL_HAS_MUSIC_SHIELD
+  MUSIC_Deinit();
+#endif
 #if PL_HAS_REMOTE
   REMOTE_Deinit();
 #endif

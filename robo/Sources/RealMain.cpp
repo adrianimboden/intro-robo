@@ -29,6 +29,12 @@
 #include "Ultrasonic.h"
 #include "Accel.h"
 #include "LegacyArgsCommand.h"
+#if PL_HAS_MUSIC_SHIELD
+extern "C" {
+#include "FAT1.h"
+}
+#include "Music.h"
+#endif
 
 extern "C" {
 #include "Reflectance.h"
@@ -48,6 +54,10 @@ void TASK_events(void*)
 			systemReady,
 			doLedHeartbeat,
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n");
+#if PL_HAS_MUSIC_SHIELD
+			MUSIC_PlayTheme(MUSIC_TOUGH);
+			WAIT1_Waitms(5000);
+#else
 			WAIT1_WaitOSms(1000);
 			BUZ_BlockingBeep(440, 500);
 			WAIT1_WaitOSms(500);
@@ -57,6 +67,7 @@ void TASK_events(void*)
 			WAIT1_WaitOSms(500);
 			BUZ_BlockingBeep(880, 500);
 			WAIT1_WaitOSms(500);
+#endif
 			MainControl::notifyStartMove(!MainControl::hasStartMove()); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
@@ -84,10 +95,16 @@ void TASK_ultrasonicScan(void*)
 		 us = US_Measure_us();
 		 cm = US_usToCentimeters(us, 22);
 		 MainControl::notifyEnemyDetected(cm);
-		 WAIT1_WaitOSms(50);
+#if PL_HAS_MUSIC_SHIELD
+		 if(cm<100 && cm>50) MUSIC_PlayTheme(MUSIC_POINT);
+		 else if (cm<50 && cm>10) MUSIC_PlayTheme(MUSIC_GO_EYES);
+		 else if (cm<10) MUSIC_PlayTheme(MUSIC_BUTT_KICK);
+#endif
+		 WAIT1_WaitOSms(35);	// MAX 30Hz -> 33ms
 	}
 }
 
+#if PL_HAS_ACCEL
 void TASK_accelerationMeasure(void*)
 {
 	int16_t xValue, yValue, zValue = 0;
@@ -98,6 +115,7 @@ void TASK_accelerationMeasure(void*)
 		WAIT1_WaitOSms(250);
 	}
 }
+#endif
 
 /**
  * C++ world main function
@@ -114,7 +132,9 @@ void realMain()
 #endif
 	if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
 	if (FRTOS1_xTaskCreate(TASK_ultrasonicScan, "ultrasonicScan", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
+#if PL_HAS_ACCEL
 	if (FRTOS1_xTaskCreate(TASK_accelerationMeasure, "accelerationMeasure", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
+#endif
 
 	eventQueue.setEvent(Event::SystemStartup);
 	RTOS_Run();
@@ -151,6 +171,20 @@ void systemReady(void){
     LED1_Off();
 #if PL_HAS_ACCEL
     ACCEL_LowLevelInit();
+#endif
+#if PL_HAS_MUSIC_SHIELD
+#if PL_HAS_SD_CARD
+  FAT1_Init();
+  static FAT1_FATFS fileSystemObject;
+  FAT1_FRESULT fres;
+  fres = FAT1_mount(&fileSystemObject, (const TCHAR*)"0" /* drive */, 0);
+  if (fres != FR_OK) {
+      for(;;){}
+  }
+#endif
+    //WAIT1_WaitOSms(300);
+    MUSIC_PlayTheme(MUSIC_AHH);
+    return;
 #endif
 
 #if PL_HAS_BUZZER

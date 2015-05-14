@@ -40,6 +40,12 @@ extern "C" {
 #include "Timer.h"
 #include "Keys.h"
 #include "Ultrasonic.h"
+#if PL_HAS_SPI
+  #include "SPI.h"
+#endif
+#if PL_HAS_MUSIC_SHIELD
+  #include "VS1053.h"
+#endif
 
 /*
 ** ===================================================================
@@ -122,6 +128,10 @@ void FRTOS1_vApplicationStackOverflowHook(xTaskHandle pxTask, char *pcTaskName)
 */
 void FRTOS1_vApplicationTickHook(void)
 {
+#if PL_HAS_MUSIC_SHIELD
+	TMOUT1_AddTick();
+	TmDt1_AddTick();
+#endif
 #if PL_HAS_TIMER
 	TMR_OnInterrupt();
 #endif
@@ -303,7 +313,9 @@ void TU_US_OnChannel0(LDD_TUserData *UserDataPtr)
 */
 void RF1_OnActivate(void)
 {
-  /* Write your code here ... */
+#if PL_HAS_SPI
+  SPI_OnSPIActivate(SPI_BAUD_INDEX_NRF);
+#endif
 }
 
 /*
@@ -319,7 +331,9 @@ void RF1_OnActivate(void)
 */
 void RF1_OnDeactivate(void)
 {
-  /* Write your code here ... */
+#if PL_HAS_SPI
+  SPI_OnSPIDeactivate(SPI_BAUD_INDEX_NRF);
+#endif
 }
 
 /*
@@ -340,6 +354,51 @@ void RNET1_OnRadioEvent(RNET1_RadioEvent event)
 {
   /* Write your code here ... */
 }
+
+/*
+** ===================================================================
+**     Event       :  SD1_OnActivate (module Events)
+**
+**     Component   :  SD1 [SD_Card]
+**     Description :
+**         Event called when Activate() method is called. This gives an
+**         opportunity to the application to synchronize access to a
+**         shared bus.
+**     Parameters  :
+**         NAME            - DESCRIPTION
+**         mode            - 0: slow mode, 1: fast mode
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SD1_OnActivate(byte mode)
+{
+#if PL_HAS_SPI
+  SPI_OnSPIActivate(SPI_BAUD_INDEX_SD_FAST);
+#endif
+}
+
+/*
+** ===================================================================
+**     Event       :  SD1_OnDeactivate (module Events)
+**
+**     Component   :  SD1 [SD_Card]
+**     Description :
+**         Event called when Deactivate() method is called. This gives
+**         an opportunity to the application to synchronize access to a
+**         shared bus.
+**     Parameters  :
+**         NAME            - DESCRIPTION
+**         mode            - 0: slow mode, 1: fast mode
+**     Returns     : Nothing
+** ===================================================================
+*/
+void SD1_OnDeactivate(byte mode)
+{
+#if PL_HAS_SPI
+  SPI_OnSPIDeactivate(mode);
+#endif
+}
+
 
 /* END Events */
 

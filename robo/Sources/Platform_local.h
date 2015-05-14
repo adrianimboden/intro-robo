@@ -80,7 +80,7 @@
 #define PL_L_HAS_ULTRASONIC			(1)
 /*! Set to 1 for Ultrasonic enabled, 0 otherwise */
 
-#define PL_L_HAS_ACCEL				(1)
+#define PL_L_HAS_ACCEL				(0)
 /*! Set to 1 for Acceleration enabled, 0 otherwise */
 
 #define PL_L_HAS_RADIO			(1)
@@ -94,7 +94,9 @@
 
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 
-#define PL_HAS_LONG_REF_HEADER		(1)
+#define PL_HAS_LONG_REF_HEADER		(0)
+
+#define PL_L_HAS_MUSIC_SHIELD		(0)
 
 #ifdef __cplusplus
 extern "C" {
