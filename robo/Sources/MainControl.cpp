@@ -8,9 +8,16 @@
 #include <WAIT1.h>
 
 #include <BehaviourMachine.h>
+#include "RoboConsole.h"
+#include <random>
 
 constexpr auto MAX_TURNING_SPEED = 25*74;
-constexpr auto MAX_BACKUP_SPEED = -60*74;
+constexpr auto MAX_FIGHT_SPEED = 100*74;
+constexpr auto START_FIGHT_SPEED = 100*74;
+
+constexpr auto MAX_SPEED = 100*74;
+
+static bool shouldTurn = false;
 
 MainControl MainControl::globalMainControl;
 
@@ -36,9 +43,37 @@ public:
 	}
 };
 
+
 class ScanEnemyBehaviour
 {
 public:
+	struct ScanVariant
+	{
+		ScanVariant(uint32_t timeoutMs, double left, double right)
+		: timeoutMs(timeoutMs)
+		, left(left*MAX_SPEED)
+		, right(right*MAX_SPEED)
+		{
+		}
+
+		uint32_t timeoutMs;
+		int32_t left;
+		int32_t right;
+	};
+
+	std::array<ScanVariant, 10> scanVariants = {{
+		ScanVariant{1000, 0.1, 0.3},
+		ScanVariant{1000, 0.3, 0.1},
+		ScanVariant{1000, 0.4, 0.1},
+		ScanVariant{1000, 0.1, 0.4},
+		ScanVariant{1000, 0.3, 0.6},
+		ScanVariant{1000, 0.6, 0.3},
+		ScanVariant{500, 0.5, -0.5},
+		ScanVariant{500, -0.5, 0.5},
+		ScanVariant{2000, -0.5, 0.5},
+		ScanVariant{2000, 0.5, -0.5},
+	}};
+
 	bool wantsToTakeControl() const
 	{
 		return MainControl::hasStartMove();
@@ -52,17 +87,29 @@ public:
 		}
 		else
 		{
-			DRV_SetSpeed(-MAX_TURNING_SPEED,MAX_TURNING_SPEED);
+			auto scanVariant = scanVariants[currentStrategy];
+			DRV_SetSpeed(scanVariant.left, scanVariant.right);
+			if ((TMR_ValueMs() - startStrategyTime) > scanVariant.timeoutMs)
+			{
+				startStrategyTime = TMR_ValueMs();
+				std::uniform_int_distribution<uint8_t> distribution(0, scanVariants.size()-1);
+				currentStrategy = distribution(randomGenerator);
+			}
 		}
 	}
+
+private:
+	uint32_t startStrategyTime = 0;
+	std::ranlux24 randomGenerator;
+	uint8_t currentStrategy = 0;
 };
 
-class ForwardBehaviour
+class ConstantSpeedFightBehaviour
 {
 public:
 	bool wantsToTakeControl() const
 	{
-		return ((MainControl::getEnemyDistance()<80) && MainControl::hasStartMove());
+		return ((MainControl::getEnemyDistance()<70) && MainControl::hasStartMove());
 	}
 
 	void step(bool suppress)
@@ -73,11 +120,87 @@ public:
 		}
 		else
 		{
-			auto speed = MainControl::getSpeed();
-			if(speed == 0) speed = 60*74;
-			DRV_SetSpeed(speed,speed);
+			DRV_SetSpeed(MAX_FIGHT_SPEED, MAX_FIGHT_SPEED);
 		}
 	}
+
+private:
+};
+
+class StaggeringFightBehaviour
+{
+public:
+	bool wantsToTakeControl() const
+	{
+		return ((MainControl::getEnemyDistance()<40) && MainControl::hasStartMove());
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			state = State::Start;
+			DRV_SetSpeed(0,0);
+		}
+		else
+		{
+			constexpr auto speedPerMSec = (80*76/1000);
+
+			int32_t maxSpeed = MainControl::getSpeed();
+			if (maxSpeed == 0) maxSpeed = MAX_FIGHT_SPEED;
+
+			int32_t speed = START_FIGHT_SPEED + ((TMR_ValueMs() - stateRampTime)) * speedPerMSec;
+			if (speed >= maxSpeed) speed = MAX_FIGHT_SPEED;
+
+			switch (state)
+			{
+			case State::Start:
+				stateRampTime = TMR_ValueMs();
+				state = State::Ramp;
+				break;
+			case State::Ramp:
+				DRV_SetSpeed(speed,speed);
+				state = (speed == maxSpeed) ? State::StartMax : State::Ramp;
+				break;
+			case State::StartMax:
+				stateMaxTime = TMR_ValueMs();
+				state = State::Max;
+			case State::Max:
+				DRV_SetSpeed(maxSpeed,maxSpeed);
+				if (stateMaxTime > 50)
+				{
+					state = State::StartBackMax;
+				}
+				break;
+			case State::StartBackMax:
+				stateMaxTime = TMR_ValueMs();
+				state = State::BackMax;
+				break;
+			case State::BackMax:
+				DRV_SetSpeed(-maxSpeed/10,-maxSpeed/10);
+				if (stateMaxTime > 10)
+				{
+					state = State::StartMax;
+				}
+				break;
+			}
+		}
+	}
+
+private:
+	enum class State
+	{
+		Start,
+		Ramp,
+		StartMax,
+		Max,
+		StartBackMax,
+		BackMax
+	};
+
+	State state = State::Start;
+	uint32_t stateRampTime = 0;
+	uint32_t stateMaxTime = 0;
 };
 
 class StopBehaviour
@@ -85,11 +208,8 @@ class StopBehaviour
 	enum class State
 	{
 		Idle,
-		Stopped,
-		StartBackup,
-		Backup,
-		StartTurning,
-		Turning
+		StartReversing,
+		Reversing,
 	};
 
 public:
@@ -112,9 +232,85 @@ public:
 				switch (state)
 				{
 				case State::Idle: return idle();
-				case State::Stopped: return stopped();
-				case State::StartBackup: return startBackup();
-				case State::Backup: return backup();
+				case State::StartReversing: return startReversing();
+				case State::Reversing: return reversing();
+				}
+				ASSERT(false);
+				return State::Idle;
+			}();
+		}
+	}
+
+	State idle()
+	{
+		return State::StartReversing;
+	}
+
+	State startReversing()
+	{
+		SpeedState nonZeroSpeedState{static_cast<int32_t>(MAX_SPEED), static_cast<int32_t>(MAX_SPEED)};
+		//SpeedState nonZeroSpeedState{0, 0};
+		for (auto lastSpeed : DRV_GetLastSpeeds())
+		{
+			if (lastSpeed.left > 0 && lastSpeed.right > 0)
+			{
+				nonZeroSpeedState = lastSpeed;
+			}
+		}
+
+		DRV_SetSpeed(-0.7*nonZeroSpeedState.left, -0.7*nonZeroSpeedState.right);
+		startReversingTime = TMR_ValueMs();
+		return State::Reversing;
+	}
+
+	State reversing()
+	{
+		if ((TMR_ValueMs() - startReversingTime) < 300)
+		{
+			return State::Reversing;
+		}
+		else
+		{
+			DRV_SetSpeed(0, 0);
+			shouldTurn = true;
+			return State::Idle;
+		}
+	}
+
+private:
+	State state = State::Idle;
+	uint32_t startReversingTime;
+};
+
+class TurnBehaviour
+{
+	enum class State
+	{
+		Idle,
+		StartTurning,
+		Turning
+	};
+
+public:
+	bool wantsToTakeControl() const
+	{
+		return ((state != State::Idle) || (MainControl::hasStartMove() && shouldTurn));
+	}
+
+	void step(bool suppress)
+	{
+		if (suppress)
+		{
+			state = State::Idle;
+			DRV_SetSpeed(0,0);
+		}
+		else
+		{
+			state = [&]()->State
+			{
+				switch (state)
+				{
+				case State::Idle: return idle();
 				case State::StartTurning: return startTurning();
 				case State::Turning: return turning();
 				}
@@ -126,34 +322,9 @@ public:
 
 	State idle()
 	{
-		return State::Stopped;
+		return State::StartTurning;
 	}
 
-	State stopped()
-	{
-		DRV_SetSpeed(0,0);
-		return State::StartBackup;
-	}
-
-	State startBackup()
-	{
-		startTurningTime = TMR_ValueMs();
-		return State::Backup;
-	}
-
-	State backup()
-	{
-		if ((TMR_ValueMs()-startTurningTime < 100))
-		{
-			DRV_SetSpeed(MAX_BACKUP_SPEED,MAX_BACKUP_SPEED);
-			return State::Backup;
-		}
-		else
-		{
-			DRV_SetSpeed(0, 0);
-			return State::StartTurning;
-		}
-	}
 
 	State startTurning()
 	{
@@ -163,7 +334,7 @@ public:
 
 	State turning()
 	{
-		if ((TMR_ValueMs()-startTurningTime < 300))
+		if ((TMR_ValueMs()-startTurningTime < 900))
 		{
 			DRV_SetSpeed(-MAX_TURNING_SPEED,MAX_TURNING_SPEED);
 			return State::Turning;
@@ -171,6 +342,7 @@ public:
 		else
 		{
 			DRV_SetSpeed(0, 0);
+			shouldTurn = false;
 			return State::Idle;
 		}
 	}
@@ -184,12 +356,13 @@ void MainControl::task(void*)
 {
 	auto arbitrator = makeArbitrator(std::make_tuple(
 		ScanEnemyBehaviour(),
-		ForwardBehaviour(),
+		TurnBehaviour(),
+		ConstantSpeedFightBehaviour(),
 		StopBehaviour(),
 		StopMotorsBehaviour())
 	);
 
-	uint8_t counter = 0;
+	//uint8_t counter = 0;
 	for (;;)
 	{
 		notifyEdgeDetected(REF_SeesLine());
@@ -203,12 +376,6 @@ void MainControl::task(void*)
 		}
 
 		arbitrator.step();
-
-		if (++counter % 100)
-		{
-			WAIT1_WaitOSms(1);
-			counter = 0;
-		}
 	}
 }
 
@@ -229,6 +396,11 @@ void MainControl::notifyStopMotors(bool stop)
 
 void MainControl::notifyEnemyDetected(uint16_t cm)
 {
+	if (cm < 40)
+	{
+		*getConsole().getUnderlyingIoStream() << cm << "\n";
+	}
+
 	globalMainControl.enemyDistance.store(cm);
 }
 
