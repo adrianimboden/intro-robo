@@ -6,6 +6,10 @@
 #include <LED.h>
 #include <Timer.h>
 #include <WAIT1.h>
+#include "Remote.h"
+#if PL_HAS_MUSIC_SHIELD
+#include "Music.h"
+#endif
 
 #include <BehaviourMachine.h>
 
@@ -95,7 +99,7 @@ class StopBehaviour
 public:
 	bool wantsToTakeControl() const
 	{
-		return ((state != State::Idle) || (MainControl::hasStartMove() && MainControl::hasEdgeDetected()));
+		return ((state != State::Idle) || (MainControl::hasStartMove() && MainControl::hasEdgeDetected()) || (MainControl::hasEdgeDetected() && REMOTE_GetOnOff()));
 	}
 
 	void step(bool suppress)
@@ -132,6 +136,9 @@ public:
 	State stopped()
 	{
 		DRV_SetSpeed(0,0);
+#if PL_HAS_MUSIC_SHIELD
+		if(!MUSIC_IsPlaying())	MUSIC_PlayTheme(MUSIC_FOOL);
+#endif
 		return State::StartBackup;
 	}
 
@@ -190,8 +197,10 @@ void MainControl::task(void*)
 	);
 
 	uint8_t counter = 0;
+	static uint8_t waitAtPowerUp = 0;
 	for (;;)
 	{
+		if(waitAtPowerUp==0) { WAIT1_Waitms(1000); waitAtPowerUp = 1;}
 		notifyEdgeDetected(REF_SeesLine());
 		if (hasEdgeDetected())
 		{

@@ -29,6 +29,8 @@
 #include "Ultrasonic.h"
 #include "Accel.h"
 #include "LegacyArgsCommand.h"
+#include "Remote.h"
+#include "Drive.h"
 #if PL_HAS_MUSIC_SHIELD
 extern "C" {
 #include "FAT1.h"
@@ -41,6 +43,9 @@ extern "C" {
 }
 
 CLS1_StdIOType io;
+#if PL_HAS_MUSIC_SHIELD
+FAT1_FATFS fileSystemObject;
+#endif
 
 void doLedHeartbeat(void);
 void systemReady(void);
@@ -55,20 +60,32 @@ void TASK_events(void*)
 			doLedHeartbeat,
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Pressed!\n");
 #if PL_HAS_MUSIC_SHIELD
-			MUSIC_PlayTheme(MUSIC_TOUGH);
-			WAIT1_Waitms(5000);
-#else
-			WAIT1_WaitOSms(1000);
-			BUZ_BlockingBeep(440, 500);
-			WAIT1_WaitOSms(500);
-			BUZ_BlockingBeep(440, 500);
-			WAIT1_WaitOSms(500);
-			BUZ_BlockingBeep(440, 500);
-			WAIT1_WaitOSms(500);
-			BUZ_BlockingBeep(880, 500);
-			WAIT1_WaitOSms(500);
+			if(!MainControl::hasStartMove()){
+				MUSIC_PlayTheme(MUSIC_TOUGH);
+				WAIT1_WaitOSms(5000);
+#if PL_L_HAS_SHOVEL
+				DRV_SetSpeed(7000,7000);
+				WAIT1_WaitOSms(100);
+				DRV_SetSpeed(0,0);
+				WAIT1_WaitOSms(250);
 #endif
-			MainControl::notifyStartMove(!MainControl::hasStartMove()); },
+
+			}
+#else
+			if(!MainControl::hasStartMove()){
+				WAIT1_WaitOSms(1000);
+				BUZ_BlockingBeep(440, 500);
+				WAIT1_WaitOSms(500);
+				BUZ_BlockingBeep(440, 500);
+				WAIT1_WaitOSms(500);
+				BUZ_BlockingBeep(440, 500);
+				WAIT1_WaitOSms(500);
+				BUZ_BlockingBeep(880, 500);
+				WAIT1_WaitOSms(500);
+			}
+#endif
+			MainControl::notifyStartMove(!MainControl::hasStartMove());
+			REMOTE_SetOnOff(!MainControl::hasStartMove());},
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Long_Pressed!\n"); eventQueue.setEvent(Event::RefStartStopCalibration); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released!\n"); },
 			[&]{ console.getUnderlyingIoStream()->write("Key_A_Released_Long!\n"); },
@@ -90,15 +107,28 @@ void TASK_keyscan(void*)
 void TASK_ultrasonicScan(void*)
 {
 	uint16_t cm, us;
+#if PL_HAS_MUSIC_SHIELD
+	static uint8_t played = 0;
+#endif
 	for(;;)
 	{
 		 us = US_Measure_us();
 		 cm = US_usToCentimeters(us, 22);
 		 MainControl::notifyEnemyDetected(cm);
+
 #if PL_HAS_MUSIC_SHIELD
-		 if(cm<100 && cm>50) MUSIC_PlayTheme(MUSIC_POINT);
-		 else if (cm<50 && cm>10) MUSIC_PlayTheme(MUSIC_GO_EYES);
-		 else if (cm<10) MUSIC_PlayTheme(MUSIC_BUTT_KICK);
+		 if(cm<100 && cm>50 && played!=0 && !MUSIC_IsPlaying()) {
+			 MUSIC_PlayTheme(MUSIC_POINT);
+			 played=0;
+		 }
+		 else if (cm<50 && cm>10 && played!=1 && !MUSIC_IsPlaying()) {
+			 MUSIC_PlayTheme(MUSIC_GO_EYES);
+			 played=1;
+		 }
+		 else if (cm<10 && played!=2 && !MUSIC_IsPlaying()) {
+			 MUSIC_PlayTheme(MUSIC_BUTT_KICK);
+			 played=2;
+		 }
 #endif
 		 WAIT1_WaitOSms(35);	// MAX 30Hz -> 33ms
 	}
@@ -175,7 +205,6 @@ void systemReady(void){
 #if PL_HAS_MUSIC_SHIELD
 #if PL_HAS_SD_CARD
   FAT1_Init();
-  static FAT1_FATFS fileSystemObject;
   FAT1_FRESULT fres;
   fres = FAT1_mount(&fileSystemObject, (const TCHAR*)"0" /* drive */, 0);
   if (fres != FR_OK) {
@@ -183,7 +212,7 @@ void systemReady(void){
   }
 #endif
     //WAIT1_WaitOSms(300);
-    MUSIC_PlayTheme(MUSIC_AHH);
+  	MUSIC_PlayTheme(MUSIC_AHH);
     return;
 #endif
 

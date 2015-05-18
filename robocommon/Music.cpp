@@ -17,7 +17,7 @@ extern "C"{
 #include "FAT1.h"
 }
 
-//#define MUSIC_DEFAULT_VOLUME  0x2020 /* not loud */
+//#define MUSIC_DEFAULT_VOLUME  0x3F3F /* not loud */
 #define MUSIC_DEFAULT_VOLUME  0x0000 /* loud */
 
 static volatile bool MUSIC_playFile = FALSE;
@@ -96,8 +96,8 @@ static uint8_t MUSIC_PlaySong(const uint8_t *fileName) {
 
 void MUSIC_PlayTheme(MUSIC_Theme theme) {
   if (MUSIC_playFile) {
-    //MUSIC_Stop();
-    //FRTOS1_vTaskDelay(50/portTICK_RATE_MS);
+    MUSIC_Stop();
+    FRTOS1_vTaskDelay(50/portTICK_RATE_MS);
 	  return;
   }
   if (theme<MUSIC_THEME_LAST) {

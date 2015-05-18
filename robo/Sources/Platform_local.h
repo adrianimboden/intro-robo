@@ -94,9 +94,11 @@
 
 #define PL_IS_INTRO_ZUMO_K22_V2		(1)
 
-#define PL_HAS_LONG_REF_HEADER		(0)
+#define PL_HAS_LONG_REF_HEADER		(1)
 
-#define PL_L_HAS_MUSIC_SHIELD		(0)
+#define PL_L_HAS_MUSIC_SHIELD		(1)
+
+#define PL_L_HAS_SHOVEL				(1)
 
 #ifdef __cplusplus
 extern "C" {

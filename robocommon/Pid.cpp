@@ -227,8 +227,9 @@ void PID_Init(void) {
   /*! \todo determine your PID values */
   speedLeftConfig.pFactor100 = 600;
   speedLeftConfig.iFactor100 = 40;
-  speedLeftConfig.dFactor100 = 100;
-  speedLeftConfig.iAntiWindup = 100000;
+
+  speedLeftConfig.dFactor100 = 2000;
+  speedLeftConfig.iAntiWindup = 120000;
   speedLeftConfig.lastError = 0;
   speedLeftConfig.integral = 0;
 
