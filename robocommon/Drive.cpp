@@ -18,17 +18,26 @@ extern "C"{
 #include "FRTOS1.h"
 #include "UTIL1.h"
 }
+#include <CircularBuffer.h>
 
 static volatile bool DRV_SpeedOn = FALSE;
 static int32_t DRV_SpeedLeft, DRV_SpeedRight;
+static CircularBuffer<SpeedState, HistorySize, CircularBufferFullStrategy::OverwriteOldest> lastSpeeds;
 
 void DRV_EnableDisable(bool enable) {
   DRV_SpeedOn = enable;
 }
 
 void DRV_SetSpeed(int32_t left, int32_t right) {
+  lastSpeeds.push_back(SpeedState{left, right});
   DRV_SpeedLeft = left;
   DRV_SpeedRight = right;
+}
+
+std::array<SpeedState, HistorySize> DRV_GetLastSpeeds() {
+	std::array<SpeedState, HistorySize> states;
+	std::copy(lastSpeeds.begin(), lastSpeeds.end(), states.begin());
+	return states;
 }
 
 static portTASK_FUNCTION(DriveTask, pvParameters) {
@@ -149,7 +158,7 @@ void DRV_Init(void) {
         "Drive", /* task name for kernel awareness debugging */
         configMINIMAL_STACK_SIZE, /* task stack size */
         (void*)NULL, /* optional task startup argument */
-        tskIDLE_PRIORITY+1,  /* initial priority */
+        tskIDLE_PRIORITY+3,  /* initial priority */
         (xTaskHandle*)NULL /* optional task handle to create */
       ) != pdPASS) {
     /*lint -e527 */

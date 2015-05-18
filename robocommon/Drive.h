@@ -37,6 +37,14 @@ void DRV_EnableDisable(bool enable);
  */
 void DRV_SetSpeed(int32_t left, int32_t right);
 
+constexpr auto HistorySize = 4;
+struct SpeedState
+{
+	int32_t left;
+	int32_t right;
+};
+std::array<SpeedState, HistorySize> DRV_GetLastSpeeds();
+
 /*! \brief Driver initialization */
 void DRV_Init(void);
 
