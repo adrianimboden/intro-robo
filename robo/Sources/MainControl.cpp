@@ -15,6 +15,7 @@ constexpr auto MAX_TURNING_SPEED = 25*74;
 constexpr auto MAX_FIGHT_SPEED = 100*74;
 constexpr auto START_FIGHT_SPEED = 100*74;
 
+constexpr auto EnemyDistanceLimit = 50;
 constexpr auto MAX_SPEED = 100*74;
 
 static bool shouldTurn = false;
@@ -61,17 +62,13 @@ public:
 		int32_t right;
 	};
 
-	std::array<ScanVariant, 10> scanVariants = {{
-		ScanVariant{1000, 0.1, 0.3},
-		ScanVariant{1000, 0.3, 0.1},
-		ScanVariant{1000, 0.4, 0.1},
-		ScanVariant{1000, 0.1, 0.4},
-		ScanVariant{1000, 0.3, 0.6},
-		ScanVariant{1000, 0.6, 0.3},
-		ScanVariant{500, 0.5, -0.5},
-		ScanVariant{500, -0.5, 0.5},
-		ScanVariant{2000, -0.5, 0.5},
-		ScanVariant{2000, 0.5, -0.5},
+	std::array<ScanVariant, 6> scanVariants = {{
+		ScanVariant{1000, 0.2, 0.3},
+		ScanVariant{1000, 0.3, 0.2},
+		ScanVariant{1000, 0.2, 0.4},
+		ScanVariant{1000, 0.4, 0.2},
+		ScanVariant{500, 0.0, 0.7},
+		ScanVariant{500, 0.7, 0.0},
 	}};
 
 	bool wantsToTakeControl() const
@@ -94,6 +91,7 @@ public:
 				startStrategyTime = TMR_ValueMs();
 				std::uniform_int_distribution<uint8_t> distribution(0, scanVariants.size()-1);
 				currentStrategy = distribution(randomGenerator);
+				*getConsole().getUnderlyingIoStream() << "new variant: " << static_cast<uint32_t>(currentStrategy) << "\n";
 			}
 		}
 	}
@@ -109,22 +107,37 @@ class ConstantSpeedFightBehaviour
 public:
 	bool wantsToTakeControl() const
 	{
-		return ((MainControl::getEnemyDistance()<70) && MainControl::hasStartMove());
+		return isFighting || ((MainControl::getEnemyDistance()<EnemyDistanceLimit) && MainControl::hasStartMove());
 	}
 
 	void step(bool suppress)
 	{
 		if (suppress)
 		{
+			isFighting = false;
 			DRV_SetSpeed(0,0);
 		}
 		else
 		{
-			DRV_SetSpeed(MAX_FIGHT_SPEED, MAX_FIGHT_SPEED);
+			if (!isFighting || (MainControl::getEnemyDistance()<EnemyDistanceLimit))
+			{
+				startFightTime = TMR_ValueMs();
+				isFighting = true;
+				DRV_SetSpeed(MAX_FIGHT_SPEED, MAX_FIGHT_SPEED);
+			}
+			else
+			{
+				if ((TMR_ValueMs() - startFightTime) > 500)
+				{
+					isFighting = false;
+				}
+			}
 		}
 	}
 
 private:
+	bool isFighting = false;
+	uint32_t startFightTime = 0;
 };
 
 class StaggeringFightBehaviour
@@ -132,7 +145,7 @@ class StaggeringFightBehaviour
 public:
 	bool wantsToTakeControl() const
 	{
-		return ((MainControl::getEnemyDistance()<40) && MainControl::hasStartMove());
+		return ((MainControl::getEnemyDistance()<EnemyDistanceLimit) && MainControl::hasStartMove());
 	}
 
 	void step(bool suppress)
@@ -396,7 +409,7 @@ void MainControl::notifyStopMotors(bool stop)
 
 void MainControl::notifyEnemyDetected(uint16_t cm)
 {
-	if (cm < 40)
+	if (cm < EnemyDistanceLimit)
 	{
 		*getConsole().getUnderlyingIoStream() << cm << "\n";
 	}
