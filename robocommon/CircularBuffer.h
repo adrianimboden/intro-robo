@@ -96,7 +96,7 @@ public:
 	}
 
 	template <typename TRet>
-	class Iterator
+	class Iterator : public std::iterator<std::forward_iterator_tag, TRet>
 	{
 	public:
 		explicit Iterator(const CircularBuffer* pBuffer, size_t currIndex = 0)

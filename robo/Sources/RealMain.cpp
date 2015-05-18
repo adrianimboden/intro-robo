@@ -163,7 +163,7 @@ void realMain()
 	if (FRTOS1_xTaskCreate(MainControl::task, "mainControl", 800, NULL, tskIDLE_PRIORITY+2, NULL) != pdPASS) { ASSERT(false); }
 	if (FRTOS1_xTaskCreate(TASK_ultrasonicScan, "ultrasonicScan", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
 #if PL_HAS_ACCEL
-	if (FRTOS1_xTaskCreate(TASK_accelerationMeasure, "accelerationMeasure", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
+	//if (FRTOS1_xTaskCreate(TASK_accelerationMeasure, "accelerationMeasure", 800, NULL, tskIDLE_PRIORITY+3, NULL) != pdPASS) { ASSERT(false); }
 #endif
 
 	eventQueue.setEvent(Event::SystemStartup);
