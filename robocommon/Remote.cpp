@@ -171,7 +171,7 @@ static portTASK_FUNCTION(RemoteTask, pvParameters) {
         LED1_Neg();
       }
 #endif
-      FRTOS1_vTaskDelay(200/portTICK_RATE_MS);
+      FRTOS1_vTaskDelay(100/portTICK_RATE_MS);
     } else {
       FRTOS1_vTaskDelay(1000/portTICK_RATE_MS);
     }
